@@ -3,7 +3,7 @@ package com.skillbox.javapro21.domain.enumeration;
 public enum FriendshipStatusType {
     REQUEST("Запрос на добавление в друзья"),
     FRIEND("Друзья"),
-    BLOCKED("Пользовательв в черном списке"),
+    BLOCKED("Пользователь в в черном списке"),
     DECLINED("Запрос на добавление в друзья отклонен"),
     SUBSCRIBED("Подписан")
     ;

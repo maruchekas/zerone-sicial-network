@@ -6,12 +6,12 @@ spring:
   jpa:
     show-sql: true
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: create
   mail:
     host:
     port:
     username:
     password:
   flyway:
-    enabled: false
+    enabled: true
 
