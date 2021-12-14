@@ -1,5 +1,6 @@
 package com.skillbox.javapro21.config;
 
+import com.skillbox.javapro21.api.security.JwtFilter;
 import com.skillbox.javapro21.api.security.UserDetailServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -22,10 +23,13 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 */
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
+    private final JwtFilter jwtFilter;
+
     private final UserDetailServiceImpl userDetailServiceImpl;
 
     @Autowired
-    public SecurityConfig(UserDetailServiceImpl userDetailServiceImpl) {
+    public SecurityConfig(JwtFilter jwtFilter, UserDetailServiceImpl userDetailServiceImpl) {
+        this.jwtFilter = jwtFilter;
         this.userDetailServiceImpl = userDetailServiceImpl;
     }
 
@@ -42,7 +46,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .formLogin().disable()
                 .httpBasic().disable()
-                .addFilterBefore(null, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
     }
 
     @Bean

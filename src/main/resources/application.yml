@@ -22,3 +22,5 @@ spring:
     password:
   flyway:
     enabled: true
+jwt:
+  secret: secret
