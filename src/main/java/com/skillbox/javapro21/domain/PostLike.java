@@ -1,21 +1,28 @@
 package com.skillbox.javapro21.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.*;
+import org.hibernate.Hibernate;
 
 import javax.persistence.*;
+import java.time.Instant;
 import java.time.ZonedDateTime;
+import java.util.Objects;
 
 @Entity
 @Table(name = "post_likes")
+@Getter
+@Setter
+@ToString
+@RequiredArgsConstructor
 public class PostLike {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Integer id;
 
     @Column(name = "time")
-    private ZonedDateTime time;
+    private Instant time;
 
     @ManyToOne
     @JsonIgnoreProperties(
@@ -38,82 +45,16 @@ public class PostLike {
     @JsonIgnoreProperties(value = { "block", "likes", "files", "comments", "tags", "author" }, allowSetters = true)
     private Post post;
 
-
-    public Integer getId() {
-        return this.id;
-    }
-
-    public PostLike id(Integer id) {
-        this.setId(id);
-        return this;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public ZonedDateTime getTime() {
-        return this.time;
-    }
-
-    public PostLike time(ZonedDateTime time) {
-        this.setTime(time);
-        return this;
-    }
-
-    public void setTime(ZonedDateTime time) {
-        this.time = time;
-    }
-
-    public Person getPerson() {
-        return this.person;
-    }
-
-    public void setPerson(Person person) {
-        this.person = person;
-    }
-
-    public PostLike person(Person person) {
-        this.setPerson(person);
-        return this;
-    }
-
-    public Post getPost() {
-        return this.post;
-    }
-
-    public void setPost(Post post) {
-        this.post = post;
-    }
-
-    public PostLike post(Post post) {
-        this.setPost(post);
-        return this;
-    }
-
-
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof PostLike)) {
-            return false;
-        }
-        return id != null && id.equals(((PostLike) o).id);
+        if (this == o) return true;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        PostLike postLike = (PostLike) o;
+        return id != null && Objects.equals(id, postLike.id);
     }
 
     @Override
     public int hashCode() {
-        // see https://vladmihalcea.com/how-to-implement-equals-and-hashcode-using-the-jpa-entity-identifier/
         return getClass().hashCode();
-    }
-
-    @Override
-    public String toString() {
-        return "PostLike{" +
-            "id=" + getId() +
-            ", time='" + getTime() + "'" +
-            "}";
     }
 }
