@@ -2,9 +2,13 @@ package com.skillbox.javapro21.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
+import org.hibernate.Hibernate;
 
 import javax.persistence.*;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
+import java.util.Objects;
 
 @Data
 @AllArgsConstructor
@@ -18,13 +22,13 @@ public class PostComment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private long id;
+    private Long id;
 
     @Column(name = "time")
-    private ZonedDateTime time;
+    private LocalDateTime time;
 
     @Column(name = "parent_id")
-    private long parentId;
+    private Integer parentId;
 
     @Column(name = "comment_text")
     private String commentText;
@@ -58,4 +62,16 @@ public class PostComment {
     )
     private Person person;
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        PostComment that = (PostComment) o;
+        return id != null && Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 }

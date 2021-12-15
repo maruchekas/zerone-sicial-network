@@ -3,9 +3,11 @@ package com.skillbox.javapro21.domain;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.skillbox.javapro21.domain.enumeration.ReadStatus;
 import lombok.*;
+import org.hibernate.Hibernate;
 
 import javax.persistence.*;
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Data
 @AllArgsConstructor
@@ -19,10 +21,10 @@ public class Message {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private long id;
+    private Long id;
 
     @Column(name = "time")
-    private ZonedDateTime time;
+    private LocalDateTime time;
 
     @Column(name = "message_text")
     private String messageText;
@@ -65,4 +67,16 @@ public class Message {
     )
     private Person recipient;
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        Message message = (Message) o;
+        return id != null && Objects.equals(id, message.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 }
