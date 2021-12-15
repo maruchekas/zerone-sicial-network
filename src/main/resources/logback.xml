@@ -6,6 +6,7 @@
     <appender name="root" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <FileNamePattern>logs/main-%d{yyyy-MM-dd}.log</FileNamePattern>
+<!--            <totalSizeCap>1GB</totalSizeCap>-->
         </rollingPolicy>
         <encoder>
             <Pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{35} : %msg %n</Pattern>

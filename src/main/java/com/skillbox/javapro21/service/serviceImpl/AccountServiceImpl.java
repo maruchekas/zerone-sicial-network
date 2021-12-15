@@ -8,19 +8,25 @@ import com.skillbox.javapro21.domain.enumeration.UserType;
 import com.skillbox.javapro21.exception.UserExistException;
 import com.skillbox.javapro21.repository.PersonRepository;
 import com.skillbox.javapro21.service.AccountService;
-import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
-@AllArgsConstructor
+@Component
 public class AccountServiceImpl implements AccountService {
     private final PersonRepository personRepository;
+
+    @Autowired
+    public AccountServiceImpl(PersonRepository personRepository) {
+        this.personRepository = personRepository;
+    }
 
     @Override
     public AccountResponse registration(RegisterRequest registerRequest) throws UserExistException {
