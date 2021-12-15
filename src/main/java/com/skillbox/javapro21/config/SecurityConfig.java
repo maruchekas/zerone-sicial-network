@@ -1,7 +1,7 @@
 package com.skillbox.javapro21.config;
 
-import com.skillbox.javapro21.api.security.JwtFilter;
-import com.skillbox.javapro21.api.security.UserDetailServiceImpl;
+import com.skillbox.javapro21.config.security.JwtFilter;
+import com.skillbox.javapro21.config.security.UserDetailServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

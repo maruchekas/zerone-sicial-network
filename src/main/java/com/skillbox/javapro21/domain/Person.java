@@ -1,14 +1,14 @@
 package com.skillbox.javapro21.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.skillbox.javapro21.domain.enumeration.MessagesPermission;
 import com.skillbox.javapro21.domain.enumeration.Permission;
+import com.skillbox.javapro21.domain.enumeration.UserType;
 import lombok.*;
 import org.hibernate.Hibernate;
 
 import javax.persistence.*;
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -67,7 +67,7 @@ public class Person {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "messages_permission")
-    private Permission messagesPermission;
+    private MessagesPermission messagesPermission;
 
     @Column(name = "last_online_time")
     private LocalDateTime lastOnlineTime;
@@ -75,6 +75,9 @@ public class Person {
     @Column(name = "is_blocked")
     private Integer isBlocked;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "user_type")
+    private UserType userType;
 
     @OneToMany(mappedBy = "person")
     @JsonIgnoreProperties(value = { "post", "comment", "person" }, allowSetters = true)

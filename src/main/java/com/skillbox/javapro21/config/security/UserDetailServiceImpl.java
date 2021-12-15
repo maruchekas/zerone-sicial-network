@@ -1,4 +1,4 @@
-package com.skillbox.javapro21.api.security;
+package com.skillbox.javapro21.config.security;
 
 import com.skillbox.javapro21.domain.Person;
 import com.skillbox.javapro21.repository.PersonRepository;
