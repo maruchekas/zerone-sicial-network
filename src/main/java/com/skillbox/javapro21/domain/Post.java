@@ -1,20 +1,18 @@
 package com.skillbox.javapro21.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.*;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.Hibernate;
 
 import javax.persistence.*;
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
 @Entity
 @Table(name = "posts")
 @Getter
@@ -22,7 +20,6 @@ import java.util.Set;
 @ToString
 @RequiredArgsConstructor
 public class Post {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -40,46 +37,48 @@ public class Post {
     @Column(name = "is_blocked")
     private Integer isBlocked;
 
-    @JsonIgnoreProperties(value = { "post", "comment", "person" }, allowSetters = true)
+    @JsonIgnoreProperties(value = {"post", "comment", "person"}, allowSetters = true)
     @OneToOne
     @JoinColumn(unique = true)
     private BlockHistory block;
 
     @OneToMany(mappedBy = "post")
-    @JsonIgnoreProperties(value = { "person", "post" }, allowSetters = true)
+    @JsonIgnoreProperties(value = {"person", "post"}, allowSetters = true)
     @ToString.Exclude
     private Set<PostLike> likes = new HashSet<>();
 
     @OneToMany(mappedBy = "post")
-    @JsonIgnoreProperties(value = { "post" }, allowSetters = true)
+    @JsonIgnoreProperties(value = {"post"}, allowSetters = true)
     @ToString.Exclude
     private Set<PostFile> files = new HashSet<>();
 
     @OneToMany(mappedBy = "post")
-    @JsonIgnoreProperties(value = { "block", "post", "person" }, allowSetters = true)
+    @JsonIgnoreProperties(value = {"block", "post", "person"}, allowSetters = true)
     @ToString.Exclude
     private Set<PostComment> comments = new HashSet<>();
 
     @ManyToMany
-    @JoinTable(name = "post2tag", joinColumns = @JoinColumn(name = "post_id"), inverseJoinColumns = @JoinColumn(name = "tag_id"))
-    @JsonIgnoreProperties(value = { "posts" }, allowSetters = true)
+    @JoinTable(name = "post2tag",
+            joinColumns = @JoinColumn(name = "post_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id"))
+    @JsonIgnoreProperties(value = {"posts"}, allowSetters = true)
     @ToString.Exclude
     private Set<Tag> tags = new HashSet<>();
 
     @ManyToOne
     @JsonIgnoreProperties(
-        value = {
-            "blocksLists",
-            "outFriendshipRequests",
-            "incFriendshipRequests",
-            "outMessages",
-            "incMessages",
-            "posts",
-            "postLikes",
-            "comments",
-            "notifications",
-        },
-        allowSetters = true
+            value = {
+                    "blocksLists",
+                    "outFriendshipRequests",
+                    "incFriendshipRequests",
+                    "outMessages",
+                    "incMessages",
+                    "posts",
+                    "postLikes",
+                    "comments",
+                    "notifications",
+            },
+            allowSetters = true
     )
     private Person author;
 
@@ -96,3 +95,4 @@ public class Post {
         return getClass().hashCode();
     }
 }
+

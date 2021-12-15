@@ -65,6 +65,7 @@ CREATE TABLE persons (
   confirmation_code VARCHAR(255) NOT NULL,
   is_approved INTEGER NOT NULL,
   messages_permission VARCHAR(255) NOT NULL,
+  user_type VARCHAR(255),
   last_online_time TIMESTAMP with time zone NOT NULL,
   is_blocked INTEGER NOT NULL,
   CONSTRAINT pk_persons PRIMARY KEY (id)

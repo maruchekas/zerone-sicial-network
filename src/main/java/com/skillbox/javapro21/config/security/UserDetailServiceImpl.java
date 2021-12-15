@@ -6,7 +6,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 
@@ -19,10 +19,10 @@ public class UserDetailServiceImpl implements UserDetailsService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String email){
+    public UserDetails loadUserByUsername(String email) {
         Optional<Person> person = personRepository.findByEmail(email);
         person.ifPresent(p -> {
-            p.setLastOnlineTime(Instant.now());
+            p.setLastOnlineTime(LocalDateTime.now());
             personRepository.save(p);
         });
         return (UserDetails) person.orElse(null);

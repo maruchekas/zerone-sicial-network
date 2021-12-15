@@ -5,9 +5,7 @@ import lombok.*;
 import org.hibernate.Hibernate;
 
 import javax.persistence.*;
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
 import java.util.Objects;
 
 @Data
@@ -28,7 +26,7 @@ public class PostComment {
     private LocalDateTime time;
 
     @Column(name = "parent_id")
-    private Integer parentId;
+    private Long parentId;
 
     @Column(name = "comment_text")
     private String commentText;
@@ -36,29 +34,29 @@ public class PostComment {
     @Column(name = "is_blocked")
     private Integer isBlocked;
 
-    @JsonIgnoreProperties(value = { "post", "comment", "person" }, allowSetters = true)
+    @JsonIgnoreProperties(value = {"post", "comment", "person"}, allowSetters = true)
     @OneToOne
     @JoinColumn(unique = true)
     private BlockHistory block;
 
     @ManyToOne
-    @JsonIgnoreProperties(value = { "block", "likes", "files", "comments", "tags", "author" }, allowSetters = true)
+    @JsonIgnoreProperties(value = {"block", "likes", "files", "comments", "tags", "author"}, allowSetters = true)
     private Post post;
 
     @ManyToOne
     @JsonIgnoreProperties(
-        value = {
-            "blocksLists",
-            "outFriendshipRequests",
-            "incFriendshipRequests",
-            "outMessages",
-            "incMessages",
-            "posts",
-            "postLikes",
-            "comments",
-            "notifications",
-        },
-        allowSetters = true
+            value = {
+                    "blocksLists",
+                    "outFriendshipRequests",
+                    "incFriendshipRequests",
+                    "outMessages",
+                    "incMessages",
+                    "posts",
+                    "postLikes",
+                    "comments",
+                    "notifications",
+            },
+            allowSetters = true
     )
     private Person person;
 
