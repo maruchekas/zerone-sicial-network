@@ -6,6 +6,7 @@ import org.hibernate.Hibernate;
 
 import javax.persistence.*;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.Objects;
 
@@ -22,7 +23,7 @@ public class PostLike {
     private Integer id;
 
     @Column(name = "time")
-    private Instant time;
+    private LocalDateTime time;
 
     @ManyToOne
     @JsonIgnoreProperties(

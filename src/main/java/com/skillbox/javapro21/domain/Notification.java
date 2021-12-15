@@ -5,6 +5,7 @@ import lombok.Data;
 
 import javax.persistence.*;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 
 @Entity
@@ -17,7 +18,7 @@ public class Notification {
     private Integer id;
 
     @Column(name = "sent_time")
-    private Instant sentTime;
+    private LocalDateTime sentTime;
 
     @Column(name = "contact")
     private String contact;

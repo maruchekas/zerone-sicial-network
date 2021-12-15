@@ -7,6 +7,7 @@ import org.hibernate.Hibernate;
 
 import javax.persistence.*;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.Objects;
@@ -32,10 +33,10 @@ public class Person {
     private String lastName;
 
     @Column(name = "reg_date")
-    private Instant regDate;
+    private LocalDateTime regDate;
 
     @Column(name = "birth_date")
-    private Instant birthDate;
+    private LocalDateTime birthDate;
 
     @Column(name = "email")
     private String email;
@@ -69,7 +70,7 @@ public class Person {
     private Permission messagesPermission;
 
     @Column(name = "last_online_time")
-    private Instant lastOnlineTime;
+    private LocalDateTime lastOnlineTime;
 
     @Column(name = "is_blocked")
     private Integer isBlocked;
