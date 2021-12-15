@@ -5,6 +5,7 @@ import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -25,25 +26,25 @@ public class Notification {
     @Column(name = "contact")
     private String contact;
 
-    @JsonIgnoreProperties(value = { "notificatios" }, allowSetters = true)
+    @JsonIgnoreProperties(value = {"notificatios"}, allowSetters = true)
     @OneToOne
     @JoinColumn(unique = true)
     private NotificationType notificationType;
 
     @ManyToOne
     @JsonIgnoreProperties(
-        value = {
-            "blocksLists",
-            "outFriendshipRequests",
-            "incFriendshipRequests",
-            "outMessages",
-            "incMessages",
-            "posts",
-            "postLikes",
-            "comments",
-            "notifications",
-        },
-        allowSetters = true
+            value = {
+                    "blocksLists",
+                    "outFriendshipRequests",
+                    "incFriendshipRequests",
+                    "outMessages",
+                    "incMessages",
+                    "posts",
+                    "postLikes",
+                    "comments",
+                    "notifications",
+            },
+            allowSetters = true
     )
     private Person person;
 

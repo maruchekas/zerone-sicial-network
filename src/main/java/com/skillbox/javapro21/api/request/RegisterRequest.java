@@ -1,6 +1,5 @@
 package com.skillbox.javapro21.api.request;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 @Data

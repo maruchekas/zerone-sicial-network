@@ -28,7 +28,7 @@ public class FriendshipStatus {
     @Column(name = "friendship_status_type")
     private FriendshipStatusType friendshipStatusType;
 
-    @JsonIgnoreProperties(value = { "friendshipStatus", "srcPerson", "dstPerson" }, allowSetters = true)
+    @JsonIgnoreProperties(value = {"friendshipStatus", "srcPerson", "dstPerson"}, allowSetters = true)
     @OneToOne(mappedBy = "friendshipStatus")
     private Friendship friendship;
 

@@ -27,7 +27,7 @@ public class Tag {
     private String tag;
 
     @ManyToMany(mappedBy = "tags")
-    @JsonIgnoreProperties(value = { "block", "likes", "files", "comments", "tags", "author" }, allowSetters = true)
+    @JsonIgnoreProperties(value = {"block", "likes", "files", "comments", "tags", "author"}, allowSetters = true)
     @ToString.Exclude
     private Set<Post> posts = new HashSet<>();
 

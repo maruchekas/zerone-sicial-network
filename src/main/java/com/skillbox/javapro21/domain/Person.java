@@ -80,47 +80,47 @@ public class Person {
     private UserType userType;
 
     @OneToMany(mappedBy = "person")
-    @JsonIgnoreProperties(value = { "post", "comment", "person" }, allowSetters = true)
+    @JsonIgnoreProperties(value = {"post", "comment", "person"}, allowSetters = true)
     @ToString.Exclude
     private Set<BlockHistory> blocksLists = new HashSet<>();
 
     @OneToMany(mappedBy = "srcPerson")
-    @JsonIgnoreProperties(value = { "friendshipStatus", "srcPerson", "dstPerson" }, allowSetters = true)
+    @JsonIgnoreProperties(value = {"friendshipStatus", "srcPerson", "dstPerson"}, allowSetters = true)
     @ToString.Exclude
     private Set<Friendship> outFriendshipRequests = new HashSet<>();
 
     @OneToMany(mappedBy = "dstPerson")
-    @JsonIgnoreProperties(value = { "friendshipStatus", "srcPerson", "dstPerson" }, allowSetters = true)
+    @JsonIgnoreProperties(value = {"friendshipStatus", "srcPerson", "dstPerson"}, allowSetters = true)
     @ToString.Exclude
     private Set<Friendship> incFriendshipRequests = new HashSet<>();
 
     @OneToMany(mappedBy = "author")
-    @JsonIgnoreProperties(value = { "author", "recipient" }, allowSetters = true)
+    @JsonIgnoreProperties(value = {"author", "recipient"}, allowSetters = true)
     @ToString.Exclude
     private Set<Message> outMessages = new HashSet<>();
 
     @OneToMany(mappedBy = "recipient")
-    @JsonIgnoreProperties(value = { "author", "recipient" }, allowSetters = true)
+    @JsonIgnoreProperties(value = {"author", "recipient"}, allowSetters = true)
     @ToString.Exclude
     private Set<Message> incMessages = new HashSet<>();
 
     @OneToMany(mappedBy = "author")
-    @JsonIgnoreProperties(value = { "block", "likes", "files", "comments", "tags", "author" }, allowSetters = true)
+    @JsonIgnoreProperties(value = {"block", "likes", "files", "comments", "tags", "author"}, allowSetters = true)
     @ToString.Exclude
     private Set<Post> posts = new HashSet<>();
 
     @OneToMany(mappedBy = "person")
-    @JsonIgnoreProperties(value = { "person", "post" }, allowSetters = true)
+    @JsonIgnoreProperties(value = {"person", "post"}, allowSetters = true)
     @ToString.Exclude
     private Set<PostLike> postLikes = new HashSet<>();
 
     @OneToMany(mappedBy = "person")
-    @JsonIgnoreProperties(value = { "block", "post", "person" }, allowSetters = true)
+    @JsonIgnoreProperties(value = {"block", "post", "person"}, allowSetters = true)
     @ToString.Exclude
     private Set<PostComment> comments = new HashSet<>();
 
     @OneToMany(mappedBy = "person")
-    @JsonIgnoreProperties(value = { "type", "person" }, allowSetters = true)
+    @JsonIgnoreProperties(value = {"type", "person"}, allowSetters = true)
     @ToString.Exclude
     private Set<Notification> notifications = new HashSet<>();
 

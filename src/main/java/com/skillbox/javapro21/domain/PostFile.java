@@ -28,7 +28,7 @@ public class PostFile {
     private String path;
 
     @ManyToOne
-    @JsonIgnoreProperties(value = { "block", "likes", "files", "comments", "tags", "author" }, allowSetters = true)
+    @JsonIgnoreProperties(value = {"block", "likes", "files", "comments", "tags", "author"}, allowSetters = true)
     private Post post;
 
     @Override

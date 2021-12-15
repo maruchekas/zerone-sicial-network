@@ -49,7 +49,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     /**
-     используется для ответа 200
+     * используется для ответа 200
      */
     private AccountResponse getAccountResponse() {
         AccountResponse accountResponse = new AccountResponse();
