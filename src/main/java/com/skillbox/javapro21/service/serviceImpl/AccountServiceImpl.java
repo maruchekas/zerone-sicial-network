@@ -3,7 +3,7 @@ package com.skillbox.javapro21.service.serviceImpl;
 import com.skillbox.javapro21.api.request.RecoveryRequest;
 import com.skillbox.javapro21.api.request.RegisterRequest;
 import com.skillbox.javapro21.api.response.DataResponse;
-import com.skillbox.javapro21.api.response.account.AccountData;
+import com.skillbox.javapro21.api.response.account.AccountContent;
 import com.skillbox.javapro21.domain.Person;
 import com.skillbox.javapro21.domain.enumeration.MessagesPermission;
 import com.skillbox.javapro21.domain.enumeration.UserType;
@@ -121,10 +121,10 @@ public class AccountServiceImpl implements AccountService {
     /**
      * используется для ответа 200
      */
-    private DataResponse<AccountData> getAccountResponse() {
-        DataResponse<AccountData> dataResponse = new DataResponse<AccountData>();
+    private DataResponse<AccountContent> getAccountResponse() {
+        DataResponse<AccountContent> dataResponse = new DataResponse<AccountContent>();
         dataResponse.setTimestamp(Instant.from(LocalDateTime.now()));
-        AccountData accountData = new AccountData();
+        AccountContent accountData = new AccountContent();
         Map<String, String> data = new HashMap<>();
         data.put("message", "ok");
         accountData.setData(data);
