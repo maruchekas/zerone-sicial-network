@@ -7,14 +7,13 @@ spring:
   profiles:
     active: dev
   datasource:
-    driver-class-name: org.postgresql.Driver
-    url:
-    username:
-    password:
+    url: jdbc:postgresql://localhost:5432/SocialNetwork
+    username: postgres
+    password: root
   jpa:
-    show-sql: false
+    show-sql: true
     hibernate:
-      ddl-auto: none
+      ddl-auto: validate
   mail:
     host:
     port:
@@ -22,3 +21,5 @@ spring:
     password:
   flyway:
     enabled: true
+jwt:
+  secret: secret

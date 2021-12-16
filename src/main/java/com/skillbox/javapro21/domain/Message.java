@@ -2,10 +2,18 @@ package com.skillbox.javapro21.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.skillbox.javapro21.domain.enumeration.ReadStatus;
+import lombok.*;
+import org.hibernate.Hibernate;
 
 import javax.persistence.*;
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
+import java.util.Objects;
 
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Setter
+@Getter
 @Entity
 @Table(name = "messages")
 public class Message {
@@ -13,10 +21,10 @@ public class Message {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private Integer id;
+    private Long id;
 
     @Column(name = "time")
-    private ZonedDateTime time;
+    private LocalDateTime time;
 
     @Column(name = "message_text")
     private String messageText;
@@ -27,142 +35,48 @@ public class Message {
 
     @ManyToOne
     @JsonIgnoreProperties(
-        value = {
-            "blocksLists",
-            "outFriendshipRequests",
-            "incFriendshipRequests",
-            "outMessages",
-            "incMessages",
-            "posts",
-            "postLikes",
-            "comments",
-            "notifications",
-        },
-        allowSetters = true
+            value = {
+                    "blocksLists",
+                    "outFriendshipRequests",
+                    "incFriendshipRequests",
+                    "outMessages",
+                    "incMessages",
+                    "posts",
+                    "postLikes",
+                    "comments",
+                    "notifications",
+            },
+            allowSetters = true
     )
     private Person author;
 
     @ManyToOne
     @JsonIgnoreProperties(
-        value = {
-            "blocksLists",
-            "outFriendshipRequests",
-            "incFriendshipRequests",
-            "outMessages",
-            "incMessages",
-            "posts",
-            "postLikes",
-            "comments",
-            "notifications",
-        },
-        allowSetters = true
+            value = {
+                    "blocksLists",
+                    "outFriendshipRequests",
+                    "incFriendshipRequests",
+                    "outMessages",
+                    "incMessages",
+                    "posts",
+                    "postLikes",
+                    "comments",
+                    "notifications",
+            },
+            allowSetters = true
     )
     private Person recipient;
 
-
-    public Integer getId() {
-        return this.id;
-    }
-
-    public Message id(Integer id) {
-        this.setId(id);
-        return this;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public ZonedDateTime getTime() {
-        return this.time;
-    }
-
-    public Message time(ZonedDateTime time) {
-        this.setTime(time);
-        return this;
-    }
-
-    public void setTime(ZonedDateTime time) {
-        this.time = time;
-    }
-
-    public String getMessageText() {
-        return this.messageText;
-    }
-
-    public Message messageText(String messageText) {
-        this.setMessageText(messageText);
-        return this;
-    }
-
-    public void setMessageText(String messageText) {
-        this.messageText = messageText;
-    }
-
-    public ReadStatus getReadStatus() {
-        return this.readStatus;
-    }
-
-    public Message readStatus(ReadStatus readStatus) {
-        this.setReadStatus(readStatus);
-        return this;
-    }
-
-    public void setReadStatus(ReadStatus readStatus) {
-        this.readStatus = readStatus;
-    }
-
-    public Person getAuthor() {
-        return this.author;
-    }
-
-    public void setAuthor(Person person) {
-        this.author = person;
-    }
-
-    public Message author(Person person) {
-        this.setAuthor(person);
-        return this;
-    }
-
-    public Person getRecipient() {
-        return this.recipient;
-    }
-
-    public void setRecipient(Person person) {
-        this.recipient = person;
-    }
-
-    public Message recipient(Person person) {
-        this.setRecipient(person);
-        return this;
-    }
-
-
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof Message)) {
-            return false;
-        }
-        return id != null && id.equals(((Message) o).id);
+        if (this == o) return true;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        Message message = (Message) o;
+        return id != null && Objects.equals(id, message.id);
     }
 
     @Override
     public int hashCode() {
-        // see https://vladmihalcea.com/how-to-implement-equals-and-hashcode-using-the-jpa-entity-identifier/
         return getClass().hashCode();
-    }
-
-    @Override
-    public String toString() {
-        return "Message{" +
-            "id=" + getId() +
-            ", time='" + getTime() + "'" +
-            ", messageText='" + getMessageText() + "'" +
-            ", readStatus='" + getReadStatus() + "'" +
-            "}";
     }
 }
