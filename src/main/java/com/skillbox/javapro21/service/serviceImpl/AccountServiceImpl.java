@@ -30,7 +30,7 @@ public class AccountServiceImpl implements AccountService {
     private final PersonRepository personRepository;
     private final JavaMailSender mailSender;
 
-    @Value("$(spring.mail.verificationLink)")
+    @Value("${spring.mail.verificationLink}")
     private String verificationLink;
 
     @Autowired
