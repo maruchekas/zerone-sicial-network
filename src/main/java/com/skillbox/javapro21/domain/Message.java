@@ -6,24 +6,25 @@ import lombok.*;
 import org.hibernate.Hibernate;
 
 import javax.persistence.*;
-import java.time.Instant;
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Setter
+@Getter
 @Entity
 @Table(name = "messages")
-@Getter
-@Setter
-@ToString
-@RequiredArgsConstructor
 public class Message {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private Integer id;
+    private Long id;
 
     @Column(name = "time")
-    private Instant time;
+    private LocalDateTime time;
 
     @Column(name = "message_text")
     private String messageText;
@@ -34,35 +35,35 @@ public class Message {
 
     @ManyToOne
     @JsonIgnoreProperties(
-        value = {
-            "blocksLists",
-            "outFriendshipRequests",
-            "incFriendshipRequests",
-            "outMessages",
-            "incMessages",
-            "posts",
-            "postLikes",
-            "comments",
-            "notifications",
-        },
-        allowSetters = true
+            value = {
+                    "blocksLists",
+                    "outFriendshipRequests",
+                    "incFriendshipRequests",
+                    "outMessages",
+                    "incMessages",
+                    "posts",
+                    "postLikes",
+                    "comments",
+                    "notifications",
+            },
+            allowSetters = true
     )
     private Person author;
 
     @ManyToOne
     @JsonIgnoreProperties(
-        value = {
-            "blocksLists",
-            "outFriendshipRequests",
-            "incFriendshipRequests",
-            "outMessages",
-            "incMessages",
-            "posts",
-            "postLikes",
-            "comments",
-            "notifications",
-        },
-        allowSetters = true
+            value = {
+                    "blocksLists",
+                    "outFriendshipRequests",
+                    "incFriendshipRequests",
+                    "outMessages",
+                    "incMessages",
+                    "posts",
+                    "postLikes",
+                    "comments",
+                    "notifications",
+            },
+            allowSetters = true
     )
     private Person recipient;
 

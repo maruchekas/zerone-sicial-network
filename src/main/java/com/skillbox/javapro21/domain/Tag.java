@@ -9,23 +9,25 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-@Entity
-@Table(name = "tag")
-@Getter
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 @Setter
-@ToString
-@RequiredArgsConstructor
+@Getter
+@Entity
+@Table(name = "tags")
 public class Tag {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private Integer id;
+    private Long id;
 
     @Column(name = "tag")
     private String tag;
 
     @ManyToMany(mappedBy = "tags")
-    @JsonIgnoreProperties(value = { "block", "likes", "files", "comments", "tags", "author" }, allowSetters = true)
+    @JsonIgnoreProperties(value = {"block", "likes", "files", "comments", "tags", "author"}, allowSetters = true)
     @ToString.Exclude
     private Set<Post> posts = new HashSet<>();
 

@@ -5,27 +5,28 @@ import lombok.*;
 import org.hibernate.Hibernate;
 
 import javax.persistence.*;
-import java.time.Instant;
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Setter
+@Getter
 @Entity
 @Table(name = "post_comments")
-@Getter
-@Setter
-@ToString
-@RequiredArgsConstructor
 public class PostComment {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private Integer id;
+    private Long id;
 
     @Column(name = "time")
-    private Instant time;
+    private LocalDateTime time;
 
     @Column(name = "parent_id")
-    private Integer parentId;
+    private Long parentId;
 
     @Column(name = "comment_text")
     private String commentText;
@@ -33,29 +34,29 @@ public class PostComment {
     @Column(name = "is_blocked")
     private Integer isBlocked;
 
-    @JsonIgnoreProperties(value = { "post", "comment", "person" }, allowSetters = true)
+    @JsonIgnoreProperties(value = {"post", "comment", "person"}, allowSetters = true)
     @OneToOne
     @JoinColumn(unique = true)
     private BlockHistory block;
 
     @ManyToOne
-    @JsonIgnoreProperties(value = { "block", "likes", "files", "comments", "tags", "author" }, allowSetters = true)
+    @JsonIgnoreProperties(value = {"block", "likes", "files", "comments", "tags", "author"}, allowSetters = true)
     private Post post;
 
     @ManyToOne
     @JsonIgnoreProperties(
-        value = {
-            "blocksLists",
-            "outFriendshipRequests",
-            "incFriendshipRequests",
-            "outMessages",
-            "incMessages",
-            "posts",
-            "postLikes",
-            "comments",
-            "notifications",
-        },
-        allowSetters = true
+            value = {
+                    "blocksLists",
+                    "outFriendshipRequests",
+                    "incFriendshipRequests",
+                    "outMessages",
+                    "incMessages",
+                    "posts",
+                    "postLikes",
+                    "comments",
+                    "notifications",
+            },
+            allowSetters = true
     )
     private Person person;
 

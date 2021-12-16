@@ -8,5 +8,4 @@ import org.springframework.stereotype.Repository;
 public interface PostCommentRepository extends JpaRepository<PostComment, Integer> {
 
 
-
 }

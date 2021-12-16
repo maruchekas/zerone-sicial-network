@@ -8,13 +8,15 @@ import javax.persistence.*;
 import java.util.Objects;
 
 
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Setter
+@Getter
 @Entity
 @Table(name = "notification_type")
-@Getter
-@Setter
-@ToString
-@RequiredArgsConstructor
 public class NotificationType {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")

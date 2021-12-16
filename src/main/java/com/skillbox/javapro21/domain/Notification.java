@@ -1,46 +1,51 @@
 package com.skillbox.javapro21.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.Data;
+import lombok.*;
 
 import javax.persistence.*;
-import java.time.Instant;
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Setter
+@Getter
 @Entity
 @Table(name = "notifications")
-@Data
 public class Notification {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private Integer id;
+    private Long id;
 
     @Column(name = "sent_time")
-    private Instant sentTime;
+    private LocalDateTime sentTime;
 
     @Column(name = "contact")
     private String contact;
 
-    @JsonIgnoreProperties(value = { "notificatios" }, allowSetters = true)
+    @JsonIgnoreProperties(value = {"notificatios"}, allowSetters = true)
     @OneToOne
     @JoinColumn(unique = true)
     private NotificationType notificationType;
 
     @ManyToOne
     @JsonIgnoreProperties(
-        value = {
-            "blocksLists",
-            "outFriendshipRequests",
-            "incFriendshipRequests",
-            "outMessages",
-            "incMessages",
-            "posts",
-            "postLikes",
-            "comments",
-            "notifications",
-        },
-        allowSetters = true
+            value = {
+                    "blocksLists",
+                    "outFriendshipRequests",
+                    "incFriendshipRequests",
+                    "outMessages",
+                    "incMessages",
+                    "posts",
+                    "postLikes",
+                    "comments",
+                    "notifications",
+            },
+            allowSetters = true
     )
     private Person person;
+
 }

@@ -7,17 +7,19 @@ import org.hibernate.Hibernate;
 import javax.persistence.*;
 import java.util.Objects;
 
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Setter
+@Getter
 @Entity
 @Table(name = "users")
-@Getter
-@Setter
-@ToString
-@RequiredArgsConstructor
 public class User {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private Integer id;
+    private Long id;
 
     @Column(name = "name")
     private String name;
