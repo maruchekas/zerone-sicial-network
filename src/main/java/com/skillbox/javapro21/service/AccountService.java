@@ -9,5 +9,8 @@ import org.springframework.stereotype.Service;
 @Service
 public interface AccountService {
     DataResponse registration(RegisterRequest registerRequest) throws UserExistException;
-    DataResponse recovery(RecoveryRequest recoveryRequest);
+
+    String verifyRegistration(String email, String code);
+
+    String recovery(RecoveryRequest recoveryRequest);
 }

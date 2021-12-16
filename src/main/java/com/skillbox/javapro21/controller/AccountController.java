@@ -32,9 +32,17 @@ public class AccountController {
         return new ResponseEntity<>(accountService.registration(registerRequest), HttpStatus.OK);
     }
 
+    @Operation(summary = "подтверждение регистрации")
+    @GetMapping("/register/complete")
+    public ResponseEntity<String> verifyRegistration(@RequestParam String email,
+                                                     @RequestParam String code) {
+        log.info("Can`t verify user with email {}", email);
+        return new ResponseEntity<>(accountService.verifyRegistration(email, code), HttpStatus.OK);
+    }
+
     @Operation(summary = "восстановление пароля")
     @PutMapping("/password/recovery")
-    public ResponseEntity<DataResponse> recovery(@RequestBody RecoveryRequest recoveryRequest) {
+    public ResponseEntity<String> recovery(@RequestBody RecoveryRequest recoveryRequest) {
         return new ResponseEntity<>(accountService.recovery(recoveryRequest), HttpStatus.OK);
     }
 }
