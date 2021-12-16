@@ -2,17 +2,18 @@ package com.skillbox.javapro21.domain;
 
 import com.skillbox.javapro21.domain.enumeration.NotificationTypeStatus;
 import lombok.*;
+import org.hibernate.Hibernate;
 
 import javax.persistence.*;
+import java.util.Objects;
 
-@EqualsAndHashCode
+
+@Entity
+@Table(name = "notification_type")
 @Getter
 @Setter
 @ToString
-@AllArgsConstructor
-@NoArgsConstructor
-@Entity
-@Table(name = "notification_type")
+@RequiredArgsConstructor
 public class NotificationType {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,4 +23,17 @@ public class NotificationType {
     @Enumerated(EnumType.STRING)
     @Column(name = "notification_status")
     private NotificationTypeStatus notificationStatus;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        NotificationType that = (NotificationType) o;
+        return id != null && Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 }
