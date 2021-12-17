@@ -1,5 +1,6 @@
 server:
   port: 8080
+  base_url: http://localhost:8080
 
 spring:
   messages:
@@ -9,7 +10,7 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/SocialNetwork
     username: postgres
-    password: root
+    password: rootroot
   jpa:
     show-sql: true
     hibernate:
