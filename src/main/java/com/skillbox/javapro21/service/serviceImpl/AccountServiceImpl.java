@@ -4,14 +4,15 @@ import com.skillbox.javapro21.api.request.RecoveryRequest;
 import com.skillbox.javapro21.api.request.RegisterRequest;
 import com.skillbox.javapro21.api.response.DataResponse;
 import com.skillbox.javapro21.api.response.account.AccountContent;
+import com.skillbox.javapro21.config.properties.ConfirmationRegistration;
 import com.skillbox.javapro21.domain.Person;
 import com.skillbox.javapro21.domain.enumeration.MessagesPermission;
 import com.skillbox.javapro21.domain.enumeration.UserType;
+import com.skillbox.javapro21.exception.TokenConfirmationException;
 import com.skillbox.javapro21.exception.UserExistException;
 import com.skillbox.javapro21.repository.PersonRepository;
 import com.skillbox.javapro21.service.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -29,18 +30,16 @@ import java.util.Random;
 public class AccountServiceImpl implements AccountService {
     private final PersonRepository personRepository;
     private final JavaMailSender mailSender;
-
-    @Value("${spring.mail.verificationLink}")
-    private String verificationLink;
+    private final ConfirmationRegistration confirmationRegistration;
 
     @Autowired
-    public AccountServiceImpl(PersonRepository personRepository, JavaMailSender mailSender) {
+    public AccountServiceImpl(PersonRepository personRepository, JavaMailSender mailSender, ConfirmationRegistration confirmationRegistration) {
         this.personRepository = personRepository;
         this.mailSender = mailSender;
+        this.confirmationRegistration = confirmationRegistration;
     }
 
     //Todo: добавить проверку каптчи
-    //Todo: добавить отправку сообщения с ссылкой по почте
     public DataResponse registration(RegisterRequest registerRequest) throws UserExistException {
         if (personRepository.findByEmail(registerRequest.getEmail()).isPresent()) throw new UserExistException();
         createNewPerson(registerRequest);
@@ -48,7 +47,7 @@ public class AccountServiceImpl implements AccountService {
         return getAccountResponse();
     }
 
-    public String verifyRegistration(String email, String code) {
+    public String verifyRegistration(String email, String code) throws TokenConfirmationException {
         Person person = findPersonByEmail(email);
         if (person.getConfirmationCode().equals(code)) {
             person.setIsApproved(1);
@@ -56,10 +55,12 @@ public class AccountServiceImpl implements AccountService {
             person.setMessagesPermission(MessagesPermission.All);
             person.setConfirmationCode("");
             personRepository.save(person);
-        }
+        } else throw new TokenConfirmationException();
         return "Пользователь подтвержден";
     }
 
+    //Todo: переделать на новый контроллер принимающий токен и имэйл и переводящий на контроллер перенаправляющий
+    // на страницу создания пароля
     public String recovery(RecoveryRequest recoveryRequest) {
         Person person = findPersonByEmail(recoveryRequest.getEmail());
         String token = getToken();
@@ -73,6 +74,14 @@ public class AccountServiceImpl implements AccountService {
 
         mailSender.send(mailMessage);
         return "Код выслан на почту";
+    }
+
+    public String verifyRecovery(String email, String code) throws TokenConfirmationException {
+        Person person = findPersonByEmail(email);
+        if (person.getConfirmationCode().equals(code)) {
+
+        } else throw new TokenConfirmationException();
+        return null;
     }
 
     //Todo: перенести добавление роли в контроллер верификации по почте
@@ -97,7 +106,7 @@ public class AccountServiceImpl implements AccountService {
         SimpleMailMessage mailMessage = new SimpleMailMessage();
         mailMessage.setTo(registerRequest.getEmail());
         mailMessage.setSubject("Подтвердите регистрацию в социальной сети Zerone!");
-        mailMessage.setText(verificationLink + "?email=" + registerRequest.getEmail() + "&code=" + token);
+        mailMessage.setText(confirmationRegistration.getUrl() + "?email=" + registerRequest.getEmail() + "&code=" + token);
 
         mailSender.send(mailMessage);
     }

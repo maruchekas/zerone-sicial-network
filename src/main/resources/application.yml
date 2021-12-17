@@ -19,8 +19,10 @@ spring:
     port: 587
     username: jpro021social@gmail.com
     password: SocialNetwork021
-    verificationLink: localhost:8080/api/v1/account/register/complete
   flyway:
     enabled: true
+registration:
+  verification:
+    url: localhost:8080/api/v1/account/register/complete
 jwt:
   secret: secret
