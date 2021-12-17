@@ -3,6 +3,7 @@ package com.skillbox.javapro21.controller;
 import com.skillbox.javapro21.api.request.RecoveryRequest;
 import com.skillbox.javapro21.api.request.RegisterRequest;
 import com.skillbox.javapro21.api.response.DataResponse;
+import com.skillbox.javapro21.exception.TokenConfirmationException;
 import com.skillbox.javapro21.exception.UserExistException;
 import com.skillbox.javapro21.service.AccountService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -35,7 +36,7 @@ public class AccountController {
     @Operation(summary = "подтверждение регистрации")
     @GetMapping("/register/complete")
     public ResponseEntity<String> verifyRegistration(@RequestParam String email,
-                                                     @RequestParam String code) {
+                                                     @RequestParam String code) throws TokenConfirmationException {
         log.info("Can`t verify user with email {}", email);
         return new ResponseEntity<>(accountService.verifyRegistration(email, code), HttpStatus.OK);
     }
@@ -44,5 +45,12 @@ public class AccountController {
     @PutMapping("/password/recovery")
     public ResponseEntity<String> recovery(@RequestBody RecoveryRequest recoveryRequest) {
         return new ResponseEntity<>(accountService.recovery(recoveryRequest), HttpStatus.OK);
+    }
+
+    @Operation(summary = "восстановление пароля")
+    @PutMapping("/password/recovery/complete")
+    public ResponseEntity<String> verifyRecovery(@RequestParam String email,
+                                                 @RequestParam String code) {
+        return new ResponseEntity<>(accountService.verifyRecovery(email, code), HttpStatus.OK);
     }
 }
