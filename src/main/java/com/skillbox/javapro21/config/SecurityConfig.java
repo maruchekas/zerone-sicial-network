@@ -14,6 +14,8 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 @EnableWebSecurity
@@ -21,11 +23,21 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 /*
 последнее включает AOP (@PreAuthorize/@PostAuthorize)
 */
-public class SecurityConfig extends WebSecurityConfigurerAdapter {
+public class SecurityConfig extends WebSecurityConfigurerAdapter implements WebMvcConfigurer {
 
     private final JwtFilter jwtFilter;
 
     private final UserDetailServiceImpl userDetailServiceImpl;
+
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**")
+                .allowedOrigins("${BASE_URL}")
+                .allowedHeaders("*")
+                .allowCredentials(true)
+                .allowedMethods("*");
+    }
+
 
     @Autowired
     public SecurityConfig(JwtFilter jwtFilter, UserDetailServiceImpl userDetailServiceImpl) {
