@@ -13,7 +13,6 @@ import com.skillbox.javapro21.exception.UserExistException;
 import com.skillbox.javapro21.repository.PersonRepository;
 import com.skillbox.javapro21.service.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -32,9 +31,6 @@ public class AccountServiceImpl implements AccountService {
     private final PersonRepository personRepository;
     private final JavaMailSender mailSender;
     private final ConfirmationRegistration confirmationRegistration;
-
-    @Value("${spring.mail.verificationLink}")
-    private String verificationLink;
 
     @Autowired
     public AccountServiceImpl(PersonRepository personRepository, JavaMailSender mailSender, ConfirmationRegistration confirmationRegistration) {

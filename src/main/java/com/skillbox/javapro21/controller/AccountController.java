@@ -50,7 +50,7 @@ public class AccountController {
     @Operation(summary = "восстановление пароля")
     @PutMapping("/password/recovery/complete")
     public ResponseEntity<String> verifyRecovery(@RequestParam String email,
-                                                 @RequestParam String code) {
+                                                 @RequestParam String code) throws TokenConfirmationException {
         return new ResponseEntity<>(accountService.verifyRecovery(email, code), HttpStatus.OK);
     }
 }
