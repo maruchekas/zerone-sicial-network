@@ -81,7 +81,6 @@ public class AccountServiceImpl implements AccountService {
         person.setEmail(registerRequest.getEmail());
         person.setFirstName(registerRequest.getFirstName());
         person.setLastName(registerRequest.getLastName());
-        person.setConfirmationCode(registerRequest.getCode());
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
         person.setPassword(passwordEncoder.encode(registerRequest.getPasswd1()));
         person.setRegDate(LocalDateTime.now());
@@ -103,19 +102,33 @@ public class AccountServiceImpl implements AccountService {
         mailSender.send(mailMessage);
     }
 
+    /**
+     * поиск пользователя по почте, если не найден выбрасывает ошибку
+     */
     private Person findPersonByEmail(String email) {
         return personRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException(email));
     }
 
     /**
+     * создание рандомного токена
+     */
+    private String getToken() {
+        return new Random().ints(10, 33, 122)
+                .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+                .toString();
+    }
+
+    /**
      * используется для ответа 200
      */
-    private AccountResponse getAccountResponse() {
-        AccountResponse accountResponse = new AccountResponse();
-        accountResponse.setTimestamp(Instant.from(LocalDateTime.now()));
+    private DataResponse<AccountContent> getAccountResponse() {
+        DataResponse<AccountContent> dataResponse = new DataResponse<AccountContent>();
+        dataResponse.setTimestamp(Instant.from(LocalDateTime.now()));
+        AccountContent accountData = new AccountContent();
         Map<String, String> data = new HashMap<>();
         data.put("message", "ok");
-        accountResponse.setData(data);
-        return accountResponse;
+        accountData.setData(data);
+        dataResponse.setData(accountData);
+        return dataResponse;
     }
 }

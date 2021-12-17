@@ -23,21 +23,11 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 /*
 последнее включает AOP (@PreAuthorize/@PostAuthorize)
 */
-public class SecurityConfig extends WebSecurityConfigurerAdapter implements WebMvcConfigurer {
+public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final JwtFilter jwtFilter;
 
     private final UserDetailServiceImpl userDetailServiceImpl;
-
-    @Override
-    public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**")
-                .allowedOrigins("${BASE_URL}")
-                .allowedHeaders("*")
-                .allowCredentials(true)
-                .allowedMethods("*");
-    }
-
 
     @Autowired
     public SecurityConfig(JwtFilter jwtFilter, UserDetailServiceImpl userDetailServiceImpl) {
