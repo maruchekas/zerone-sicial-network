@@ -1,5 +1,6 @@
 package com.skillbox.javapro21.service.serviceImpl;
 
+import com.skillbox.javapro21.api.request.AuthRequest;
 import com.skillbox.javapro21.api.request.RecoveryRequest;
 import com.skillbox.javapro21.api.request.RegisterRequest;
 import com.skillbox.javapro21.api.response.DataResponse;
@@ -46,6 +47,16 @@ public class AccountServiceImpl implements AccountService {
         createNewPerson(registerRequest);
         mailMessageForRegistration(registerRequest);
         return getAccountResponse();
+    }
+
+    @Override
+    public DataResponse login(AuthRequest authRequest) {
+        return null;
+    }
+
+    @Override
+    public DataResponse logout(AuthRequest authRequest) {
+        return null;
     }
 
     public String verifyRegistration(String email, String code) {
