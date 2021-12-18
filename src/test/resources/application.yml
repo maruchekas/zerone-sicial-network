@@ -1,27 +1,23 @@
 server:
   port: 8080
-  base_url: http://localhost:8080
-
 spring:
-  messages:
-    basename: lang.messages
-  profiles:
-    active: dev
   datasource:
-    url: jdbc:postgresql://localhost:5432/SocialNetwork
-    username: postgres
-    password: rootroot
+    url: jdbc:h2:~/testdb;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password:
+    driverClassName: org.h2.Driver
   jpa:
-    show-sql: true
+    show-sql: false
     hibernate:
-      ddl-auto: validate
+      dialect: org.hibernate.dialect.H2Dialect
+      ddl-auto: update
+  flyway:
+    enabled: true
   mail:
     host: smtp.gmail.com
     port: 587
     username: jpro021social@gmail.com
     password: SocialNetwork021
-  flyway:
-    enabled: true
 registration:
   verification:
     url: localhost:8080/api/v1/account/register/complete
@@ -31,3 +27,6 @@ recovery:
       url: localhost:8080/api/v1/account//password/recovery/complete
 jwt:
   secret: secret
+cors:
+  urls:
+    - http://localhost/
