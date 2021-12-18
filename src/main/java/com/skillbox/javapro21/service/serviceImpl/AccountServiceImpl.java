@@ -122,6 +122,7 @@ public class AccountServiceImpl implements AccountService {
         person.setEmail(registerRequest.getEmail());
         person.setFirstName(registerRequest.getFirstName());
         person.setLastName(registerRequest.getLastName());
+        person.setConfirmationCode(registerRequest.getCode());
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
         person.setPassword(passwordEncoder.encode(registerRequest.getPasswd1()));
         person.setRegDate(LocalDateTime.now());
