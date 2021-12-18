@@ -22,8 +22,11 @@ public class NotificationType {
     @Column(name = "id")
     private Integer id;
 
+    @Column(name = "code")
+    private boolean code;
+
     @Enumerated(EnumType.STRING)
-    @Column(name = "notification_status")
+    @Column(name = "name")
     private NotificationTypeStatus notificationStatus;
 
     @Override

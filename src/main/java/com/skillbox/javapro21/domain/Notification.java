@@ -26,7 +26,7 @@ public class Notification {
     @Column(name = "contact")
     private String contact;
 
-    @JsonIgnoreProperties(value = {"notificatios"}, allowSetters = true)
+    @JsonIgnoreProperties(value = {"notifications"}, allowSetters = true)
     @OneToOne
     @JoinColumn(unique = true)
     private NotificationType notificationType;

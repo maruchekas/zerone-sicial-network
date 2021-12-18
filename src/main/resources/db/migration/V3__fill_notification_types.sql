@@ -1,8 +1,13 @@
 
 INSERT INTO notification_type(
-	id, notification_status)
-	VALUES (1, 'POST'),
-		   (2, 'POST_COMMENT'),
-		   (3, 'COMMENT_COMMENT'),
-		   (4, 'FRIEND_REQUEST'),
-		   (5, 'MESSAGE');
+	code, name)
+	VALUES ('false', 'POST'),
+	       ('true', 'POST'),
+		   ('false', 'POST_COMMENT'),
+		   ('true', 'POST_COMMENT'),
+		   ('false', 'COMMENT_COMMENT'),
+		   ('true', 'COMMENT_COMMENT'),
+		   ('false', 'FRIEND_REQUEST'),
+		   ('true', 'FRIEND_REQUEST'),
+		   ('false', 'MESSAGE'),
+		   ('true', 'MESSAGE');
