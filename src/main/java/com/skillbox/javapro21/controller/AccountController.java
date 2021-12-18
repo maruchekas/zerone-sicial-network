@@ -29,14 +29,14 @@ public class AccountController {
         this.accountService = accountService;
     }
 
-    @Operation(summary = "регистрация")
+    @Operation(summary = "Регистрация")
     @PostMapping("/register")
     public ResponseEntity<DataResponse<?>> registration(@RequestBody RegisterRequest registerRequest) throws UserExistException {
         log.info("Can`t create user with email {} and name {}", registerRequest.getEmail(), registerRequest.getFirstName());
         return new ResponseEntity<>(accountService.registration(registerRequest), HttpStatus.OK);
     }
 
-    @Operation(summary = "подтверждение регистрации")
+    @Operation(summary = "Подтверждение регистрации")
     @GetMapping("/register/complete")
     public ResponseEntity<String> verifyRegistration(@RequestParam String email,
                                                      @RequestParam String code) throws TokenConfirmationException {
@@ -44,14 +44,14 @@ public class AccountController {
         return new ResponseEntity<>(accountService.verifyRegistration(email, code), HttpStatus.OK);
     }
 
-    @Operation(summary = "отправка ссылки на почту для восстановления пароля")
+    @Operation(summary = "Отправка ссылки на почту для восстановления пароля")
     @GetMapping("/password/send_recovery_massage")
     public ResponseEntity<String> recovery(@RequestBody RecoveryRequest recoveryRequest) {
         log.info("Not found user with email {}", recoveryRequest.getEmail());
         return new ResponseEntity<>(accountService.recovery(recoveryRequest), HttpStatus.OK);
     }
 
-    @Operation(summary = "разрешение на восстановление пароля")
+    @Operation(summary = "Разрешение на восстановление пароля")
     @GetMapping("/password/recovery/complete")
     public ResponseEntity<String> verifyRecovery(@RequestParam String email,
                                                  @RequestParam String code) throws TokenConfirmationException {
@@ -59,7 +59,7 @@ public class AccountController {
         return new ResponseEntity<>(accountService.verifyRecovery(email, code), HttpStatus.OK);
     }
 
-    @Operation(summary = "восстановление пароля")
+    @Operation(summary = "Восстановление пароля")
     @PutMapping("/password/recovery")
     public ResponseEntity<String> recoveryPassword(@RequestParam String email,
                                                    @RequestParam String password) {
@@ -67,14 +67,14 @@ public class AccountController {
         return new ResponseEntity<>(accountService.recoveryPassword(email, password), HttpStatus.OK);
     }
 
-    @Operation(summary = "смена пароля", security = @SecurityRequirement(name = "jwt"))
+    @Operation(summary = "Смена пароля", security = @SecurityRequirement(name = "jwt"))
     @PutMapping("/password/set")
     @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<DataResponse<?>> changePassword(@RequestBody ChangePasswordRequest changePasswordRequest) {
         return new ResponseEntity<>(accountService.changePassword(changePasswordRequest), HttpStatus.OK);
     }
 
-    @Operation(summary = "смена email", security = @SecurityRequirement(name = "jwt"))
+    @Operation(summary = "Смена email", security = @SecurityRequirement(name = "jwt"))
     @PutMapping("/email")
     @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<DataResponse<?>> changeEmail(@RequestBody ChangeEmailRequest changeEmailRequest,
@@ -82,7 +82,7 @@ public class AccountController {
         return new ResponseEntity<>(accountService.changeEmail(changeEmailRequest, principal), HttpStatus.OK);
     }
 
-    @Operation(summary = "редактирование настроек оповещения", security = @SecurityRequirement(name = "jwt"))
+    @Operation(summary = "Редактирование настроек оповещения", security = @SecurityRequirement(name = "jwt"))
     @PutMapping("/notifications")
     @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<DataResponse<?>> changeNotifications(@RequestBody ChangeNotificationsRequest changeNotificationsRequest,

@@ -33,7 +33,6 @@ public class JwtFilter extends GenericFilterBean {
         this.userDetailServiceImpl = userDetailServiceImpl;
     }
 
-    // TODO: 14.12.2021 что стоит перед токеном?
     private String getTokenFromHttpServletRequest(HttpServletRequest request) {
         String token = request.getHeader(AUTH_KEY);
         if (hasText(token)) return StringUtils.removeStart(token, "Bearer").trim();

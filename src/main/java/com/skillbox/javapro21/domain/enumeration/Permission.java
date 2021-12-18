@@ -2,8 +2,8 @@ package com.skillbox.javapro21.domain.enumeration;
 
 public enum Permission {
     USER("user:write"),
-    MODERATOR("moderator:write"),
-    ADMIN("admin:write");
+    MODERATOR("user:moderate"),
+    ADMIN("user:administrate");
     private final String permission;
 
     Permission(String permission) {
