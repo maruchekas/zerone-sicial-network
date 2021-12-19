@@ -113,13 +113,13 @@ public class AccountServiceImpl implements AccountService {
         return getAccountResponse();
     }
 
+    //Todo: сделать как будет поправлена бд
     public DataResponse<AccountContent> changeNotifications(ChangeNotificationsRequest changeNotificationsRequest, Principal principal) {
         Person person = findPersonByEmail(principal.getName());
-//        NotificationType notificationType = notificationTypeRepository.findByPersonId(person.getId());
         return null;
     }
 
-    @Override
+    //Todo: сделать как будет поправлена бд
     public ListDataResponse<NotificationSettingData> getNotifications(Principal principal) {
         return null;
     }
