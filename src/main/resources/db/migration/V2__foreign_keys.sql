@@ -1,9 +1,9 @@
 
 ALTER TABLE block_history ADD CONSTRAINT FK_BLOCK_HISTORY_ON_PERSON FOREIGN KEY (person_id) REFERENCES persons (id);
-ALTER TABLE friendships ADD CONSTRAINT uc_friendships_friendshipstatus UNIQUE (friendship_status_id);
-ALTER TABLE friendships ADD CONSTRAINT FK_FRIENDSHIPS_ON_DSTPERSON FOREIGN KEY (dst_person_id) REFERENCES persons (id);
-ALTER TABLE friendships ADD CONSTRAINT FK_FRIENDSHIPS_ON_FRIENDSHIPSTATUS FOREIGN KEY (friendship_status_id) REFERENCES friendship_statuses (id);
-ALTER TABLE friendships ADD CONSTRAINT FK_FRIENDSHIPS_ON_SRCPERSON FOREIGN KEY (src_person_id) REFERENCES persons (id);
+ALTER TABLE friendship ADD CONSTRAINT uc_friendship_friendshipstatus UNIQUE (status_id);
+ALTER TABLE friendship ADD CONSTRAINT FK_FRIENDSHIP_ON_DSTPERSON FOREIGN KEY (dst_person_id) REFERENCES persons (id);
+ALTER TABLE friendship ADD CONSTRAINT FK_FRIENDSHIP_ON_FRIENDSHIPSTATUS FOREIGN KEY (status_id) REFERENCES friendship_statuses (id);
+ALTER TABLE friendship ADD CONSTRAINT FK_FRIENDSHIP_ON_SRCPERSON FOREIGN KEY (src_person_id) REFERENCES persons (id);
 ALTER TABLE messages ADD CONSTRAINT FK_MESSAGES_ON_AUTHOR FOREIGN KEY (author_id) REFERENCES persons (id);
 ALTER TABLE messages ADD CONSTRAINT FK_MESSAGES_ON_RECIPIENT FOREIGN KEY (recipient_id) REFERENCES persons (id);
 ALTER TABLE notifications ADD CONSTRAINT uc_notifications_notificationtype UNIQUE (notification_type_id);
