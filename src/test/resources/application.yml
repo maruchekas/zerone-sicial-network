@@ -9,10 +9,10 @@ spring:
   jpa:
     show-sql: false
     hibernate:
-      dialect: org.hibernate.dialect.H2Dialect
+      dialect: org.h2.Driver
       ddl-auto: update
   flyway:
-    enabled: true
+    enabled: false
   mail:
     host: smtp.gmail.com
     port: 587

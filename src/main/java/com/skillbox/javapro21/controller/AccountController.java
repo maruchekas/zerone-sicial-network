@@ -1,7 +1,10 @@
 package com.skillbox.javapro21.controller;
 
-import com.skillbox.javapro21.api.request.*;
+import com.skillbox.javapro21.api.request.account.*;
 import com.skillbox.javapro21.api.response.DataResponse;
+import com.skillbox.javapro21.api.response.ListDataResponse;
+import com.skillbox.javapro21.api.response.account.AccountContent;
+import com.skillbox.javapro21.api.response.account.NotificationSettingData;
 import com.skillbox.javapro21.exception.TokenConfirmationException;
 import com.skillbox.javapro21.exception.UserExistException;
 import com.skillbox.javapro21.service.AccountService;
@@ -31,7 +34,7 @@ public class AccountController {
 
     @Operation(summary = "Регистрация")
     @PostMapping("/register")
-    public ResponseEntity<DataResponse<?>> registration(@RequestBody RegisterRequest registerRequest) throws UserExistException {
+    public ResponseEntity<DataResponse<AccountContent>> registration(@RequestBody RegisterRequest registerRequest) throws UserExistException {
         log.info("Can`t create user with email {} and name {}", registerRequest.getEmail(), registerRequest.getFirstName());
         return new ResponseEntity<>(accountService.registration(registerRequest), HttpStatus.OK);
     }
@@ -45,10 +48,10 @@ public class AccountController {
     }
 
     @Operation(summary = "Отправка ссылки на почту для восстановления пароля")
-    @GetMapping("/password/send_recovery_massage")
-    public ResponseEntity<String> recovery(@RequestBody RecoveryRequest recoveryRequest) {
+    @PutMapping("/password/send_recovery_massage")
+    public ResponseEntity<String> recoveryPasswordMessage(@RequestBody RecoveryRequest recoveryRequest) {
         log.info("Not found user with email {}", recoveryRequest.getEmail());
-        return new ResponseEntity<>(accountService.recovery(recoveryRequest), HttpStatus.OK);
+        return new ResponseEntity<>(accountService.recoveryPasswordMessage(recoveryRequest), HttpStatus.OK);
     }
 
     @Operation(summary = "Разрешение на восстановление пароля")
@@ -70,14 +73,14 @@ public class AccountController {
     @Operation(summary = "Смена пароля", security = @SecurityRequirement(name = "jwt"))
     @PutMapping("/password/set")
     @PreAuthorize("hasAuthority('user:write')")
-    public ResponseEntity<DataResponse<?>> changePassword(@RequestBody ChangePasswordRequest changePasswordRequest) {
+    public ResponseEntity<DataResponse<AccountContent>> changePassword(@RequestBody ChangePasswordRequest changePasswordRequest) {
         return new ResponseEntity<>(accountService.changePassword(changePasswordRequest), HttpStatus.OK);
     }
 
     @Operation(summary = "Смена email", security = @SecurityRequirement(name = "jwt"))
     @PutMapping("/email")
     @PreAuthorize("hasAuthority('user:write')")
-    public ResponseEntity<DataResponse<?>> changeEmail(@RequestBody ChangeEmailRequest changeEmailRequest,
+    public ResponseEntity<DataResponse<AccountContent>> changeEmail(@RequestBody ChangeEmailRequest changeEmailRequest,
                                                        Principal principal) {
         return new ResponseEntity<>(accountService.changeEmail(changeEmailRequest, principal), HttpStatus.OK);
     }
@@ -85,8 +88,15 @@ public class AccountController {
     @Operation(summary = "Редактирование настроек оповещения", security = @SecurityRequirement(name = "jwt"))
     @PutMapping("/notifications")
     @PreAuthorize("hasAuthority('user:write')")
-    public ResponseEntity<DataResponse<?>> changeNotifications(@RequestBody ChangeNotificationsRequest changeNotificationsRequest,
+    public ResponseEntity<DataResponse<AccountContent>> changeNotifications(@RequestBody ChangeNotificationsRequest changeNotificationsRequest,
                                                        Principal principal) {
         return new ResponseEntity<>(accountService.changeNotifications(changeNotificationsRequest, principal), HttpStatus.OK);
+    }
+
+    @Operation(summary = "Получение настроек оповещения", security = @SecurityRequirement(name = "jwt"))
+    @GetMapping("/notifications")
+    @PreAuthorize("hasAuthority('user:write')")
+    public ResponseEntity<ListDataResponse<NotificationSettingData>> getNotifications(Principal principal) {
+        return new ResponseEntity<>(accountService.getNotifications(principal), HttpStatus.OK);
     }
 }

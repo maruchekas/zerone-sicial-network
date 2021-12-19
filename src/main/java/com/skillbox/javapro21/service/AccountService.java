@@ -1,8 +1,10 @@
 package com.skillbox.javapro21.service;
 
-import com.skillbox.javapro21.api.request.*;
+import com.skillbox.javapro21.api.request.account.*;
 import com.skillbox.javapro21.api.response.DataResponse;
+import com.skillbox.javapro21.api.response.ListDataResponse;
 import com.skillbox.javapro21.api.response.account.AccountContent;
+import com.skillbox.javapro21.api.response.account.NotificationSettingData;
 import com.skillbox.javapro21.exception.TokenConfirmationException;
 import com.skillbox.javapro21.exception.UserExistException;
 import org.springframework.stereotype.Service;
@@ -15,7 +17,7 @@ public interface AccountService {
 
     String verifyRegistration(String email, String code) throws TokenConfirmationException;
 
-    String recovery(RecoveryRequest recoveryRequest);
+    String recoveryPasswordMessage(RecoveryRequest recoveryRequest);
 
     String verifyRecovery(String email, String code) throws TokenConfirmationException;
 
@@ -26,4 +28,6 @@ public interface AccountService {
     DataResponse<AccountContent> changeEmail(ChangeEmailRequest changeEmailRequest, Principal principal);
 
     DataResponse<AccountContent> changeNotifications(ChangeNotificationsRequest changeNotificationsRequest, Principal principal);
+
+    ListDataResponse<NotificationSettingData> getNotifications(Principal principal);
 }

@@ -2,7 +2,6 @@ package com.skillbox.javapro21.config.security;
 
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -14,7 +13,6 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
-
 import java.io.IOException;
 
 import static org.springframework.util.StringUtils.hasText;
@@ -22,12 +20,9 @@ import static org.springframework.util.StringUtils.hasText;
 @Component
 public class JwtFilter extends GenericFilterBean {
     public static final String AUTH_KEY = "Authorization";
-
     private final JwtGenerator jwtGenerator;
-
     private final UserDetailServiceImpl userDetailServiceImpl;
 
-    @Autowired
     public JwtFilter(JwtGenerator jwtGenerator, UserDetailServiceImpl userDetailServiceImpl) {
         this.jwtGenerator = jwtGenerator;
         this.userDetailServiceImpl = userDetailServiceImpl;
@@ -53,6 +48,4 @@ public class JwtFilter extends GenericFilterBean {
         }
         filterChain.doFilter(servletRequest, servletResponse);
     }
-
-
 }

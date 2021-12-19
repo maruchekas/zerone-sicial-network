@@ -1,4 +1,4 @@
-package com.skillbox.javapro21.api.request;
+package com.skillbox.javapro21.api.request.account;
 
 import lombok.Data;
 

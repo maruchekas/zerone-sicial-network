@@ -1,8 +1,10 @@
 package com.skillbox.javapro21.service.serviceImpl;
 
-import com.skillbox.javapro21.api.request.*;
+import com.skillbox.javapro21.api.request.account.*;
 import com.skillbox.javapro21.api.response.DataResponse;
+import com.skillbox.javapro21.api.response.ListDataResponse;
 import com.skillbox.javapro21.api.response.account.AccountContent;
+import com.skillbox.javapro21.api.response.account.NotificationSettingData;
 import com.skillbox.javapro21.config.properties.ConfirmationRecoveryPass;
 import com.skillbox.javapro21.config.properties.ConfirmationRegistration;
 import com.skillbox.javapro21.config.security.JwtGenerator;
@@ -68,7 +70,7 @@ public class AccountServiceImpl implements AccountService {
         return "Пользователь подтвержден";
     }
 
-    public String recovery(RecoveryRequest recoveryRequest) {
+    public String recoveryPasswordMessage(RecoveryRequest recoveryRequest) {
         Person person = findPersonByEmail(recoveryRequest.getEmail());
         String token = getToken();
         person.setConfirmationCode(token);
@@ -114,6 +116,11 @@ public class AccountServiceImpl implements AccountService {
     public DataResponse<AccountContent> changeNotifications(ChangeNotificationsRequest changeNotificationsRequest, Principal principal) {
         Person person = findPersonByEmail(principal.getName());
 //        NotificationType notificationType = notificationTypeRepository.findByPersonId(person.getId());
+        return null;
+    }
+
+    @Override
+    public ListDataResponse<NotificationSettingData> getNotifications(Principal principal) {
         return null;
     }
 
