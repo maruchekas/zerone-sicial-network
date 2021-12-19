@@ -31,7 +31,7 @@ public class PostComment {
     private String commentText;
 
     @Column(name = "is_blocked")
-    private Integer isBlocked;
+    private boolean isBlocked;
 
     @JsonIgnoreProperties(value = {"post", "comment", "person"}, allowSetters = true)
     @OneToOne
@@ -57,6 +57,7 @@ public class PostComment {
             },
             allowSetters = true
     )
+    @JoinColumn(name = "author_id")
     private Person person;
 
     @Override
