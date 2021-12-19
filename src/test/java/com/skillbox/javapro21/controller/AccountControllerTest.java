@@ -16,6 +16,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
@@ -23,6 +24,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@TestPropertySource(value = {"classpath:application-test.yml"})
 public class AccountControllerTest extends AbstractTest {
     @Autowired
     private MockMvc mockMvc;
@@ -56,6 +58,7 @@ public class AccountControllerTest extends AbstractTest {
         verifyPerson.setPassword(passwordEncoder.encode(password));
         verifyPerson.setFirstName(firstName);
         verifyPerson.setLastName(lastName);
+        verifyPerson.setConfirmationCode("123");
 
         personRepository.save(verifyPerson);
     }
@@ -115,8 +118,7 @@ public class AccountControllerTest extends AbstractTest {
 
     @Test
     void verifyRecovery() throws Exception {
-        verifyPerson.setConfirmationCode("123");
-        String json = "{\"email\": \"test@test.ru\", \"code\": \"123\"}";
+        String json = "{\"email\":\"test@test.ru\", \"code\":\"123\"}";
 
         mockMvc.perform(MockMvcRequestBuilders
                         .get("/api/vi/account/password/recovery/complete")
@@ -130,12 +132,12 @@ public class AccountControllerTest extends AbstractTest {
     @Test
     void recoveryPassword() throws Exception {
         String json = "{\"email\": \"test@test.ru\", \"password\": \"1234\"}";
-
         mockMvc.perform(MockMvcRequestBuilders
-                        .put("/api/vi/account/password/recovery/complete")
+                        .put("/api/vi/account/password/recovery")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(json)
-                        .accept(MediaType.APPLICATION_JSON))
+                        .param("email", "test@test.ru")
+                        .param("password", "1234")
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }

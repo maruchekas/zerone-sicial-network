@@ -16,10 +16,10 @@ spring:
     hibernate:
       ddl-auto: validate
   mail:
-    host: smtp.gmail.com
-    port: 587
-    username: jpro021social@gmail.com
-    password: SocialNetwork021
+    host: smtp.mail.ru
+    port: 465
+    username:  jpo021social@mail.ru
+    password: SocialNetwork0211
   flyway:
     enabled: true
 registration:
@@ -28,6 +28,6 @@ registration:
 recovery:
   pass:
     verification:
-      url: localhost:8080/api/v1/account//password/recovery/complete
+      url: localhost:8080/api/v1/account/password/recovery/complete
 jwt:
   secret: secret
