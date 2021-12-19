@@ -23,8 +23,11 @@ public class FriendshipStatus {
     @Column(name = "time")
     private ZonedDateTime time;
 
+    @Column
+    private long code;
+
     @Enumerated(EnumType.STRING)
-    @Column(name = "friendship_status_type")
+    @Column(name = "name")
     private FriendshipStatusType friendshipStatusType;
 
     @JsonIgnoreProperties(value = {"friendshipStatus", "srcPerson", "dstPerson"}, allowSetters = true)

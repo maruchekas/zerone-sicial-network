@@ -3,12 +3,14 @@ package com.skillbox.javapro21.service.serviceImpl;
 import com.skillbox.javapro21.api.request.*;
 import com.skillbox.javapro21.api.response.DataResponse;
 import com.skillbox.javapro21.api.response.account.AccountContent;
+import com.skillbox.javapro21.api.response.account.AuthContent;
 import com.skillbox.javapro21.config.properties.ConfirmationRecoveryPass;
 import com.skillbox.javapro21.config.properties.ConfirmationRegistration;
 import com.skillbox.javapro21.config.security.JwtGenerator;
 import com.skillbox.javapro21.domain.Person;
 import com.skillbox.javapro21.domain.enumeration.MessagesPermission;
 import com.skillbox.javapro21.domain.enumeration.UserType;
+import com.skillbox.javapro21.exception.NotSuchUserOrWrongPasswordException;
 import com.skillbox.javapro21.exception.TokenConfirmationException;
 import com.skillbox.javapro21.exception.UserExistException;
 import com.skillbox.javapro21.repository.NotificationTypeRepository;
@@ -17,6 +19,7 @@ import com.skillbox.javapro21.service.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -117,6 +120,7 @@ public class AccountServiceImpl implements AccountService {
         return null;
     }
 
+
     private void createNewPerson(RegisterRequest registerRequest) {
         Person person = new Person();
         person.setEmail(registerRequest.getEmail());
@@ -172,4 +176,6 @@ public class AccountServiceImpl implements AccountService {
         dataResponse.setData(accountData);
         return dataResponse;
     }
+
+
 }

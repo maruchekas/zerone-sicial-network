@@ -2,15 +2,18 @@ package com.skillbox.javapro21.controller;
 
 import com.skillbox.javapro21.api.request.AuthRequest;
 import com.skillbox.javapro21.api.response.DataResponse;
-import com.skillbox.javapro21.exception.UserExistException;
-import com.skillbox.javapro21.service.AccountService;
+import com.skillbox.javapro21.exception.NotSuchUserOrWrongPasswordException;
+import com.skillbox.javapro21.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @RestController
@@ -19,26 +22,25 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AuthController {
 
-    private final AccountService accountService;
+    private final AuthService authService;
 
-    @Operation(summary = "вход")
+    @Operation(summary = "Вход через логин/пароль")
     @PostMapping("/login")
-    public ResponseEntity<DataResponse> login(@RequestParam String email,
-                                              @RequestParam String password) throws UserExistException {
+    public ResponseEntity<DataResponse<?>> login(@RequestBody AuthRequest authRequest) throws NotSuchUserOrWrongPasswordException {
 
         // TODO запрос на вход (лог/пасс), проверка существования юзера,
         //  выброс исключения notSuchUserExistsException. Вернуть пользователя
-        log.info("Login user with email {} and name {}", email, email);
-        AuthRequest authRequest = new AuthRequest();
+        log.info("Login user with email {}", authRequest.getEmail());
 
-        return new ResponseEntity<>(accountService.login(authRequest), HttpStatus.OK);
+        return new ResponseEntity<>(authService.login(authRequest), HttpStatus.OK);
     }
 
-    @Operation(summary = "выход")
+    @Operation(summary = "Выход")
     @PostMapping("/logout")
-    public ResponseEntity<DataResponse> logOut(@RequestBody AuthRequest authRequest) throws UserExistException {
-        // TODO взять авторизованного пользователя, убить токен, завершить сессию
-        log.info("User with email {} and name {} logout", authRequest.getEmail(), authRequest.getPassword());
-        return new ResponseEntity<>(accountService.login(authRequest), HttpStatus.OK);
+    public ResponseEntity<DataResponse<?>> logOut() {
+        String name = authService.logout().getData().getPerson().getFirstName();
+        String email = authService.logout().getData().getPerson().getEmail();
+        log.info("User with email {} and name {} has logout", email, name);
+        return new ResponseEntity<>(authService.logout(), HttpStatus.OK);
     }
 }
