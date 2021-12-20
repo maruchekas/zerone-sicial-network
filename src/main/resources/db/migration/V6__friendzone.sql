@@ -18,6 +18,20 @@ VALUES ('2021-12-10 12:44:34', 'REQUEST', 11),
        ('2021-12-09 06:25:16', 'FRIEND', 13),
        ('2021-12-09 12:25:13', 'BLOCKED', 13);
 
+INSERT INTO notification_type(
+    person_id, code, name)
+    VALUES (1, 'false', 'POST'),
+           (3, 'true', 'POST'),
+           (1, 'false', 'POST_COMMENT'),
+           (3, 'true', 'POST_COMMENT'),
+           (3, 'false', 'COMMENT_COMMENT'),
+           (1, 'true', 'COMMENT_COMMENT'),
+           (3, 'false', 'FRIEND_REQUEST'),
+           (1, 'true', 'FRIEND_REQUEST'),
+           (3, 'false', 'MESSAGE'),
+           (1, 'true', 'MESSAGE');
+
+
 
 insert into friendship (status_id, src_person_id, dst_person_id)
 values (1, 11, 1),
