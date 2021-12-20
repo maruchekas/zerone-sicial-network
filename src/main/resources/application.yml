@@ -15,10 +15,10 @@ spring:
     hibernate:
       ddl-auto: validate
   mail:
-    host:
-    port:
-    username:
-    password:
+    host: smtp.gmail.com
+    port: 587
+    username: jpro021social@gmail.com
+    password: SocialNetwork021
   flyway:
     enabled: true
 jwt:

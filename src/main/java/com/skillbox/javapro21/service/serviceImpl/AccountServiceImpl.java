@@ -50,7 +50,8 @@ public class AccountServiceImpl implements AccountService {
         personRepository.save(person);
     }
 
-    private Person findPersonByEmail(String email) {
+    @Override
+    public Person findPersonByEmail(String email) {
         return personRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException(email));
     }
 
