@@ -31,7 +31,7 @@ public class Post {
     @Column(name = "title")
     private String title;
 
-    @Column(name = "post_text")
+    @Column(name = "post_text", columnDefinition = "TEXT")
     private String postText;
 
     @Column(name = "is_blocked")

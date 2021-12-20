@@ -49,7 +49,7 @@ public class Person {
     @Column(name = "photo")
     private String photo;
 
-    @Column(name = "about")
+    @Column(name = "about", columnDefinition = "TEXT")
     private String about;
 
     @Column(name = "town")

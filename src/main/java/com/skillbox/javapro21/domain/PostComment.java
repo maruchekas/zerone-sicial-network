@@ -28,7 +28,7 @@ public class PostComment {
     @Column(name = "parent_id")
     private Long parentId;
 
-    @Column(name = "comment_text")
+    @Column(name = "comment_text", columnDefinition = "TEXT")
     private String commentText;
 
     @Column(name = "is_blocked")

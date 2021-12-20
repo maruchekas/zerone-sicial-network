@@ -25,7 +25,7 @@ public class Message {
     @Column(name = "time")
     private LocalDateTime time;
 
-    @Column(name = "message_text")
+    @Column(name = "message_text", columnDefinition = "TEXT")
     private String messageText;
 
     @Enumerated(EnumType.STRING)
