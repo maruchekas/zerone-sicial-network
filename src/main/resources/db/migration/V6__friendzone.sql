@@ -38,4 +38,18 @@ insert into friendship (status_id, src_person_id, dst_person_id ) values
         (17, 1, 13),
         (18, 1, 13);
 
+INSERT INTO notification_type(
+    person_id, code, name)
+    VALUES (1, 'false', 'POST'),
+           (3, 'true', 'POST'),
+           (1, 'false', 'POST_COMMENT'),
+           (3, 'true', 'POST_COMMENT'),
+           (3, 'false', 'COMMENT_COMMENT'),
+           (1, 'true', 'COMMENT_COMMENT'),
+           (3, 'false', 'FRIEND_REQUEST'),
+           (1, 'true', 'FRIEND_REQUEST'),
+           (3, 'false', 'MESSAGE'),
+           (1, 'true', 'MESSAGE');
+
+
 
