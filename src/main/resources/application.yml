@@ -1,7 +1,6 @@
 server:
   port: 8080
   base_url: http://localhost:8080
-
 spring:
   messages:
     basename: lang.messages
@@ -10,16 +9,17 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/SocialNetwork
     username: postgres
-    password: rootroot
+    password: root
   jpa:
     show-sql: true
     hibernate:
       ddl-auto: validate
+mailjet:
   mail:
-    host: smtp.mail.ru
-    port: 465
-    username:  jpo021social@mail.ru
-    password: SocialNetwork0211
+    key: 42ab394187a24011ecdcb095ff7fe4b6
+    from: jpa021network@mail.ru
+    secret: e70ed72dd4cfecf672bac3e516762acb!
+    version: v3.1
   flyway:
     enabled: true
 registration:

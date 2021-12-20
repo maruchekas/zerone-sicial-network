@@ -41,6 +41,7 @@ public class AccountControllerTest extends AbstractTest {
     @BeforeEach
     public void setup() {
         super.setup();
+        personRepository.deleteAll();
         String email = "arcadiy@test.ru";
         String verifyEmail = "test@test.ru";
         String password = "1234";
@@ -131,7 +132,6 @@ public class AccountControllerTest extends AbstractTest {
 
     @Test
     void recoveryPassword() throws Exception {
-        String json = "{\"email\": \"test@test.ru\", \"password\": \"1234\"}";
         mockMvc.perform(MockMvcRequestBuilders
                         .put("/api/vi/account/password/recovery")
                         .contentType(MediaType.APPLICATION_JSON)

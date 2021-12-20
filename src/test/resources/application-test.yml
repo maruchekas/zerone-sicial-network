@@ -13,11 +13,12 @@ spring:
       ddl-auto: update
   flyway:
     enabled: false
+mailjet:
   mail:
-    host: smtp.gmail.com
-    port: 587
-    username: jpro021social@gmail.com
-    password: SocialNetwork021
+    key: 42ab394187a24011ecdcb095ff7fe4b6
+    from: jpa021network@mail.ru
+    secret: e70ed72dd4cfecf672bac3e516762acb!
+    version: v3.1
 registration:
   verification:
     url: localhost:8080/api/v1/account/register/complete

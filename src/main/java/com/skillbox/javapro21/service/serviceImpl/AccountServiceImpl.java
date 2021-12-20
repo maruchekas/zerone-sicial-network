@@ -1,10 +1,13 @@
 package com.skillbox.javapro21.service.serviceImpl;
 
+import com.mailjet.client.errors.MailjetException;
+import com.mailjet.client.errors.MailjetSocketTimeoutException;
 import com.skillbox.javapro21.api.request.account.*;
 import com.skillbox.javapro21.api.response.DataResponse;
 import com.skillbox.javapro21.api.response.ListDataResponse;
 import com.skillbox.javapro21.api.response.account.AccountContent;
 import com.skillbox.javapro21.api.response.account.NotificationSettingData;
+import com.skillbox.javapro21.config.MailjetSender;
 import com.skillbox.javapro21.config.properties.ConfirmationRecoveryPass;
 import com.skillbox.javapro21.config.properties.ConfirmationRegistration;
 import com.skillbox.javapro21.config.security.JwtGenerator;
@@ -17,8 +20,6 @@ import com.skillbox.javapro21.repository.NotificationTypeRepository;
 import com.skillbox.javapro21.repository.PersonRepository;
 import com.skillbox.javapro21.service.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -34,16 +35,16 @@ import java.util.Random;
 @Component
 public class AccountServiceImpl implements AccountService {
     private final PersonRepository personRepository;
-    private final JavaMailSender mailSender;
+    private final MailjetSender mailMessage;
     private final ConfirmationRegistration confirmationRegistration;
     private final ConfirmationRecoveryPass confirmationRecoveryPass;
     private final JwtGenerator jwtGenerator;
     private final NotificationTypeRepository notificationTypeRepository;
 
     @Autowired
-    public AccountServiceImpl(PersonRepository personRepository, JavaMailSender mailSender, ConfirmationRegistration confirmationRegistration, ConfirmationRecoveryPass confirmationRecoveryPass, JwtGenerator jwtGenerator, NotificationTypeRepository notificationTypeRepository) {
+    public AccountServiceImpl(PersonRepository personRepository, MailjetSender mailMessage, ConfirmationRegistration confirmationRegistration, ConfirmationRecoveryPass confirmationRecoveryPass, JwtGenerator jwtGenerator, NotificationTypeRepository notificationTypeRepository) {
         this.personRepository = personRepository;
-        this.mailSender = mailSender;
+        this.mailMessage = mailMessage;
         this.confirmationRegistration = confirmationRegistration;
         this.confirmationRecoveryPass = confirmationRecoveryPass;
         this.jwtGenerator = jwtGenerator;
@@ -51,7 +52,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     //Todo: нужна ли проверка каптчи?
-    public DataResponse<AccountContent> registration(RegisterRequest registerRequest) throws UserExistException {
+    public DataResponse<AccountContent> registration(RegisterRequest registerRequest) throws UserExistException, MailjetSocketTimeoutException, MailjetException {
         if (personRepository.findByEmail(registerRequest.getEmail()).isPresent()) throw new UserExistException();
         createNewPerson(registerRequest);
         mailMessageForRegistration(registerRequest);
@@ -63,26 +64,24 @@ public class AccountServiceImpl implements AccountService {
         if (person.getConfirmationCode().equals(code)) {
             person.setIsApproved(1);
             person.setUserType(UserType.USER);
-            person.setMessagesPermission(MessagesPermission.All);
+            person.setMessagesPermission(MessagesPermission.ALL);
             person.setConfirmationCode("");
             personRepository.save(person);
         } else throw new TokenConfirmationException();
         return "Пользователь подтвержден";
     }
 
-    public String recoveryPasswordMessage(RecoveryRequest recoveryRequest) {
-        Person person = findPersonByEmail(recoveryRequest.getEmail());
+    public String recoveryPasswordMessage(RecoveryRequest recoveryRequest) throws MailjetSocketTimeoutException, MailjetException {
         String token = getToken();
-        person.setConfirmationCode(token);
-        personRepository.save(person);
-
-        SimpleMailMessage mailMessage = new SimpleMailMessage();
-        mailMessage.setTo(recoveryRequest.getEmail());
-        mailMessage.setSubject("Ссылка на страницу восстановления пароля");
-        mailMessage.setText(confirmationRecoveryPass.getUrl() + "?email=" + recoveryRequest.getEmail() + "&code=" + token);
-
-        mailSender.send(mailMessage);
+        String text  = confirmationRecoveryPass.getUrl() + "?email=" + recoveryRequest.getEmail() + "&code=" + token;
+        confirmPersonAndSendEmail(recoveryRequest.getEmail(), text, token);
         return "Ссылка отправлена на почту";
+    }
+
+    private void mailMessageForRegistration(RegisterRequest registerRequest) throws MailjetSocketTimeoutException, MailjetException {
+        String token = getToken();
+        String text = confirmationRegistration.getUrl() + "?email=" + registerRequest.getEmail() + "&code=" + token;
+        confirmPersonAndSendEmail(registerRequest.getEmail(), text, token);
     }
 
     public String verifyRecovery(String email, String code) throws TokenConfirmationException {
@@ -120,8 +119,17 @@ public class AccountServiceImpl implements AccountService {
     }
 
     //Todo: сделать как будет поправлена бд
+
     public ListDataResponse<NotificationSettingData> getNotifications(Principal principal) {
         return null;
+    }
+
+    private void confirmPersonAndSendEmail(String email, String text, String token) throws MailjetSocketTimeoutException, MailjetException {
+        Person person = findPersonByEmail(email);
+        person.setConfirmationCode(token);
+        personRepository.save(person);
+
+        mailMessage.send(email,text);
     }
 
     private void createNewPerson(RegisterRequest registerRequest) {
@@ -135,20 +143,6 @@ public class AccountServiceImpl implements AccountService {
         person.setRegDate(LocalDateTime.now());
         person.setLastOnlineTime(LocalDateTime.now());
         personRepository.save(person);
-    }
-
-    private void mailMessageForRegistration(RegisterRequest registerRequest) {
-        Person person = findPersonByEmail(registerRequest.getEmail());
-        String token = getToken();
-        person.setConfirmationCode(token);
-        personRepository.save(person);
-
-        SimpleMailMessage mailMessage = new SimpleMailMessage();
-        mailMessage.setTo(registerRequest.getEmail());
-        mailMessage.setSubject("Подтвердите регистрацию в социальной сети Zerone!");
-        mailMessage.setText(confirmationRegistration.getUrl() + "?email=" + registerRequest.getEmail() + "&code=" + token);
-
-        mailSender.send(mailMessage);
     }
 
     /**

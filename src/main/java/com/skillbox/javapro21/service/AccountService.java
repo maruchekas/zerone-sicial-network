@@ -1,5 +1,7 @@
 package com.skillbox.javapro21.service;
 
+import com.mailjet.client.errors.MailjetException;
+import com.mailjet.client.errors.MailjetSocketTimeoutException;
 import com.skillbox.javapro21.api.request.account.*;
 import com.skillbox.javapro21.api.response.DataResponse;
 import com.skillbox.javapro21.api.response.ListDataResponse;
@@ -13,11 +15,11 @@ import java.security.Principal;
 
 @Service
 public interface AccountService {
-    DataResponse<AccountContent> registration(RegisterRequest registerRequest) throws UserExistException;
+    DataResponse<AccountContent> registration(RegisterRequest registerRequest) throws UserExistException, MailjetSocketTimeoutException, MailjetException;
 
     String verifyRegistration(String email, String code) throws TokenConfirmationException;
 
-    String recoveryPasswordMessage(RecoveryRequest recoveryRequest);
+    String recoveryPasswordMessage(RecoveryRequest recoveryRequest) throws MailjetSocketTimeoutException, MailjetException;
 
     String verifyRecovery(String email, String code) throws TokenConfirmationException;
 
