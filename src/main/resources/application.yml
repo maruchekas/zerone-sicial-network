@@ -7,9 +7,11 @@ spring:
   profiles:
     active: dev
   datasource:
-    url: jdbc:postgresql://localhost:5432/SocialNetwork
-    username: postgres
-    password: root
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:3306/SocialNetwork?createDatabaseIfNotExist=true
+      &allowPublicKeyRetrieval=true&useSSL=false&useUnicode=true
+      &characterEncoding=UTF-8&serverTimezone=UTC
+    username: bestuser
+    password: bestuser
   jpa:
     show-sql: true
     hibernate:

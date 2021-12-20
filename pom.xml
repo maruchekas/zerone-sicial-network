@@ -75,10 +75,15 @@
 		</dependency>
 
 		<!--Работа с БД-->
+<!--		<dependency>-->
+<!--			<groupId>org.postgresql</groupId>-->
+<!--			<artifactId>postgresql</artifactId>-->
+<!--            <version>${postgresql.version}</version>-->
+<!--		</dependency>-->
 		<dependency>
-			<groupId>org.postgresql</groupId>
-			<artifactId>postgresql</artifactId>
-            <version>${postgresql.version}</version>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>8.0.25</version>
 		</dependency>
 		<dependency>
 			<groupId>org.flywaydb</groupId>

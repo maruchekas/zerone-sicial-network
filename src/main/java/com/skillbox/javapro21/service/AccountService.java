@@ -7,6 +7,8 @@ import com.skillbox.javapro21.api.response.DataResponse;
 import com.skillbox.javapro21.api.response.ListDataResponse;
 import com.skillbox.javapro21.api.response.account.AccountContent;
 import com.skillbox.javapro21.api.response.account.NotificationSettingData;
+import com.skillbox.javapro21.api.response.account.AuthContent;
+import com.skillbox.javapro21.exception.NotSuchUserOrWrongPasswordException;
 import com.skillbox.javapro21.exception.TokenConfirmationException;
 import com.skillbox.javapro21.exception.UserExistException;
 import org.springframework.stereotype.Service;
