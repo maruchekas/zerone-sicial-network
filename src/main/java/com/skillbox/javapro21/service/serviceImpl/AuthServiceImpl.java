@@ -46,7 +46,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public DataResponse<AuthContent> logout() {
         DataResponse<AuthContent> dataResponse = new DataResponse<>();
-        dataResponse.setTimestamp(Instant.from(LocalDateTime.now()));
+        dataResponse.setTimestamp(LocalDateTime.now());
         SecurityContextHolder.clearContext();
         return dataResponse;
     }
@@ -62,7 +62,7 @@ public class AuthServiceImpl implements AuthService {
 
     private DataResponse<AuthContent> getAuthResponse(Person person) {
         DataResponse<AuthContent> dataResponse = new DataResponse<>();
-        dataResponse.setTimestamp(Instant.from(LocalDateTime.now()));
+        dataResponse.setTimestamp(LocalDateTime.now());
         AuthContent authData = new AuthContent();
         authData.setPerson(person);
         dataResponse.setData(authData);

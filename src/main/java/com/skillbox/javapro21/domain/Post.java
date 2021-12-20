@@ -52,7 +52,7 @@ public class Post {
     @ToString.Exclude
     private Set<PostFile> files = new HashSet<>();
 
-    @OneToMany(mappedBy = "post")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "post")
     @JsonIgnoreProperties(value = {"block", "post", "person"}, allowSetters = true)
     @ToString.Exclude
     private Set<PostComment> comments = new HashSet<>();

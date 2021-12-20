@@ -124,7 +124,6 @@ public class AccountServiceImpl implements AccountService {
     }
 
     //Todo: сделать как будет поправлена бд
-
     public ListDataResponse<NotificationSettingData> getNotifications(Principal principal) {
         return null;
     }
@@ -171,7 +170,7 @@ public class AccountServiceImpl implements AccountService {
      */
     private DataResponse<AccountContent> getAccountResponse() {
         DataResponse<AccountContent> dataResponse = new DataResponse<>();
-        dataResponse.setTimestamp(Instant.from(LocalDateTime.now()));
+        dataResponse.setTimestamp(LocalDateTime.now());
         AccountContent accountData = new AccountContent();
         Map<String, String> data = new HashMap<>();
         data.put("message", "ok");

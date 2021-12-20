@@ -17,6 +17,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
@@ -41,7 +42,6 @@ public class AccountControllerTest extends AbstractTest {
     @BeforeEach
     public void setup() {
         super.setup();
-        personRepository.deleteAll();
         String email = "arcadiy@test.ru";
         String verifyEmail = "test@test.ru";
         String password = "1234";

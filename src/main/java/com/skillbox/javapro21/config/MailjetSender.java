@@ -24,13 +24,15 @@ public class MailjetSender {
         MailjetClient client;
         MailjetRequest request;
         MailjetResponse response;
-        client = new MailjetClient(System.getenv(mailjet.getKey()), System.getenv(mailjet.getSecret()), new ClientOptions(mailjet.getVersion()));
+        client = new MailjetClient(System.getenv(mailjet.getKey()),
+                System.getenv(mailjet.getSecret()),
+                new ClientOptions("v3.1"));
         request = new MailjetRequest(Emailv31.resource)
                 .property(Emailv31.MESSAGES, new JSONArray()
                         .put(new JSONObject()
                                 .put(Emailv31.Message.FROM, new JSONObject()
                                         .put("Email", mailjet.getFrom())
-                                        .put("Name", "Zerone"))
+                                        .put("Name", "Ivan"))
                                 .put(Emailv31.Message.TO, new JSONArray()
                                         .put(new JSONObject()
                                                 .put("Email", emailTo)
