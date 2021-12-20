@@ -1,18 +1,24 @@
 package com.skillbox.javapro21.controller;
 
-import com.skillbox.javapro21.api.request.RecoveryRequest;
-import com.skillbox.javapro21.api.request.RegisterRequest;
+import com.skillbox.javapro21.api.request.account.*;
 import com.skillbox.javapro21.api.response.DataResponse;
+import com.skillbox.javapro21.api.response.ListDataResponse;
+import com.skillbox.javapro21.api.response.account.AccountContent;
+import com.skillbox.javapro21.api.response.account.NotificationSettingData;
 import com.skillbox.javapro21.exception.TokenConfirmationException;
 import com.skillbox.javapro21.exception.UserExistException;
 import com.skillbox.javapro21.service.AccountService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.security.Principal;
 
 @Slf4j
 @RestController
@@ -26,14 +32,14 @@ public class AccountController {
         this.accountService = accountService;
     }
 
-    @Operation(summary = "регистрация")
+    @Operation(summary = "Регистрация")
     @PostMapping("/register")
-    public ResponseEntity<DataResponse> registration(@RequestBody RegisterRequest registerRequest) throws UserExistException {
+    public ResponseEntity<DataResponse<AccountContent>> registration(@RequestBody RegisterRequest registerRequest) throws UserExistException {
         log.info("Can`t create user with email {} and name {}", registerRequest.getEmail(), registerRequest.getFirstName());
         return new ResponseEntity<>(accountService.registration(registerRequest), HttpStatus.OK);
     }
 
-    @Operation(summary = "подтверждение регистрации")
+    @Operation(summary = "Подтверждение регистрации")
     @GetMapping("/register/complete")
     public ResponseEntity<String> verifyRegistration(@RequestParam String email,
                                                      @RequestParam String code) throws TokenConfirmationException {
@@ -41,16 +47,56 @@ public class AccountController {
         return new ResponseEntity<>(accountService.verifyRegistration(email, code), HttpStatus.OK);
     }
 
-    @Operation(summary = "восстановление пароля")
-    @PutMapping("/password/recovery")
-    public ResponseEntity<String> recovery(@RequestBody RecoveryRequest recoveryRequest) {
-        return new ResponseEntity<>(accountService.recovery(recoveryRequest), HttpStatus.OK);
+    @Operation(summary = "Отправка ссылки на почту для восстановления пароля")
+    @PutMapping("/password/send_recovery_massage")
+    public ResponseEntity<String> recoveryPasswordMessage(@RequestBody RecoveryRequest recoveryRequest) {
+        log.info("Not found user with email {}", recoveryRequest.getEmail());
+        return new ResponseEntity<>(accountService.recoveryPasswordMessage(recoveryRequest), HttpStatus.OK);
     }
 
-    @Operation(summary = "восстановление пароля")
-    @PutMapping("/password/recovery/complete")
+    @Operation(summary = "Разрешение на восстановление пароля")
+    @GetMapping("/password/recovery/complete")
     public ResponseEntity<String> verifyRecovery(@RequestParam String email,
-                                                 @RequestParam String code) {
+                                                 @RequestParam String code) throws TokenConfirmationException {
+        log.info("Can`t verify user with email {}", email);
         return new ResponseEntity<>(accountService.verifyRecovery(email, code), HttpStatus.OK);
+    }
+
+    @Operation(summary = "Восстановление пароля")
+    @PutMapping("/password/recovery")
+    public ResponseEntity<String> recoveryPassword(@RequestParam String email,
+                                                   @RequestParam String password) {
+        log.info("Can`t verify user with email {}", email);
+        return new ResponseEntity<>(accountService.recoveryPassword(email, password), HttpStatus.OK);
+    }
+
+    @Operation(summary = "Смена пароля", security = @SecurityRequirement(name = "jwt"))
+    @PutMapping("/password/set")
+    @PreAuthorize("hasAuthority('user:write')")
+    public ResponseEntity<DataResponse<AccountContent>> changePassword(@RequestBody ChangePasswordRequest changePasswordRequest) {
+        return new ResponseEntity<>(accountService.changePassword(changePasswordRequest), HttpStatus.OK);
+    }
+
+    @Operation(summary = "Смена email", security = @SecurityRequirement(name = "jwt"))
+    @PutMapping("/email")
+    @PreAuthorize("hasAuthority('user:write')")
+    public ResponseEntity<DataResponse<AccountContent>> changeEmail(@RequestBody ChangeEmailRequest changeEmailRequest,
+                                                       Principal principal) {
+        return new ResponseEntity<>(accountService.changeEmail(changeEmailRequest, principal), HttpStatus.OK);
+    }
+
+    @Operation(summary = "Редактирование настроек оповещения", security = @SecurityRequirement(name = "jwt"))
+    @PutMapping("/notifications")
+    @PreAuthorize("hasAuthority('user:write')")
+    public ResponseEntity<DataResponse<AccountContent>> changeNotifications(@RequestBody ChangeNotificationsRequest changeNotificationsRequest,
+                                                       Principal principal) {
+        return new ResponseEntity<>(accountService.changeNotifications(changeNotificationsRequest, principal), HttpStatus.OK);
+    }
+
+    @Operation(summary = "Получение настроек оповещения", security = @SecurityRequirement(name = "jwt"))
+    @GetMapping("/notifications")
+    @PreAuthorize("hasAuthority('user:write')")
+    public ResponseEntity<ListDataResponse<NotificationSettingData>> getNotifications(Principal principal) {
+        return new ResponseEntity<>(accountService.getNotifications(principal), HttpStatus.OK);
     }
 }

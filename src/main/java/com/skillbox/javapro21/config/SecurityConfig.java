@@ -2,7 +2,6 @@ package com.skillbox.javapro21.config;
 
 import com.skillbox.javapro21.config.security.JwtFilter;
 import com.skillbox.javapro21.config.security.UserDetailServiceImpl;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -24,12 +23,9 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 последнее включает AOP (@PreAuthorize/@PostAuthorize)
 */
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
-
     private final JwtFilter jwtFilter;
-
     private final UserDetailServiceImpl userDetailServiceImpl;
 
-    @Autowired
     public SecurityConfig(JwtFilter jwtFilter, UserDetailServiceImpl userDetailServiceImpl) {
         this.jwtFilter = jwtFilter;
         this.userDetailServiceImpl = userDetailServiceImpl;
@@ -37,14 +33,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.csrf().disable()
+        http
+                .csrf().disable()
                 .cors()
                 .and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
                 .antMatchers("/**").permitAll()
-                .anyRequest().authenticated()
+                .anyRequest()
+                .authenticated()
                 .and()
                 .formLogin().disable()
                 .httpBasic().disable()
