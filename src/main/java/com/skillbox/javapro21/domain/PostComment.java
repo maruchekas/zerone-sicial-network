@@ -32,7 +32,7 @@ public class PostComment {
     private String commentText;
 
     @Column(name = "is_blocked")
-    private boolean isBlocked;
+    private int isBlocked;
 
     @JsonIgnoreProperties(value = {"post", "comment", "person"}, allowSetters = true)
     @OneToOne
