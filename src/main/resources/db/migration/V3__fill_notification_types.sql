@@ -1,13 +1,12 @@
-
 INSERT INTO notification_type(
-	code, name)
-	VALUES (0, 'POST'),
-	       (1, 'POST'),
-		   (0, 'POST_COMMENT'),
-		   (1, 'POST_COMMENT'),
-		   (0, 'COMMENT_COMMENT'),
-		   (1, 'COMMENT_COMMENT'),
-		   (0, 'FRIEND_REQUEST'),
-		   (1, 'FRIEND_REQUEST'),
-		   (0, 'MESSAGE'),
-		   (0, 'MESSAGE');
+    code, name)
+VALUES ('false', 'POST'),
+       ('true', 'POST'),
+       ('false', 'POST_COMMENT'),
+       ('true', 'POST_COMMENT'),
+       ('false', 'COMMENT_COMMENT'),
+       ('true', 'COMMENT_COMMENT'),
+       ('false', 'FRIEND_REQUEST'),
+       ('true', 'FRIEND_REQUEST'),
+       ('false', 'MESSAGE'),
+       ('true', 'MESSAGE');

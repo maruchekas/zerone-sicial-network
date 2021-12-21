@@ -184,10 +184,13 @@ public class AccountServiceImpl implements AccountService {
         person.setFirstName(registerRequest.getFirstName());
         person.setLastName(registerRequest.getLastName());
         person.setConfirmationCode(registerRequest.getCode());
+        person.setIsApproved(0);
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
         person.setPassword(passwordEncoder.encode(registerRequest.getPasswd1()));
         person.setRegDate(LocalDateTime.now());
         person.setLastOnlineTime(LocalDateTime.now());
+        person.setIsBlocked(0);
+        person.setMessagesPermission(MessagesPermission.NOBODY);
         personRepository.save(person);
         globalNotificationsSettings(person);
     }
