@@ -1,73 +1,37 @@
 package com.skillbox.javapro21.domain;
 
-import com.skillbox.javapro21.domain.enumeration.NotificationTypeStatus;
+import lombok.*;
+import lombok.experimental.Accessors;
 
 import javax.persistence.*;
 
-
+@Setter
+@Getter
 @Entity
 @Table(name = "notification_type")
+@Accessors(chain = true)
 public class NotificationType {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Integer id;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "notification_status")
-    private NotificationTypeStatus notificationStatus;
+    @OneToOne
+    @JoinColumn(name = "person_id")
+    private Person person;
 
+    @Column(name = "post")
+    private boolean isPost;
 
-    public Integer getId() {
-        return this.id;
-    }
+    @Column(name = "post_comment")
+    private boolean isPostComment;
 
-    public NotificationType id(Integer id) {
-        this.setId(id);
-        return this;
-    }
+    @Column(name = "comment_comment")
+    private boolean isCommentComment;
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
+    @Column(name = "friends_request")
+    private boolean isFriendsRequest;
 
-    public NotificationTypeStatus getNotificationStatus() {
-        return this.notificationStatus;
-    }
-
-    public NotificationType notificationStatus(NotificationTypeStatus notificationStatus) {
-        this.setNotificationStatus(notificationStatus);
-        return this;
-    }
-
-    public void setNotificationStatus(NotificationTypeStatus notificationStatus) {
-        this.notificationStatus = notificationStatus;
-    }
-
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof NotificationType)) {
-            return false;
-        }
-        return id != null && id.equals(((NotificationType) o).id);
-    }
-
-    @Override
-    public int hashCode() {
-        // see https://vladmihalcea.com/how-to-implement-equals-and-hashcode-using-the-jpa-entity-identifier/
-        return getClass().hashCode();
-    }
-
-    @Override
-    public String toString() {
-        return "NotificationType{" +
-                "id=" + getId() +
-                ", notificationStatus='" + getNotificationStatus() + "'" +
-                "}";
-    }
+    @Column(name = "message")
+    private boolean isMessage;
 }

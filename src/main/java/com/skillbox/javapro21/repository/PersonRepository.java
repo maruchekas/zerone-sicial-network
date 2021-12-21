@@ -4,9 +4,12 @@ import com.skillbox.javapro21.domain.Person;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface PersonRepository extends JpaRepository<Person, Integer> {
 
+    Optional<Person> findByEmail(String email);
 
-
+    Optional<Person> findByEmailAndPassword(String email, String password);
 }
