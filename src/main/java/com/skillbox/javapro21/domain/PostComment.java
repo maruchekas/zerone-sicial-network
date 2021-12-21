@@ -25,22 +25,19 @@ public class PostComment {
     @Column(name = "time")
     private LocalDateTime time;
 
-    @Column(name = "parent_id")
-    private Long parentId;
+    @ManyToOne
+    @JoinColumn(name = "parent_id")
+    private PostComment parentId;
 
-    @Column(name = "comment_text", columnDefinition = "TEXT")
+    @Column(name = "comment_text")
     private String commentText;
 
     @Column(name = "is_blocked")
     private int isBlocked;
 
-    @JsonIgnoreProperties(value = {"post", "comment", "person"}, allowSetters = true)
-    @OneToOne
-    @JoinColumn(unique = true)
-    private BlockHistory block;
-
     @ManyToOne
     @JsonIgnoreProperties(value = {"block", "likes", "files", "comments", "tags", "author"}, allowSetters = true)
+    @JoinColumn(name = "post_id")
     private Post post;
 
     @ManyToOne

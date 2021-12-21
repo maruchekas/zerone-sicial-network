@@ -4,6 +4,7 @@ import com.skillbox.javapro21.AbstractTest;
 import com.skillbox.javapro21.api.request.account.*;
 import com.skillbox.javapro21.config.security.JwtGenerator;
 import com.skillbox.javapro21.domain.Person;
+import com.skillbox.javapro21.domain.enumeration.MessagesPermission;
 import com.skillbox.javapro21.domain.enumeration.NotificationTypeStatus;
 import com.skillbox.javapro21.repository.PersonRepository;
 import org.junit.jupiter.api.AfterEach;
@@ -17,11 +18,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+
+import java.time.LocalDateTime;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -42,11 +44,13 @@ public class AccountControllerTest extends AbstractTest {
     @BeforeEach
     public void setup() {
         super.setup();
-        String email = "arcadiy@test.ru";
+        String email = "arcadiy9@test.ru";
         String verifyEmail = "test@test.ru";
         String password = "1234";
         String firstName = "Arcadiy";
         String lastName = "Parovozov";
+        LocalDateTime reg_date = LocalDateTime.now();
+        String conf_code = "123";
 
         person = new Person();
         person.setEmail(email);
@@ -60,6 +64,12 @@ public class AccountControllerTest extends AbstractTest {
         verifyPerson.setFirstName(firstName);
         verifyPerson.setLastName(lastName);
         verifyPerson.setConfirmationCode("123");
+        verifyPerson.setRegDate(reg_date);
+        verifyPerson.setConfirmationCode(conf_code);
+        verifyPerson.setMessagesPermission(MessagesPermission.ALL);
+        verifyPerson.setIsBlocked(0);
+        verifyPerson.setIsApproved(1);
+        verifyPerson.setLastOnlineTime(LocalDateTime.now());
 
         personRepository.save(verifyPerson);
     }
@@ -177,7 +187,7 @@ public class AccountControllerTest extends AbstractTest {
 
     @Test
     @WithMockUser(username = "test@test.ru", authorities = "user:write")
-    void changeNotifications() throws Exception{
+    void changeNotifications() throws Exception {
         ChangeNotificationsRequest changeNotificationsRequest = new ChangeNotificationsRequest();
         changeNotificationsRequest.setNotificationTypeStatus(NotificationTypeStatus.MESSAGE);
         changeNotificationsRequest.setEnable(true);
@@ -188,6 +198,16 @@ public class AccountControllerTest extends AbstractTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(changeNotificationsRequest))
                         .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @Test
+    @WithMockUser(username = "test@test.ru", authorities = "user:write")
+    void getNotifications() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/api/vi/account/notifications")
+                        .principal(() -> "test@test.ru"))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }

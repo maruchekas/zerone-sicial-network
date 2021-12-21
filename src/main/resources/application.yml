@@ -7,13 +7,13 @@ spring:
   profiles:
     active: dev
   datasource:
-    url: jdbc:postgresql://localhost:5432/SocialNetwork
+    url: jdbc:postgresql://localhost:5432/SocialNetwork?stringtype=unspecified
     username: postgres
     password: root
   jpa:
     show-sql: true
     hibernate:
-      ddl-auto: validate
+      ddl-auto: none
 mailjet:
   mail:
     key: b5736394130d305b19e80ea67901b8d3
