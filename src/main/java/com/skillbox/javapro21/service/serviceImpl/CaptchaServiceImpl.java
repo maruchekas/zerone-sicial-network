@@ -1,14 +1,14 @@
 package com.skillbox.javapro21.service.serviceImpl;
 
 import com.github.cage.Cage;
-import com.skillbox.javapro21.api.response.CaptchaResponse;
+import com.skillbox.javapro21.api.response.captcha.CaptchaResponse;
 import com.skillbox.javapro21.domain.CaptchaCode;
 import com.skillbox.javapro21.repository.CaptchaRepository;
 import com.skillbox.javapro21.service.CaptchaService;
-import lombok.Data;
 import org.imgscalr.Scalr;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -18,17 +18,23 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Base64;
 
-@Data
-@Service
+@Component
 public class CaptchaServiceImpl implements CaptchaService {
-    private static final int captchaWidth = 193;
-    private static final int captchaHeight = 57;
-    private static final String captchaImagePNG = "data:captchaImage/png;base64, ";
-    private final CaptchaRepository captchaRepository;
+    @Value("${captcha.width}")
+    private int captchaWidth;
+    @Value("${captcha.height}")
+    private int captchaHeight;
+    @Value("${captcha.image}")
+    private String captchaImagePNG;
     @Value("${captcha.lifespanBySec}")
     private long captchaLifespan;
 
-    @Override
+    private final CaptchaRepository captchaRepository;
+    @Autowired
+    public CaptchaServiceImpl(CaptchaRepository captchaRepository) {
+        this.captchaRepository = captchaRepository;
+    }
+
     public CaptchaResponse getNewCaptcha() {
         Timestamp timeThreshold = Timestamp.valueOf(LocalDateTime.now()
                 .minusSeconds(captchaLifespan));

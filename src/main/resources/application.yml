@@ -31,3 +31,8 @@ recovery:
       url: localhost:8080/api/v1/account/password/recovery/complete
 jwt:
   secret: secret
+captcha:
+  width: 193
+  height: 57
+  image: data:captchaImage/png;base64,
+  lifespanBySec: 0
