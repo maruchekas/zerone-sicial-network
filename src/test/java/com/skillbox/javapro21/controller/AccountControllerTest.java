@@ -177,7 +177,7 @@ public class AccountControllerTest extends AbstractTest {
 
     @Test
     @WithMockUser(username = "test@test.ru", authorities = "user:write")
-    void changeNotifications() throws Exception{
+    void changeNotifications() throws Exception {
         ChangeNotificationsRequest changeNotificationsRequest = new ChangeNotificationsRequest();
         changeNotificationsRequest.setNotificationTypeStatus(NotificationTypeStatus.MESSAGE);
         changeNotificationsRequest.setEnable(true);
@@ -188,6 +188,16 @@ public class AccountControllerTest extends AbstractTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(changeNotificationsRequest))
                         .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @Test
+    @WithMockUser(username = "test@test.ru", authorities = "user:write")
+    void getNotifications() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/api/vi/account/notifications")
+                        .principal(() -> "test@test.ru"))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }

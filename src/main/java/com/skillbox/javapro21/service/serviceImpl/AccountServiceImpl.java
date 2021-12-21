@@ -8,34 +8,28 @@ import com.skillbox.javapro21.api.response.ListDataResponse;
 import com.skillbox.javapro21.api.response.account.AccountContent;
 import com.skillbox.javapro21.api.response.account.NotificationSettingData;
 import com.skillbox.javapro21.config.MailjetSender;
-import com.skillbox.javapro21.api.response.account.AuthContent;
 import com.skillbox.javapro21.config.properties.ConfirmationRecoveryPass;
 import com.skillbox.javapro21.config.properties.ConfirmationRegistration;
 import com.skillbox.javapro21.config.security.JwtGenerator;
+import com.skillbox.javapro21.domain.NotificationType;
 import com.skillbox.javapro21.domain.Person;
 import com.skillbox.javapro21.domain.enumeration.MessagesPermission;
+import com.skillbox.javapro21.domain.enumeration.NotificationTypeStatus;
 import com.skillbox.javapro21.domain.enumeration.UserType;
-import com.skillbox.javapro21.exception.NotSuchUserOrWrongPasswordException;
 import com.skillbox.javapro21.exception.TokenConfirmationException;
 import com.skillbox.javapro21.exception.UserExistException;
 import com.skillbox.javapro21.repository.NotificationTypeRepository;
 import com.skillbox.javapro21.repository.PersonRepository;
 import com.skillbox.javapro21.service.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.security.Principal;
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 @Component
 public class AccountServiceImpl implements AccountService {
@@ -78,7 +72,7 @@ public class AccountServiceImpl implements AccountService {
 
     public String recoveryPasswordMessage(RecoveryRequest recoveryRequest) throws MailjetSocketTimeoutException, MailjetException {
         String token = getToken();
-        String text  = confirmationRecoveryPass.getUrl() + "?email=" + recoveryRequest.getEmail() + "&code=" + token;
+        String text = confirmationRecoveryPass.getUrl() + "?email=" + recoveryRequest.getEmail() + "&code=" + token;
         confirmPersonAndSendEmail(recoveryRequest.getEmail(), text, token);
         return "Ссылка отправлена на почту";
     }
@@ -117,25 +111,73 @@ public class AccountServiceImpl implements AccountService {
         return getAccountResponse();
     }
 
-    //Todo: сделать как будет поправлена бд
     public DataResponse<AccountContent> changeNotifications(ChangeNotificationsRequest changeNotificationsRequest, Principal principal) {
         Person person = findPersonByEmail(principal.getName());
-        return null;
+        NotificationType notificationType = notificationTypeRepository.findNotificationTypeByPersonId(person.getId())
+                .orElse(new NotificationType()
+                        .setPost(true)
+                        .setPostComment(true)
+                        .setCommentComment(true)
+                        .setFriendsRequest(true)
+                        .setMessage(true));
+        switch (changeNotificationsRequest.getNotificationTypeStatus()) {
+            case POST -> notificationType.setPost(changeNotificationsRequest.isEnable());
+            case POST_COMMENT -> notificationType.setPostComment(changeNotificationsRequest.isEnable());
+            case COMMENT_COMMENT -> notificationType.setCommentComment(changeNotificationsRequest.isEnable());
+            case FRIEND_REQUEST -> notificationType.setFriendsRequest(changeNotificationsRequest.isEnable());
+            case MESSAGE -> notificationType.setMessage(changeNotificationsRequest.isEnable());
+        }
+        notificationTypeRepository.save(notificationType);
+        return getAccountResponse();
     }
 
-    //Todo: сделать как будет поправлена бд
     public ListDataResponse<NotificationSettingData> getNotifications(Principal principal) {
-        return null;
+        Person person = findPersonByEmail(principal.getName());
+        NotificationType notificationType = notificationTypeRepository.findNotificationTypeByPersonId(person.getId())
+                .orElse(new NotificationType()
+                        .setPost(true)
+                        .setPostComment(true)
+                        .setCommentComment(true)
+                        .setFriendsRequest(true)
+                        .setMessage(true));
+        ListDataResponse<NotificationSettingData> dataResponse = new ListDataResponse<>();
+        dataResponse.setTimestamp(LocalDateTime.now());
+        dataListNotification(notificationType);
+        dataResponse.setData(dataListNotification(notificationType));
+        return dataResponse;
     }
 
+    /**
+     * Заполнение новыми парраметрами настроек оповещения
+     */
+    private List<NotificationSettingData> dataListNotification(NotificationType notificationType) {
+        List<NotificationSettingData> list = new ArrayList<>();
+        list.add(new NotificationSettingData().setNotificationTypeStatus(NotificationTypeStatus.POST)
+                .setEnable(notificationType.isPost()));
+        list.add(new NotificationSettingData().setNotificationTypeStatus(NotificationTypeStatus.POST_COMMENT)
+                .setEnable(notificationType.isPostComment()));
+        list.add(new NotificationSettingData().setNotificationTypeStatus(NotificationTypeStatus.COMMENT_COMMENT)
+                .setEnable(notificationType.isCommentComment()));
+        list.add(new NotificationSettingData().setNotificationTypeStatus(NotificationTypeStatus.FRIEND_REQUEST)
+                .setEnable(notificationType.isFriendsRequest()));
+        list.add(new NotificationSettingData().setNotificationTypeStatus(NotificationTypeStatus.MESSAGE)
+                .setEnable(notificationType.isMessage()));
+        return list;
+    }
+
+    /**
+     * Отправка на почту письма с токеном
+     */
     private void confirmPersonAndSendEmail(String email, String text, String token) throws MailjetSocketTimeoutException, MailjetException {
         Person person = findPersonByEmail(email);
         person.setConfirmationCode(token);
         personRepository.save(person);
-
-        mailMessage.send(email,text);
+        mailMessage.send(email, text);
     }
 
+    /**
+     * Создание пользователя без верификации
+     */
     private void createNewPerson(RegisterRequest registerRequest) {
         Person person = new Person();
         person.setEmail(registerRequest.getEmail());
@@ -147,6 +189,21 @@ public class AccountServiceImpl implements AccountService {
         person.setRegDate(LocalDateTime.now());
         person.setLastOnlineTime(LocalDateTime.now());
         personRepository.save(person);
+        globalNotificationsSettings(person);
+    }
+
+    /**
+     * Стартовые настройки оповещения
+     */
+    private void globalNotificationsSettings(Person person) {
+        NotificationType notificationType = new NotificationType();
+        notificationType.setPerson(person);
+        notificationType.setPost(true);
+        notificationType.setPostComment(true);
+        notificationType.setCommentComment(true);
+        notificationType.setFriendsRequest(true);
+        notificationType.setMessage(true);
+        notificationTypeRepository.save(notificationType);
     }
 
     /**
