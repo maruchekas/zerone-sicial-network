@@ -25,14 +25,14 @@ public class Message {
     @Column(name = "time")
     private LocalDateTime time;
 
-    @Column(name = "message_text", columnDefinition = "TEXT")
+    @Column(name = "message_text")
     private String messageText;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "read_status")
     private ReadStatus readStatus;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JsonIgnoreProperties(
             value = {
                     "blocksLists",
@@ -50,7 +50,7 @@ public class Message {
     @JoinColumn(name = "author_id")
     private Person author;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JsonIgnoreProperties(
             value = {
                     "blocksLists",
@@ -65,7 +65,7 @@ public class Message {
             },
             allowSetters = true
     )
-    @JoinColumn(name = "recipient_id")
+//    @JoinColumn(name = "person_id")
     private Person recipient;
 
     @Override

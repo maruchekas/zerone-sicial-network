@@ -5,6 +5,7 @@ import com.skillbox.javapro21.domain.enumeration.FriendshipStatusType;
 import lombok.*;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 
 @AllArgsConstructor
@@ -21,7 +22,7 @@ public class FriendshipStatus {
     private Integer id;
 
     @Column(name = "time")
-    private ZonedDateTime time;
+    private LocalDateTime time;
 
     @Column(name = "code")
     private long code;

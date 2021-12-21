@@ -148,6 +148,3 @@ CREATE TABLE post2tag (
   tag_id INT8 not null,
   CONSTRAINT pk_post2tag PRIMARY KEY (id)
   );
-
-
-
