@@ -28,6 +28,7 @@ public class PostFile {
 
     @ManyToOne
     @JsonIgnoreProperties(value = {"block", "likes", "files", "comments", "tags", "author"}, allowSetters = true)
+    @JoinColumn(name = "post_id")
     private Post post;
 
     @Override

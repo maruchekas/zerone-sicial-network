@@ -23,15 +23,15 @@ public class FriendshipStatus {
     @Column(name = "time")
     private ZonedDateTime time;
 
-    @Column
+    @Column(name = "code")
     private long code;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "name")
     private FriendshipStatusType friendshipStatusType;
 
-    @JsonIgnoreProperties(value = {"friendshipStatus", "srcPerson", "dstPerson"}, allowSetters = true)
-    @OneToOne(mappedBy = "friendshipStatus")
-    private Friendship friendship;
+//    @JsonIgnoreProperties(value = {"friendshipStatus", "srcPerson", "dstPerson"}, allowSetters = true)
+//    @OneToOne(mappedBy = "friendshipStatus")
+//    private Friendship friendship;
 
 }

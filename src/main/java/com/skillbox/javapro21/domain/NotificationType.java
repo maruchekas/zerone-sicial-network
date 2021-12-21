@@ -14,18 +14,30 @@ import java.util.Objects;
 @Entity
 @Table(name = "notification_type")
 public class NotificationType {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
+    @Column
     private Integer id;
 
-    @Column(name = "code")
-    private boolean code;
+    @OneToOne
+    @JoinColumn(name = "person_id")
+    private Person person;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "name")
-    private NotificationTypeStatus notificationStatus;
+    @Column(name = "post")
+    private boolean isPost;
+
+    @Column(name = "post_comment")
+    private boolean isPostComment;
+
+    @Column(name = "comment_comment")
+    private boolean isCommentComment;
+
+    @Column(name = "friends_request")
+    private boolean isFriendsRequest;
+
+    @Column(name = "message")
+    private boolean isMessage;
+
 
     @Override
     public boolean equals(Object o) {

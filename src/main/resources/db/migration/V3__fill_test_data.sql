@@ -1,3 +1,4 @@
+
 INSERT INTO users (name, email, password, type) VALUES
          ('rgatland0', 'rbrowett0@newyorker.com', 'yNtCVYE060X', 'MODERATOR'),
          ('keads1', 'mrablen1@redcross.org', '0svnfsU', 'ADMIN'),
@@ -43,23 +44,6 @@ INSERT INTO persons (first_name, last_name, reg_date, birth_date, email, phone, 
         ('Issiah', 'Kleisle', '2021-07-15 22:48:37', '2001-07-25', 'ikleisler@gov.uk', '+63 (666) 205-3426', 'enVbUs', 'https://robohash.org/nostrumquiaconsequatur.png?size=50x50&set=set1', 'augue a suscipit', 'Tubalan', 'Philippines', '3070', 1, 'FRIENDS', '2021-12-14 06:18:58', 0),
         ('Rodrick', 'Ramel', '2021-11-28 05:22:51', '2003-07-18', 'rramels@buzzfeed.com', '+62 (299) 347-3022', 'zduMfs4wV', 'https://robohash.org/quisdolorqui.png?size=50x50&set=set1', 'ut dolor', 'Pasirmukti', 'Indonesia', '5750', 0, 'FRIENDS', '2021-12-11 02:54:25', 0),
         ('Olav', 'Zuppa', '2020-12-09 21:51:45', '1988-03-12', 'ozuppat@washingtonpost.com', '+998 (164) 464-8160', 'aC8QVS6nRsB', 'https://robohash.org/sitrepudiandaealias.png?size=50x50&set=set1', 'aliquam non mauris', 'Namangan Shahri', 'Uzbekistan', '4168', 0, 'ALL', '2021-12-11 06:25:21', 0);
-
-INSERT INTO block_history (time, person_id, post_id, comment_id, action) VALUES('2021-12-09 13:10:58', 3, null, 3, 'BLOCK'),
-        ('2021-12-12 10:35:11', 3, null, 3, 'UNBLOCK'),
-        ('2021-12-15 05:51:51', 18, 7, null, 'BLOCK'),
-        ('2021-12-15 07:51:51', 18, 7, null, 'UNBLOCK'),
-        ('2021-12-14 13:06:48', 17, 5, null, 'BLOCK'),
-        ('2021-12-14 15:06:48', 17, 5, null, 'UNBLOCK'),
-        ('2021-12-12 04:35:08', 21, 11, null, 'BLOCK'),
-        ('2021-12-12 04:35:08', 21, 11, null, 'UNBLOCK'),
-        ('2021-12-15 10:59:22', 5, null, 13, 'BLOCK'),
-        ('2021-12-16 10:59:22', 5, null, 13, 'UNBLOCK'),
-        ('2021-12-11 01:59:01', 15, 12, null, 'BLOCK'),
-        ('2021-12-11 01:59:01', 11, 19, null, 'BLOCK'),
-        ('2021-12-11 01:59:01', 11, 19, null, 'UNBLOCK'),
-        ('2021-12-14 15:04:51', 17, null, 19, 'BLOCK'),
-        ('2021-12-11 12:24:56', 20, null, 8, 'BLOCK'),
-        ('2021-12-13 19:40:45', 27, null, 12, 'BLOCK');
 
  INSERT INTO tags (tag) VALUES ('котики'),
          ('отдых'),
