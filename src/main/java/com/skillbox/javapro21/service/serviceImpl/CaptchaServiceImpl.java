@@ -21,11 +21,11 @@ import java.util.Base64;
 @Component
 public class CaptchaServiceImpl implements CaptchaService {
     @Value("${captcha.width}")
-    private static final int captchaWidth = 193;
+    private int captchaWidth;
     @Value("${captcha.height}")
-    private static final int captchaHeight = 57;
+    private int captchaHeight;
     @Value("${captcha.image}")
-    private static final String captchaImagePNG = "data:captchaImage/png;base64, ";
+    private String captchaImagePNG;
     @Value("${captcha.lifespanBySec}")
     private long captchaLifespan;
 
