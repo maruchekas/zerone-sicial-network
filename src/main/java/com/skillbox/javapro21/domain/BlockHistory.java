@@ -2,7 +2,10 @@ package com.skillbox.javapro21.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.skillbox.javapro21.domain.enumeration.ActionType;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -28,11 +31,13 @@ public class BlockHistory {
     private ActionType action;
 
     @JsonIgnoreProperties(value = {"block", "likes", "files", "comments", "tags", "author"}, allowSetters = true)
-    @OneToOne(mappedBy = "block")
+    @OneToOne
+    @JoinColumn(name = "post_id")
     private Post post;
 
     @JsonIgnoreProperties(value = {"block", "post", "person"}, allowSetters = true)
-    @OneToOne(mappedBy = "block")
+    @OneToOne
+    @JoinColumn(name ="post_comment_id")
     private PostComment comment;
 
     @ManyToOne

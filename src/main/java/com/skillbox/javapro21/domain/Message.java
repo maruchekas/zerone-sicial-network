@@ -47,6 +47,7 @@ public class Message {
             },
             allowSetters = true
     )
+    @JoinColumn(name = "author_id")
     private Person author;
 
     @ManyToOne
@@ -64,6 +65,7 @@ public class Message {
             },
             allowSetters = true
     )
+    @JoinColumn(name = "recipient_id")
     private Person recipient;
 
     @Override
