@@ -100,14 +100,11 @@ public class AccountControllerTest extends AbstractTest {
 
     @Test
     void verifyRegistration() throws Exception {
-        verifyPerson.setConfirmationCode("123");
-        String json = "{\"email\": \"Arcadiy\", \"code\": \"123\"}";
-
         mockMvc.perform(MockMvcRequestBuilders
                         .get("/api/vi/account/register/complete")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(json)
-                        .accept(MediaType.APPLICATION_JSON))
+                        .param("email", "test@test.ru")
+                        .param("code", "123"))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }
@@ -129,13 +126,11 @@ public class AccountControllerTest extends AbstractTest {
 
     @Test
     void verifyRecovery() throws Exception {
-        String json = "{\"email\":\"test@test.ru\", \"code\":\"123\"}";
-
         mockMvc.perform(MockMvcRequestBuilders
                         .get("/api/vi/account/password/recovery/complete")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(json)
-                        .accept(MediaType.APPLICATION_JSON))
+                        .param("email", "test@test.ru")
+                        .param("code", "123"))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }
@@ -146,8 +141,7 @@ public class AccountControllerTest extends AbstractTest {
                         .put("/api/vi/account/password/recovery")
                         .contentType(MediaType.APPLICATION_JSON)
                         .param("email", "test@test.ru")
-                        .param("password", "1234")
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .param("password", "1234"))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }
