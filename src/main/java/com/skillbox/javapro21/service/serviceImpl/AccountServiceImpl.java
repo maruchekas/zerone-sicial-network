@@ -8,8 +8,7 @@ import com.skillbox.javapro21.api.response.ListDataResponse;
 import com.skillbox.javapro21.api.response.account.AccountContent;
 import com.skillbox.javapro21.api.response.account.NotificationSettingData;
 import com.skillbox.javapro21.config.MailjetSender;
-import com.skillbox.javapro21.config.properties.ConfirmationRecoveryPass;
-import com.skillbox.javapro21.config.properties.ConfirmationRegistration;
+import com.skillbox.javapro21.config.properties.ConfirmationUrl;
 import com.skillbox.javapro21.config.security.JwtGenerator;
 import com.skillbox.javapro21.domain.NotificationType;
 import com.skillbox.javapro21.domain.Person;
@@ -35,17 +34,15 @@ import java.util.*;
 public class AccountServiceImpl implements AccountService {
     private final PersonRepository personRepository;
     private final MailjetSender mailMessage;
-    private final ConfirmationRegistration confirmationRegistration;
-    private final ConfirmationRecoveryPass confirmationRecoveryPass;
+    private final ConfirmationUrl confirmationUrl;
     private final JwtGenerator jwtGenerator;
     private final NotificationTypeRepository notificationTypeRepository;
 
     @Autowired
-    public AccountServiceImpl(PersonRepository personRepository, MailjetSender mailMessage, ConfirmationRegistration confirmationRegistration, ConfirmationRecoveryPass confirmationRecoveryPass, JwtGenerator jwtGenerator, NotificationTypeRepository notificationTypeRepository) {
+    public AccountServiceImpl(PersonRepository personRepository, MailjetSender mailMessage, ConfirmationUrl confirmationUrl, JwtGenerator jwtGenerator, NotificationTypeRepository notificationTypeRepository) {
         this.personRepository = personRepository;
         this.mailMessage = mailMessage;
-        this.confirmationRegistration = confirmationRegistration;
-        this.confirmationRecoveryPass = confirmationRecoveryPass;
+        this.confirmationUrl = confirmationUrl;
         this.jwtGenerator = jwtGenerator;
         this.notificationTypeRepository = notificationTypeRepository;
     }
@@ -61,10 +58,10 @@ public class AccountServiceImpl implements AccountService {
     public String verifyRegistration(String email, String code) throws TokenConfirmationException {
         Person person = findPersonByEmail(email);
         if (person.getConfirmationCode().equals(code)) {
-            person.setIsApproved(1);
-            person.setUserType(UserType.USER);
-            person.setMessagesPermission(MessagesPermission.ALL);
-            person.setConfirmationCode("");
+            person.setIsApproved(1)
+                    .setUserType(UserType.USER)
+                    .setMessagesPermission(MessagesPermission.ALL)
+                    .setConfirmationCode("");
             personRepository.save(person);
         } else throw new TokenConfirmationException();
         return "Пользователь подтвержден";
@@ -72,14 +69,14 @@ public class AccountServiceImpl implements AccountService {
 
     public String recoveryPasswordMessage(RecoveryRequest recoveryRequest) throws MailjetSocketTimeoutException, MailjetException {
         String token = getToken();
-        String text = confirmationRecoveryPass.getUrl() + "?email=" + recoveryRequest.getEmail() + "&code=" + token;
+        String text = confirmationUrl.getUrlForPasswordComplete() + "?email=" + recoveryRequest.getEmail() + "&code=" + token;
         confirmPersonAndSendEmail(recoveryRequest.getEmail(), text, token);
         return "Ссылка отправлена на почту";
     }
 
     private void mailMessageForRegistration(RegisterRequest registerRequest) throws MailjetSocketTimeoutException, MailjetException {
         String token = getToken();
-        String text = confirmationRegistration.getUrl() + "?email=" + registerRequest.getEmail() + "&code=" + token;
+        String text = confirmationUrl.getUrlForRegisterComplete() + "?email=" + registerRequest.getEmail() + "&code=" + token;
         confirmPersonAndSendEmail(registerRequest.getEmail(), text, token);
     }
 
@@ -179,18 +176,18 @@ public class AccountServiceImpl implements AccountService {
      * Создание пользователя без верификации
      */
     private void createNewPerson(RegisterRequest registerRequest) {
-        Person person = new Person();
-        person.setEmail(registerRequest.getEmail());
-        person.setFirstName(registerRequest.getFirstName());
-        person.setLastName(registerRequest.getLastName());
-        person.setConfirmationCode(registerRequest.getCode());
-        person.setIsApproved(0);
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
-        person.setPassword(passwordEncoder.encode(registerRequest.getPasswd1()));
-        person.setRegDate(LocalDateTime.now());
-        person.setLastOnlineTime(LocalDateTime.now());
-        person.setIsBlocked(0);
-        person.setMessagesPermission(MessagesPermission.NOBODY);
+        Person person = new Person()
+                .setEmail(registerRequest.getEmail())
+                .setFirstName(registerRequest.getFirstName())
+                .setLastName(registerRequest.getLastName())
+                .setConfirmationCode(registerRequest.getCode())
+                .setIsApproved(0)
+                .setPassword(passwordEncoder.encode(registerRequest.getPasswd1()))
+                .setRegDate(LocalDateTime.now())
+                .setLastOnlineTime(LocalDateTime.now())
+                .setIsBlocked(0)
+                .setMessagesPermission(MessagesPermission.NOBODY);
         personRepository.save(person);
         globalNotificationsSettings(person);
     }
@@ -199,13 +196,13 @@ public class AccountServiceImpl implements AccountService {
      * Стартовые настройки оповещения
      */
     private void globalNotificationsSettings(Person person) {
-        NotificationType notificationType = new NotificationType();
-        notificationType.setPerson(person);
-        notificationType.setPost(true);
-        notificationType.setPostComment(true);
-        notificationType.setCommentComment(true);
-        notificationType.setFriendsRequest(true);
-        notificationType.setMessage(true);
+        NotificationType notificationType = new NotificationType()
+                .setPerson(person)
+                .setPost(true)
+                .setPostComment(true)
+                .setCommentComment(true)
+                .setFriendsRequest(true)
+                .setMessage(true);
         notificationTypeRepository.save(notificationType);
     }
 
