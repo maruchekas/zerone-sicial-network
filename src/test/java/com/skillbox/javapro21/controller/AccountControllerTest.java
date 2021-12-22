@@ -52,25 +52,24 @@ public class AccountControllerTest extends AbstractTest {
         LocalDateTime reg_date = LocalDateTime.now();
         String conf_code = "123";
 
-        person = new Person();
-        person.setEmail(email);
-        person.setPassword(passwordEncoder.encode(password));
-        person.setFirstName(firstName);
-        person.setLastName(lastName);
+        person = new Person()
+                .setEmail(email)
+                .setPassword(passwordEncoder.encode(password))
+                .setFirstName(firstName)
+                .setLastName(lastName);
 
-        verifyPerson = new Person();
-        verifyPerson.setEmail(verifyEmail);
-        verifyPerson.setPassword(passwordEncoder.encode(password));
-        verifyPerson.setFirstName(firstName);
-        verifyPerson.setLastName(lastName);
-        verifyPerson.setConfirmationCode("123");
-        verifyPerson.setRegDate(reg_date);
-        verifyPerson.setConfirmationCode(conf_code);
-        verifyPerson.setMessagesPermission(MessagesPermission.ALL);
-        verifyPerson.setIsBlocked(0);
-        verifyPerson.setIsApproved(1);
-        verifyPerson.setLastOnlineTime(LocalDateTime.now());
-
+        verifyPerson = new Person()
+                .setEmail(verifyEmail)
+                .setPassword(passwordEncoder.encode(password))
+                .setFirstName(firstName)
+                .setLastName(lastName)
+                .setConfirmationCode("123")
+                .setRegDate(reg_date)
+                .setConfirmationCode(conf_code)
+                .setMessagesPermission(MessagesPermission.ALL)
+                .setIsBlocked(0)
+                .setIsApproved(1)
+                .setLastOnlineTime(LocalDateTime.now());
         personRepository.save(verifyPerson);
     }
 
