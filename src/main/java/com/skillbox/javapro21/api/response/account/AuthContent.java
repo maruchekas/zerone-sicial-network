@@ -52,7 +52,7 @@ public class AuthContent implements Content {
         }};
         this.country = new HashMap<String, String>() {{
             put("id", person.getId().toString());
-            put("City", person.getCountry());
+            put("Country", person.getCountry());
         }};
         this.messagePermission = person.getMessagesPermission();
         this.lastOnlineTime = Timestamp.valueOf(person.getLastOnlineTime());

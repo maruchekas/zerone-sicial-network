@@ -41,7 +41,7 @@ public class AuthController {
 //        String name = authService.logout().getData().getPerson().getFirstName();
 //        String email = authService.logout().getData().getPerson().getEmail();
         log.info("User has logout");
-        authService.logout();
-        return new ResponseEntity<>(HttpStatus.OK);
+
+        return new ResponseEntity<>(authService.logout(), HttpStatus.OK);
     }
 }
