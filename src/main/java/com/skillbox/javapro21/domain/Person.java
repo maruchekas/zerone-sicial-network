@@ -3,7 +3,9 @@ package com.skillbox.javapro21.domain;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.skillbox.javapro21.domain.enumeration.MessagesPermission;
 import com.skillbox.javapro21.domain.enumeration.UserType;
-import lombok.*;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 import lombok.experimental.Accessors;
 import org.hibernate.Hibernate;
 
@@ -78,7 +80,7 @@ public class Person {
     @Column(name = "user_type")
     private UserType userType;
 
-//    @OneToMany(mappedBy = "person", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    //    @OneToMany(mappedBy = "person", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 //    @JsonIgnoreProperties(value = {"post", "comment", "person"}, allowSetters = true)
 //    @ToString.Exclude
 //    private Set<BlockHistory> blocksLists = new HashSet<>();

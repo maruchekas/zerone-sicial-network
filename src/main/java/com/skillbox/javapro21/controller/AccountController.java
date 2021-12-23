@@ -83,7 +83,7 @@ public class AccountController {
     @PutMapping("/email")
     @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<DataResponse<AccountContent>> changeEmail(@RequestBody ChangeEmailRequest changeEmailRequest,
-                                                       Principal principal) {
+                                                                    Principal principal) {
         return new ResponseEntity<>(accountService.changeEmail(changeEmailRequest, principal), HttpStatus.OK);
     }
 
@@ -91,7 +91,7 @@ public class AccountController {
     @PutMapping("/notifications")
     @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<DataResponse<AccountContent>> changeNotifications(@RequestBody ChangeNotificationsRequest changeNotificationsRequest,
-                                                       Principal principal) {
+                                                                            Principal principal) {
         return new ResponseEntity<>(accountService.changeNotifications(changeNotificationsRequest, principal), HttpStatus.OK);
     }
 

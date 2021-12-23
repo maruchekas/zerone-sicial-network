@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @RestController
 @Tag(name = "Контроллер авторизации")
-@RequestMapping("/api/vi/auth")
+@RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
 public class AuthController {
 
@@ -38,9 +38,10 @@ public class AuthController {
     @Operation(summary = "Выход")
     @PostMapping("/logout")
     public ResponseEntity<DataResponse<?>> logOut() {
-        String name = authService.logout().getData().getPerson().getFirstName();
-        String email = authService.logout().getData().getPerson().getEmail();
-        log.info("User with email {} and name {} has logout", email, name);
-        return new ResponseEntity<>(authService.logout(), HttpStatus.OK);
+//        String name = authService.logout().getData().getPerson().getFirstName();
+//        String email = authService.logout().getData().getPerson().getEmail();
+        log.info("User has logout");
+        authService.logout();
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }
