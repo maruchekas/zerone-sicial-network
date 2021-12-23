@@ -2,6 +2,7 @@ package com.skillbox.javapro21.controller;
 
 import com.skillbox.javapro21.api.request.AuthRequest;
 import com.skillbox.javapro21.api.response.DataResponse;
+import com.skillbox.javapro21.api.response.account.AuthContent;
 import com.skillbox.javapro21.exception.NotSuchUserOrWrongPasswordException;
 import com.skillbox.javapro21.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -26,7 +27,7 @@ public class AuthController {
 
     @Operation(summary = "Вход через логин/пароль")
     @PostMapping("/login")
-    public ResponseEntity<DataResponse<?>> login(@RequestBody AuthRequest authRequest) throws NotSuchUserOrWrongPasswordException {
+    public ResponseEntity<DataResponse<AuthContent>> login(@RequestBody AuthRequest authRequest) throws NotSuchUserOrWrongPasswordException {
 
         // TODO запрос на вход (лог/пасс), проверка существования юзера,
         //  выброс исключения notSuchUserExistsException. Вернуть пользователя
@@ -37,11 +38,9 @@ public class AuthController {
 
     @Operation(summary = "Выход")
     @PostMapping("/logout")
-    public ResponseEntity<DataResponse<?>> logOut() {
-//        String name = authService.logout().getData().getPerson().getFirstName();
-//        String email = authService.logout().getData().getPerson().getEmail();
+    public ResponseEntity<DataResponse<AuthContent>> logOut() {
         log.info("User has logout");
-        authService.logout();
-        return new ResponseEntity<>(HttpStatus.OK);
+
+        return new ResponseEntity<>(authService.logout(), HttpStatus.OK);
     }
 }

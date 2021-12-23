@@ -1,7 +1,6 @@
 package com.skillbox.javapro21.config.security;
 
 import io.jsonwebtoken.*;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -21,7 +20,7 @@ public class JwtGenerator {
     @Value("$(jwt.secret)")
     private String SECRET_KEY;
 
-    public JwtGenerator(@Qualifier("userDetailServiceImpl") UserDetailsService userDetailsService) {
+    public JwtGenerator(UserDetailsService userDetailsService) {
         this.userDetailsService = userDetailsService;
     }
 
@@ -43,7 +42,7 @@ public class JwtGenerator {
         }
     }
 
-    public Authentication getAuthentication(String token){
+    public Authentication getAuthentication(String token) {
         UserDetails userDetails = this.userDetailsService.loadUserByUsername(getLoginFromToken(token));
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
