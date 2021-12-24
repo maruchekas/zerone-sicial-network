@@ -27,7 +27,7 @@ public class MyAspect {
         this.personRepository = personRepository;
     }
 
-    @Pointcut("execution(public * com.skillbox.javapro21.service.serviceImpl.ProfileServiceImpl.*())")
+    @Pointcut("execution(public * com.skillbox.javapro21.service.serviceImpl.ProfileServiceImpl.*(..))")
     public void callAtMyServicePublic() { }
 
     @Before("callAtMyServicePublic()")
