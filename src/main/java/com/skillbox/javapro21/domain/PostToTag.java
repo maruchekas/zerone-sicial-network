@@ -1,6 +1,8 @@
 package com.skillbox.javapro21.domain;
 
+import com.skillbox.javapro21.api.response.Content;
 import lombok.*;
+import lombok.experimental.Accessors;
 
 import javax.persistence.*;
 
@@ -10,8 +12,9 @@ import javax.persistence.*;
 @Setter
 @Getter
 @Entity
+@Accessors(chain = true)
 @Table(name = "post2tag")
-public class PostToTag {
+public class PostToTag implements Content {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

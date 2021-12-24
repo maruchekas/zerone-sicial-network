@@ -1,5 +1,6 @@
 package com.skillbox.javapro21.domain;
 
+import com.skillbox.javapro21.api.response.Content;
 import lombok.*;
 import lombok.experimental.Accessors;
 
@@ -10,7 +11,7 @@ import javax.persistence.*;
 @Entity
 @Table(name = "notification_type")
 @Accessors(chain = true)
-public class NotificationType {
+public class NotificationType implements Content {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")

@@ -1,6 +1,7 @@
 package com.skillbox.javapro21.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.skillbox.javapro21.api.response.Content;
 import com.skillbox.javapro21.domain.enumeration.MessagesPermission;
 import com.skillbox.javapro21.domain.enumeration.UserType;
 import lombok.*;
@@ -18,7 +19,7 @@ import java.util.Set;
 @Entity
 @Table(name = "persons")
 @Accessors(chain = true)
-public class Person {
+public class Person implements Content {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

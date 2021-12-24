@@ -1,8 +1,10 @@
 package com.skillbox.javapro21.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.skillbox.javapro21.api.response.Content;
 import com.skillbox.javapro21.domain.enumeration.ReadStatus;
 import lombok.*;
+import lombok.experimental.Accessors;
 import org.hibernate.Hibernate;
 
 import javax.persistence.*;
@@ -14,8 +16,9 @@ import java.util.Objects;
 @Setter
 @Getter
 @Entity
+@Accessors(chain = true)
 @Table(name = "messages")
-public class Message {
+public class Message implements Content {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
