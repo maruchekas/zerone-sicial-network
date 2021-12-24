@@ -21,7 +21,6 @@ import com.skillbox.javapro21.repository.NotificationTypeRepository;
 import com.skillbox.javapro21.repository.PersonRepository;
 import com.skillbox.javapro21.service.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -31,7 +30,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 @Component
-public class AccountServiceImpl implements AccountService {
+public class AccountServiceImpl extends AbstractMethodClass implements AccountService {
     private final PersonRepository personRepository;
     private final MailjetSender mailMessage;
     private final ConfirmationUrl confirmationUrl;
@@ -40,6 +39,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Autowired
     public AccountServiceImpl(PersonRepository personRepository, MailjetSender mailMessage, ConfirmationUrl confirmationUrl, JwtGenerator jwtGenerator, NotificationTypeRepository notificationTypeRepository) {
+        super(personRepository);
         this.personRepository = personRepository;
         this.mailMessage = mailMessage;
         this.confirmationUrl = confirmationUrl;
@@ -204,33 +204,5 @@ public class AccountServiceImpl implements AccountService {
                 .setFriendsRequest(true)
                 .setMessage(true);
         notificationTypeRepository.save(notificationType);
-    }
-
-    /**
-     * поиск пользователя по почте, если не найден выбрасывает ошибку
-     */
-    protected Person findPersonByEmail(String email) {
-        return personRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException(email));
-    }
-
-    /**
-     * создание рандомного токена
-     */
-    protected String getToken() {
-        return new Random().ints(10, 33, 122)
-                .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
-                .toString();
-    }
-
-    /**
-     * используется для ответа 200
-     */
-    protected DataResponse<MessageOkContent> getAccountResponse() {
-        DataResponse<MessageOkContent> dataResponse = new DataResponse<>();
-        dataResponse.setTimestamp(LocalDateTime.now());
-        MessageOkContent accountData = new MessageOkContent();
-        accountData.setMessage("ok");
-        dataResponse.setData(accountData);
-        return dataResponse;
     }
 }

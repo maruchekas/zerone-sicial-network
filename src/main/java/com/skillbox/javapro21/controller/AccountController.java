@@ -25,7 +25,7 @@ import java.security.Principal;
 @Slf4j
 @RestController
 @Tag(name = "Контроллер для работы с аккаунтом")
-@RequestMapping("/api/vi/account")
+@RequestMapping("/api/v1/account")
 public class AccountController {
     private final AccountService accountService;
 
