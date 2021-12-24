@@ -5,7 +5,7 @@ import com.mailjet.client.errors.MailjetSocketTimeoutException;
 import com.skillbox.javapro21.api.request.account.*;
 import com.skillbox.javapro21.api.response.DataResponse;
 import com.skillbox.javapro21.api.response.ListDataResponse;
-import com.skillbox.javapro21.api.response.account.AccountContent;
+import com.skillbox.javapro21.api.response.MessageOkContent;
 import com.skillbox.javapro21.api.response.account.NotificationSettingData;
 import com.skillbox.javapro21.config.MailjetSender;
 import com.skillbox.javapro21.config.properties.ConfirmationUrl;
@@ -48,7 +48,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     //Todo: нужна ли проверка каптчи?
-    public DataResponse<AccountContent> registration(RegisterRequest registerRequest) throws UserExistException, MailjetSocketTimeoutException, MailjetException {
+    public DataResponse<MessageOkContent> registration(RegisterRequest registerRequest) throws UserExistException, MailjetSocketTimeoutException, MailjetException {
         if (personRepository.findByEmail(registerRequest.getEmail()).isPresent()) throw new UserExistException();
         createNewPerson(registerRequest);
         mailMessageForRegistration(registerRequest);
@@ -94,7 +94,7 @@ public class AccountServiceImpl implements AccountService {
         return "Пароль успешно изменен";
     }
 
-    public DataResponse<AccountContent> changePassword(ChangePasswordRequest changePasswordRequest) {
+    public DataResponse<MessageOkContent> changePassword(ChangePasswordRequest changePasswordRequest) {
         Person person = findPersonByEmail(jwtGenerator.getLoginFromToken(changePasswordRequest.getToken()));
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
         person.setPassword(passwordEncoder.encode(changePasswordRequest.getPassword()));
@@ -102,13 +102,13 @@ public class AccountServiceImpl implements AccountService {
         return getAccountResponse();
     }
 
-    public DataResponse<AccountContent> changeEmail(ChangeEmailRequest changeEmailRequest, Principal principal) {
+    public DataResponse<MessageOkContent> changeEmail(ChangeEmailRequest changeEmailRequest, Principal principal) {
         Person person = findPersonByEmail(principal.getName());
         person.setEmail(changeEmailRequest.getEmail());
         return getAccountResponse();
     }
 
-    public DataResponse<AccountContent> changeNotifications(ChangeNotificationsRequest changeNotificationsRequest, Principal principal) {
+    public DataResponse<MessageOkContent> changeNotifications(ChangeNotificationsRequest changeNotificationsRequest, Principal principal) {
         Person person = findPersonByEmail(principal.getName());
         NotificationType notificationType = notificationTypeRepository.findNotificationTypeByPersonId(person.getId())
                 .orElse(new NotificationType()
@@ -209,14 +209,14 @@ public class AccountServiceImpl implements AccountService {
     /**
      * поиск пользователя по почте, если не найден выбрасывает ошибку
      */
-    private Person findPersonByEmail(String email) {
+    protected Person findPersonByEmail(String email) {
         return personRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException(email));
     }
 
     /**
      * создание рандомного токена
      */
-    private String getToken() {
+    protected String getToken() {
         return new Random().ints(10, 33, 122)
                 .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
                 .toString();
@@ -225,13 +225,11 @@ public class AccountServiceImpl implements AccountService {
     /**
      * используется для ответа 200
      */
-    private DataResponse<AccountContent> getAccountResponse() {
-        DataResponse<AccountContent> dataResponse = new DataResponse<>();
+    protected DataResponse<MessageOkContent> getAccountResponse() {
+        DataResponse<MessageOkContent> dataResponse = new DataResponse<>();
         dataResponse.setTimestamp(LocalDateTime.now());
-        AccountContent accountData = new AccountContent();
-        Map<String, String> data = new HashMap<>();
-        data.put("message", "ok");
-        accountData.setData(data);
+        MessageOkContent accountData = new MessageOkContent();
+        accountData.setMessage("ok");
         dataResponse.setData(accountData);
         return dataResponse;
     }
