@@ -13,7 +13,7 @@ spring:
   jpa:
     show-sql: true
     hibernate:
-      ddl-auto: validate
+      ddl-auto: none
 mailjet:
   mail:
     key: ${MAIlJET_MAIL_KEY}
@@ -31,3 +31,8 @@ recovery:
       url: ${PEC_PASS_VERIFICATION_URL}
 jwt:
   secret: ${JWT_SECRET}
+captcha:
+  width: 193
+  height: 57
+  image: data:captchaImage/png;base64,
+  lifespanBySec: 0

@@ -1,5 +1,12 @@
 package com.skillbox.javapro21.domain.enumeration;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.ToString;
+
+@Getter
+@ToString
+@AllArgsConstructor
 public enum FriendshipStatusType {
     REQUEST("Запрос на добавление в друзья"),
     FRIEND("Друзья"),
@@ -8,19 +15,4 @@ public enum FriendshipStatusType {
     SUBSCRIBED("Подписан");
 
     private final String name;
-
-    FriendshipStatusType(String name) {
-        this.name = name;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public String toString() {
-        return "FriendshipStatusType{" +
-                "name='" + name + '\'' +
-                '}';
-    }
 }

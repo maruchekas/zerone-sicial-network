@@ -52,25 +52,24 @@ public class AccountControllerTest extends AbstractTest {
         LocalDateTime reg_date = LocalDateTime.now();
         String conf_code = "123";
 
-        person = new Person();
-        person.setEmail(email);
-        person.setPassword(passwordEncoder.encode(password));
-        person.setFirstName(firstName);
-        person.setLastName(lastName);
+        person = new Person()
+                .setEmail(email)
+                .setPassword(passwordEncoder.encode(password))
+                .setFirstName(firstName)
+                .setLastName(lastName);
 
-        verifyPerson = new Person();
-        verifyPerson.setEmail(verifyEmail);
-        verifyPerson.setPassword(passwordEncoder.encode(password));
-        verifyPerson.setFirstName(firstName);
-        verifyPerson.setLastName(lastName);
-        verifyPerson.setConfirmationCode("123");
-        verifyPerson.setRegDate(reg_date);
-        verifyPerson.setConfirmationCode(conf_code);
-        verifyPerson.setMessagesPermission(MessagesPermission.ALL);
-        verifyPerson.setIsBlocked(0);
-        verifyPerson.setIsApproved(1);
-        verifyPerson.setLastOnlineTime(LocalDateTime.now());
-
+        verifyPerson = new Person()
+                .setEmail(verifyEmail)
+                .setPassword(passwordEncoder.encode(password))
+                .setFirstName(firstName)
+                .setLastName(lastName)
+                .setConfirmationCode("123")
+                .setRegDate(reg_date)
+                .setConfirmationCode(conf_code)
+                .setMessagesPermission(MessagesPermission.ALL)
+                .setIsBlocked(0)
+                .setIsApproved(1)
+                .setLastOnlineTime(LocalDateTime.now());
         personRepository.save(verifyPerson);
     }
 
@@ -100,14 +99,11 @@ public class AccountControllerTest extends AbstractTest {
 
     @Test
     void verifyRegistration() throws Exception {
-        verifyPerson.setConfirmationCode("123");
-        String json = "{\"email\": \"Arcadiy\", \"code\": \"123\"}";
-
         mockMvc.perform(MockMvcRequestBuilders
                         .get("/api/vi/account/register/complete")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(json)
-                        .accept(MediaType.APPLICATION_JSON))
+                        .param("email", "test@test.ru")
+                        .param("code", "123"))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }
@@ -129,13 +125,11 @@ public class AccountControllerTest extends AbstractTest {
 
     @Test
     void verifyRecovery() throws Exception {
-        String json = "{\"email\":\"test@test.ru\", \"code\":\"123\"}";
-
         mockMvc.perform(MockMvcRequestBuilders
                         .get("/api/vi/account/password/recovery/complete")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(json)
-                        .accept(MediaType.APPLICATION_JSON))
+                        .param("email", "test@test.ru")
+                        .param("code", "123"))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }
@@ -146,8 +140,7 @@ public class AccountControllerTest extends AbstractTest {
                         .put("/api/vi/account/password/recovery")
                         .contentType(MediaType.APPLICATION_JSON)
                         .param("email", "test@test.ru")
-                        .param("password", "1234")
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .param("password", "1234"))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }
