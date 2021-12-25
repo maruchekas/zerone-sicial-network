@@ -36,7 +36,7 @@ public class AccountController {
     @Operation(summary = "Регистрация")
     @PostMapping("/register")
     public ResponseEntity<DataResponse<MessageOkContent>> registration(@RequestBody RegisterRequest registerRequest) throws UserExistException, MailjetException {
-        log.info("Can`t create user with email {} and name {}", registerRequest.getEmail(), registerRequest.getFirstName());
+        log.info("Вызван метод регистрации по почте {}", registerRequest.getEmail());
         return new ResponseEntity<>(accountService.registration(registerRequest), HttpStatus.OK);
     }
 
@@ -44,14 +44,14 @@ public class AccountController {
     @GetMapping("/register/complete")
     public ResponseEntity<String> verifyRegistration(@RequestParam String email,
                                                      @RequestParam String code) throws TokenConfirmationException {
-        log.info("Can`t verify user with email {}", email);
+        log.info("Регистрация для email {} пройдена.", email);
         return new ResponseEntity<>(accountService.verifyRegistration(email, code), HttpStatus.OK);
     }
 
     @Operation(summary = "Отправка ссылки на почту для восстановления пароля")
     @PutMapping("/password/send_recovery_massage")
     public ResponseEntity<String> recoveryPasswordMessage(@RequestBody RecoveryRequest recoveryRequest) throws MailjetException {
-        log.info("Not found user with email {}", recoveryRequest.getEmail());
+        log.info("Отправка на email: {} пиьсма с сылкой на регистрацию", recoveryRequest.getEmail());
         return new ResponseEntity<>(accountService.recoveryPasswordMessage(recoveryRequest), HttpStatus.OK);
     }
 
@@ -67,7 +67,7 @@ public class AccountController {
     @PutMapping("/password/recovery")
     public ResponseEntity<String> recoveryPassword(@RequestParam String email,
                                                    @RequestParam String password) {
-        log.info("Can`t verify user with email {}", email);
+        log.info("Измение пароля для email {}.", email);
         return new ResponseEntity<>(accountService.recoveryPassword(email, password), HttpStatus.OK);
     }
 
@@ -75,6 +75,7 @@ public class AccountController {
     @PutMapping("/password/set")
     @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<DataResponse<MessageOkContent>> changePassword(@RequestBody ChangePasswordRequest changePasswordRequest) {
+        log.info("Измение пароля авторизованным пользователем.");
         return new ResponseEntity<>(accountService.changePassword(changePasswordRequest), HttpStatus.OK);
     }
 
@@ -83,6 +84,7 @@ public class AccountController {
     @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<DataResponse<MessageOkContent>> changeEmail(@RequestBody ChangeEmailRequest changeEmailRequest,
                                                                       Principal principal) {
+        log.info("Смена email авторизованным пользователем {}.", principal.getName());
         return new ResponseEntity<>(accountService.changeEmail(changeEmailRequest, principal), HttpStatus.OK);
     }
 
@@ -91,6 +93,7 @@ public class AccountController {
     @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<DataResponse<MessageOkContent>> changeNotifications(@RequestBody ChangeNotificationsRequest changeNotificationsRequest,
                                                                               Principal principal) {
+        log.info("Редактирование настроек оповещения. Email {}.", principal.getName());
         return new ResponseEntity<>(accountService.changeNotifications(changeNotificationsRequest, principal), HttpStatus.OK);
     }
 
@@ -98,6 +101,7 @@ public class AccountController {
     @GetMapping("/notifications")
     @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<ListDataResponse<NotificationSettingData>> getNotifications(Principal principal) {
+        log.info("Получение настроек оповещения. Email {}.", principal.getName());
         return new ResponseEntity<>(accountService.getNotifications(principal), HttpStatus.OK);
     }
 }

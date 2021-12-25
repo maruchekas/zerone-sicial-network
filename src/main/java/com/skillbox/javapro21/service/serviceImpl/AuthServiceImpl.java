@@ -11,6 +11,7 @@ import com.skillbox.javapro21.exception.UserLegalException;
 import com.skillbox.javapro21.repository.PersonRepository;
 import com.skillbox.javapro21.service.AuthService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,10 +24,10 @@ import java.util.Map;
 @Slf4j
 @Component
 public class AuthServiceImpl extends AbstractMethodClass implements AuthService {
-
     private final PersonRepository personRepository;
     private final JwtGenerator jwtGenerator;
 
+    @Autowired
     protected AuthServiceImpl(PersonRepository personRepository, JwtGenerator jwtGenerator) {
         super(personRepository);
         this.personRepository = personRepository;
@@ -38,7 +39,7 @@ public class AuthServiceImpl extends AbstractMethodClass implements AuthService 
         if (!isPersonLegal(person)) throw new UserLegalException(authRequest.getEmail());
 
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
-        if (passwordEncoder.matches(authRequest.getPassword(), person.getPassword()))
+        if (!passwordEncoder.matches(authRequest.getPassword(), person.getPassword()))
             throw new NotSuchUserOrWrongPasswordException();
 
         String token = jwtGenerator.generateToken(authRequest.getEmail());
