@@ -29,7 +29,7 @@ public class PostServiceImpl extends AbstractMethodClass implements PostService 
         this.postRepository = postRepository;
     }
 
-    public ListDataResponse<Post> getPosts(String text, long dateFrom, long dateTo, int offset, int itemPerPage, Principal principal) {
+    public ListDataResponse<?> getPosts(String text, long dateFrom, long dateTo, int offset, int itemPerPage, Principal principal) {
         Pageable pageable = PageRequest.of(offset / itemPerPage, itemPerPage);
         LocalDateTime datetimeFrom = (dateFrom == -1) ? LocalDateTime.from(Instant.now()) : LocalDateTime.from(Instant.ofEpochMilli(dateFrom));
         LocalDateTime datetimeTo = (dateTo == -1) ? LocalDateTime.from(Instant.now()) : LocalDateTime.from(Instant.ofEpochMilli(dateTo));
@@ -37,7 +37,7 @@ public class PostServiceImpl extends AbstractMethodClass implements PostService 
         return getPostsResponse(offset, itemPerPage, pageablePostList, principal);
     }
 
-    private ListDataResponse<Post> getPostsResponse(int offset, int itemPerPage, Page<Post> pageablePostList, Principal principal) {
+    private ListDataResponse<?> getPostsResponse(int offset, int itemPerPage, Page<Post> pageablePostList, Principal principal) {
         return null;
 //                (ListDataResponse<Post>) new ListDataResponse<>()
 //                .setPerPage(itemPerPage)

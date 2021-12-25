@@ -1,7 +1,7 @@
 package com.skillbox.javapro21.controller;
 
 import com.skillbox.javapro21.AbstractTest;
-import com.skillbox.javapro21.api.request.AuthRequest;
+import com.skillbox.javapro21.api.request.auth.AuthRequest;
 import com.skillbox.javapro21.config.security.JwtGenerator;
 import com.skillbox.javapro21.domain.Person;
 import com.skillbox.javapro21.repository.PersonRepository;

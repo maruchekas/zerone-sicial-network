@@ -28,6 +28,6 @@ public class ProfileServiceImpl extends AbstractMethodClass implements ProfileSe
                 .setLastOnlineTime(LocalDateTime.now());
         personRepository.save(person);
         SecurityContextHolder.clearContext();
-        return getAccountResponse();
+        return getMessageOkResponse();
     }
 }

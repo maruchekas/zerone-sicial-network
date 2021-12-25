@@ -28,7 +28,7 @@ public abstract class AbstractMethodClass {
     /**
      * используется для ответа 200 "message: ok"
      */
-    public DataResponse<MessageOkContent> getAccountResponse() {
+    public DataResponse<MessageOkContent> getMessageOkResponse() {
         DataResponse<MessageOkContent> dataResponse = new DataResponse<>();
         dataResponse.setTimestamp(LocalDateTime.now());
         MessageOkContent accountData = new MessageOkContent();
@@ -45,4 +45,13 @@ public abstract class AbstractMethodClass {
                 .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
                 .toString();
     }
+
+
+    /**
+     * заблокирован поьзователь или нет ?
+     */
+    public String isBlockedPerson(Person person){
+        return person.getIsBlocked() == 0 ? "false" : "true";
+    }
+
 }

@@ -1,8 +1,6 @@
 package com.skillbox.javapro21.domain;
 
-import com.skillbox.javapro21.api.response.Content;
 import com.skillbox.javapro21.domain.enumeration.UserType;
-import lombok.*;
 import lombok.experimental.Accessors;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

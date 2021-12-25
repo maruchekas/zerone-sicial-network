@@ -26,6 +26,6 @@ public class UserDetailServiceImpl implements UserDetailsService {
             p.setLastOnlineTime(LocalDateTime.now());
             personRepository.save(p);
         });
-        return (UserDetails) person.orElse(null);
+        return person.orElse(null);
     }
 }

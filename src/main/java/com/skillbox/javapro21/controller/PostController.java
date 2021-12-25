@@ -1,7 +1,6 @@
 package com.skillbox.javapro21.controller;
 
 import com.skillbox.javapro21.api.response.ListDataResponse;
-import com.skillbox.javapro21.domain.Post;
 import com.skillbox.javapro21.service.PostService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -32,7 +31,7 @@ public class PostController {
     @Operation(summary = "Поиск публикации")
     @GetMapping("/")
     @PreAuthorize("hasAuthority('user:write')")
-    public ResponseEntity<ListDataResponse<Post>> getPosts(@RequestParam(name = "text", defaultValue = "") String text,
+    public ResponseEntity<ListDataResponse<?>> getPosts(@RequestParam(name = "text", defaultValue = "") String text,
                                                            @RequestParam(name = "date_from", defaultValue = "-1") long dateFrom,
                                                            @RequestParam(name = "date_to", defaultValue = "-1") long dateTo,
                                                            @RequestParam(name = "offset", defaultValue = "0") int offset,

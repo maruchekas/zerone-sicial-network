@@ -54,7 +54,7 @@ public class AccountServiceImpl extends AbstractMethodClass implements AccountSe
         if (personRepository.findByEmail(registerRequest.getEmail()).isPresent()) throw new UserExistException();
         createNewPerson(registerRequest);
         mailMessageForRegistration(registerRequest);
-        return getAccountResponse();
+        return getMessageOkResponse();
     }
 
     public String verifyRegistration(String email, String code) throws TokenConfirmationException {
@@ -101,13 +101,13 @@ public class AccountServiceImpl extends AbstractMethodClass implements AccountSe
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
         person.setPassword(passwordEncoder.encode(changePasswordRequest.getPassword()));
         personRepository.save(person);
-        return getAccountResponse();
+        return getMessageOkResponse();
     }
 
     public DataResponse<MessageOkContent> changeEmail(ChangeEmailRequest changeEmailRequest, Principal principal) {
         Person person = findPersonByEmail(principal.getName());
         person.setEmail(changeEmailRequest.getEmail());
-        return getAccountResponse();
+        return getMessageOkResponse();
     }
 
     public DataResponse<MessageOkContent> changeNotifications(ChangeNotificationsRequest changeNotificationsRequest, Principal principal) {
@@ -127,7 +127,7 @@ public class AccountServiceImpl extends AbstractMethodClass implements AccountSe
             case MESSAGE -> notificationType.setMessage(changeNotificationsRequest.isEnable());
         }
         notificationTypeRepository.save(notificationType);
-        return getAccountResponse();
+        return getMessageOkResponse();
     }
 
     public ListDataResponse<NotificationSettingData> getNotifications(Principal principal) {

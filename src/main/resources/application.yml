@@ -22,13 +22,6 @@ mailjet:
     version: v3.1
   flyway:
     enabled: true
-registration:
-  verification:
-    url: ${REG_VERIFICATION_URL}
-recovery:
-  pass:
-    verification:
-      url: ${PEC_PASS_VERIFICATION_URL}
 jwt:
   secret: ${JWT_SECRET}
 captcha:
