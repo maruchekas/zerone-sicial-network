@@ -18,15 +18,17 @@ public class NotificationsController {
 
     @Operation(summary = "Получить список уведомлений для текущего пользователя")
     @GetMapping("")
+//    @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<String> getNotifications(@RequestParam(name = "offset", defaultValue = "0") int offset,
                                                    @RequestParam(name = "item_per_page", defaultValue = "20") int itemPerPage,
                                                    Principal principal) {
-        log.info("Получение списка уведомлений {}", principal.getName());
+        log.info("Получение списка уведомлений ожидающих прочтения {}", principal.getName());
         return new ResponseEntity<>("Уведомления", HttpStatus.OK);
     }
 
     @Operation(summary = "Отметить уведомление как \"прочитанное\"")
     @PutMapping("")
+//    @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<String> verifyRegistration(@RequestParam int id,
                                                      @RequestParam boolean all,
                                                      Principal principal) {
