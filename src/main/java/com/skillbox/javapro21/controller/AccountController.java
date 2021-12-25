@@ -1,7 +1,6 @@
 package com.skillbox.javapro21.controller;
 
 import com.mailjet.client.errors.MailjetException;
-import com.mailjet.client.errors.MailjetSocketTimeoutException;
 import com.skillbox.javapro21.api.request.account.*;
 import com.skillbox.javapro21.api.response.DataResponse;
 import com.skillbox.javapro21.api.response.ListDataResponse;
@@ -36,7 +35,7 @@ public class AccountController {
 
     @Operation(summary = "Регистрация")
     @PostMapping("/register")
-    public ResponseEntity<DataResponse<MessageOkContent>> registration(@RequestBody RegisterRequest registerRequest) throws UserExistException, MailjetSocketTimeoutException, MailjetException {
+    public ResponseEntity<DataResponse<MessageOkContent>> registration(@RequestBody RegisterRequest registerRequest) throws UserExistException, MailjetException {
         log.info("Can`t create user with email {} and name {}", registerRequest.getEmail(), registerRequest.getFirstName());
         return new ResponseEntity<>(accountService.registration(registerRequest), HttpStatus.OK);
     }
@@ -51,7 +50,7 @@ public class AccountController {
 
     @Operation(summary = "Отправка ссылки на почту для восстановления пароля")
     @PutMapping("/password/send_recovery_massage")
-    public ResponseEntity<String> recoveryPasswordMessage(@RequestBody RecoveryRequest recoveryRequest) throws MailjetSocketTimeoutException, MailjetException {
+    public ResponseEntity<String> recoveryPasswordMessage(@RequestBody RecoveryRequest recoveryRequest) throws MailjetException {
         log.info("Not found user with email {}", recoveryRequest.getEmail());
         return new ResponseEntity<>(accountService.recoveryPasswordMessage(recoveryRequest), HttpStatus.OK);
     }

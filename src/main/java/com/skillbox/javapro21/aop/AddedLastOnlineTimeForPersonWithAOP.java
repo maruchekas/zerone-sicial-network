@@ -17,28 +17,27 @@ import java.util.Optional;
 
 @Aspect
 @Component
-public class AddedLastOnlineTimeWithAOP {
+public class AddedLastOnlineTimeForPersonWithAOP {
     private final PersonRepository personRepository;
 
     private static String email;
 
     @Autowired
-    public AddedLastOnlineTimeWithAOP(PersonRepository personRepository) {
+    public AddedLastOnlineTimeForPersonWithAOP(PersonRepository personRepository) {
         this.personRepository = personRepository;
     }
 
     @Pointcut("execution(public * com.skillbox.javapro21.service.serviceImpl.ProfileServiceImpl.*(..))")
-    public void callAtMyServiceProfile() {
-
+    public void callAtServiceProfile() {
     }
 
-    @Before("callAtMyServiceProfile()")
+    @Before("callAtServiceProfile()")
     public void getEmailBeforeDelete() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         email = auth.getName();
     }
 
-    @AfterReturning("callAtMyServiceProfile()")
+    @AfterReturning("callAtServiceProfile()")
     public void setLastOnlineTime() {
         Optional<Person> person = personRepository.findByEmail(email);
         person.get().setLastOnlineTime(LocalDateTime.now());
