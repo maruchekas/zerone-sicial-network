@@ -34,3 +34,11 @@ build/
 
 ### logs ###
 *.log
+
+### enviroments ###
+.env
+
+### Front resources ###
+src/main/resources/static/static/
+*.js.map
+*.svg

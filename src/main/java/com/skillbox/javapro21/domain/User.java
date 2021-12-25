@@ -1,7 +1,10 @@
 package com.skillbox.javapro21.domain;
 
 import com.skillbox.javapro21.domain.enumeration.UserType;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.Hibernate;
 
 import javax.persistence.*;

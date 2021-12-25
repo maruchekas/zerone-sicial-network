@@ -1,4 +1,4 @@
 package com.skillbox.javapro21.exception;
 
-public class NotSuchUserOrWrongPasswordException extends Exception{
+public class NotSuchUserOrWrongPasswordException extends Exception {
 }

@@ -37,7 +37,7 @@ public class BlockHistory {
 
     @JsonIgnoreProperties(value = {"block", "post", "person"}, allowSetters = true)
     @OneToOne
-    @JoinColumn(name ="post_comment_id")
+    @JoinColumn(name = "post_comment_id")
     private PostComment comment;
 
     @ManyToOne
