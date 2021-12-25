@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @RestController
 @Tag(name = "Контроллер авторизации")
-@RequestMapping("/api/v1/auth")
+@RequestMapping("/api/vi/auth")
 @RequiredArgsConstructor
 public class AuthController {
 
