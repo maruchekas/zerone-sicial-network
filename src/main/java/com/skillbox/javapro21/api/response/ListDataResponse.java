@@ -10,7 +10,7 @@ import java.util.List;
 @Data
 @Accessors(chain = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ListDataResponse <T extends Content> {
+public class ListDataResponse<T extends Content> {
     private String error;
     private LocalDateTime timestamp;
     private int total;

@@ -4,6 +4,10 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.skillbox.javapro21.api.response.Content;
 import lombok.*;
 import lombok.experimental.Accessors;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.Hibernate;
 
 import javax.persistence.*;
@@ -16,7 +20,7 @@ import java.util.Objects;
 @Entity
 @Accessors(chain = true)
 @Table(name = "post_files")
-public class PostFile implements Content {
+public class PostFile {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

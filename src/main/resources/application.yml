@@ -1,29 +1,36 @@
 server:
   port: 8080
-  base_url: http://localhost:8080
+  base_url: ${BASE_URL}
 spring:
   messages:
     basename: lang.messages
   profiles:
     active: dev
   datasource:
-    url: jdbc:postgresql://localhost:5432/SocialNetwork?stringtype=unspecified
-    username: postgres
-    password: root
+    url: ${JDBC_DATABASE_URL}
+    username: ${JDBC_DATABASE_USERNAME}
+    password: ${JDBC_DATABASE_PASSWORD}
   jpa:
     show-sql: true
     hibernate:
       ddl-auto: none
 mailjet:
   mail:
-    key: 044badceaa9c50ffadca8bd6977ad2e2
-    from: jpro021network.zerone@mail.ru
-    secret: 9fee7f15536b6b26cc08dd0edef4785a
+    key: ${MAIlJET_MAIL_KEY}
+    from: ${MAIlJET_MAIL_FROM}
+    secret: ${MAIlJET_MAIL_SECRET}
     version: v3.1
   flyway:
     enabled: true
+registration:
+  verification:
+    url: ${REG_VERIFICATION_URL}
+recovery:
+  pass:
+    verification:
+      url: ${PEC_PASS_VERIFICATION_URL}
 jwt:
-  secret: secret
+  secret: ${JWT_SECRET}
 captcha:
   width: 193
   height: 57
