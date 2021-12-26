@@ -16,18 +16,16 @@ spring:
       ddl-auto: none
 mailjet:
   mail:
-    key: b5736394130d305b19e80ea67901b8d3
-    from: zerone.soc.net@gmail.com
-    secret: 8e03e14c440fd2c075a1607cd107c0f9
+    key: 044badceaa9c50ffadca8bd6977ad2e2
+    from: jpro021network.zerone@mail.ru
+    secret: 9fee7f15536b6b26cc08dd0edef4785a
     version: v3.1
   flyway:
     enabled: true
-registration:
-  verification:
-    url: localhost:8080/api/v1/account/register/complete
-recovery:
-  pass:
-    verification:
-      url: localhost:8080/api/v1/account/password/recovery/complete
 jwt:
   secret: secret
+captcha:
+  width: 193
+  height: 57
+  image: data:captchaImage/png;base64,
+  lifespanBySec: 0
