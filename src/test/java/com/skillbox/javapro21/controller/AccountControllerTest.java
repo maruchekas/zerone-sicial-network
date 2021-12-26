@@ -52,25 +52,24 @@ public class AccountControllerTest extends AbstractTest {
         LocalDateTime reg_date = LocalDateTime.now();
         String conf_code = "123";
 
-        person = new Person();
-        person.setEmail(email);
-        person.setPassword(passwordEncoder.encode(password));
-        person.setFirstName(firstName);
-        person.setLastName(lastName);
+        person = new Person()
+                .setEmail(email)
+                .setPassword(passwordEncoder.encode(password))
+                .setFirstName(firstName)
+                .setLastName(lastName);
 
-        verifyPerson = new Person();
-        verifyPerson.setEmail(verifyEmail);
-        verifyPerson.setPassword(passwordEncoder.encode(password));
-        verifyPerson.setFirstName(firstName);
-        verifyPerson.setLastName(lastName);
-        verifyPerson.setConfirmationCode("123");
-        verifyPerson.setRegDate(reg_date);
-        verifyPerson.setConfirmationCode(conf_code);
-        verifyPerson.setMessagesPermission(MessagesPermission.ALL);
-        verifyPerson.setIsBlocked(0);
-        verifyPerson.setIsApproved(1);
-        verifyPerson.setLastOnlineTime(LocalDateTime.now());
-
+        verifyPerson = new Person()
+                .setEmail(verifyEmail)
+                .setPassword(passwordEncoder.encode(password))
+                .setFirstName(firstName)
+                .setLastName(lastName)
+                .setConfirmationCode("123")
+                .setRegDate(reg_date)
+                .setConfirmationCode(conf_code)
+                .setMessagesPermission(MessagesPermission.ALL)
+                .setIsBlocked(0)
+                .setIsApproved(1)
+                .setLastOnlineTime(LocalDateTime.now());
         personRepository.save(verifyPerson);
     }
 
@@ -90,7 +89,7 @@ public class AccountControllerTest extends AbstractTest {
         registerRequest.setCode(person.getPassword());
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .post("/api/vi/account/register")
+                        .post("/api/v1/account/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(registerRequest))
                         .accept(MediaType.APPLICATION_JSON))
@@ -101,7 +100,7 @@ public class AccountControllerTest extends AbstractTest {
     @Test
     void verifyRegistration() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders
-                        .get("/api/vi/account/register/complete")
+                        .get("/api/v1/account/register/complete")
                         .contentType(MediaType.APPLICATION_JSON)
                         .param("email", "test@test.ru")
                         .param("code", "123"))
@@ -115,7 +114,7 @@ public class AccountControllerTest extends AbstractTest {
         recoveryRequest.setEmail(verifyPerson.getEmail());
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .put("/api/vi/account/password/send_recovery_massage")
+                        .put("/api/v1/account/password/send_recovery_massage")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(recoveryRequest))
                         .accept(MediaType.APPLICATION_JSON))
@@ -127,7 +126,7 @@ public class AccountControllerTest extends AbstractTest {
     @Test
     void verifyRecovery() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders
-                        .get("/api/vi/account/password/recovery/complete")
+                        .get("/api/v1/account/password/recovery/complete")
                         .contentType(MediaType.APPLICATION_JSON)
                         .param("email", "test@test.ru")
                         .param("code", "123"))
@@ -138,7 +137,7 @@ public class AccountControllerTest extends AbstractTest {
     @Test
     void recoveryPassword() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders
-                        .put("/api/vi/account/password/recovery")
+                        .put("/api/v1/account/password/recovery")
                         .contentType(MediaType.APPLICATION_JSON)
                         .param("email", "test@test.ru")
                         .param("password", "1234"))
@@ -154,7 +153,7 @@ public class AccountControllerTest extends AbstractTest {
         changePasswordRequest.setToken(jwtGenerator.generateToken(verifyPerson.getEmail()));
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .put("/api/vi/account/password/set")
+                        .put("/api/v1/account/password/set")
                         .principal(() -> "test@test.ru")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(changePasswordRequest))
@@ -170,7 +169,7 @@ public class AccountControllerTest extends AbstractTest {
         changeEmailRequest.setEmail(verifyPerson.getEmail());
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .put("/api/vi/account/email")
+                        .put("/api/v1/account/email")
                         .principal(() -> "test@test.ru")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(changeEmailRequest))
@@ -187,7 +186,7 @@ public class AccountControllerTest extends AbstractTest {
         changeNotificationsRequest.setEnable(true);
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .put("/api/vi/account/notifications")
+                        .put("/api/v1/account/notifications")
                         .principal(() -> "test@test.ru")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(changeNotificationsRequest))
@@ -200,7 +199,7 @@ public class AccountControllerTest extends AbstractTest {
     @WithMockUser(username = "test@test.ru", authorities = "user:write")
     void getNotifications() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders
-                        .get("/api/vi/account/notifications")
+                        .get("/api/v1/account/notifications")
                         .principal(() -> "test@test.ru"))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk());
