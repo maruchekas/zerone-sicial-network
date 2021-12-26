@@ -50,8 +50,6 @@ VALUES ('Сергей', 'Сергеев', '2021-07-30 23:30:03', '1995-08-15', '
        ('Jaimie', 'Bentham', '2021-12-01 23:32:01', '1989-03-24', 'jbenthama@free.fr', '+1 (517) 228-3062',
         '$2a$12$i2ypriukxO741yN1tuSaUOeN1HlGGj3Z.Of7fOe4/dbtepRO82qrq', 'https://robohash.org/quasirecusandaevoluptatem.png?size=50x50&set=set1', 'pede justo',
         'Innisfil', 'Canada', '4099', 0, 'FRIENDS', 'USER', '2021-12-09 22:04:41', 0),
-        'xckYQ33JqT', 'https://robohash.org/quasirecusandaevoluptatem.png?size=50x50&set=set1', 'pede justo',
-        'Innisfil', 'Canada', '4099', 0, 'FRIENDS', 'USER', '2021-12-09 22:04:41', 0),
        ('Ellynn', 'Ribeiro', '2021-07-07 22:05:50', '2004-07-20', 'eribeirob@nymag.com', '+86 (610) 697-9102', 'xLYhwi',
         'https://robohash.org/quiadoloribusvoluptate.png?size=50x50&set=set1', 'ut odio', 'Mishan', 'China', '6947', 1,
         'FRIENDS', 'USER', '2021-12-09 16:08:03', 0),
@@ -129,4 +127,11 @@ VALUES ('котики'),
        ('блог'),
        ('стрим'),
        ('люди');
+
+INSERT INTO persons (first_name, last_name, reg_date, birth_date, email, phone, password, photo, about, town, country,
+                     confirmation_code, is_approved, messages_permission, user_type, last_online_time, is_blocked)
+VALUES ('Юзер', 'Тестов', '2021-12-26 17:30:03', '1995-08-15', 'test0@test.ru', '+7 (999) 111-0000', '$2a$12$KooSeqO4D9V/bDq/NYvrmO9n6OX8W0v1sAgJW8P47dE6al8OScIRK',
+        'https://robohash.org/velsaepeea.png?size=50x50&set=set1',
+        'Я тестовый пользователь. ', 'Москва', 'Россия',
+        '1899', 1, 'FRIENDS', 'USER', '2021-12-16 16:57:08', 0);
 
