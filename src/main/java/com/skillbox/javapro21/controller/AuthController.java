@@ -3,7 +3,7 @@ package com.skillbox.javapro21.controller;
 import com.skillbox.javapro21.api.request.auth.AuthRequest;
 import com.skillbox.javapro21.api.response.DataResponse;
 import com.skillbox.javapro21.api.response.MessageOkContent;
-import com.skillbox.javapro21.api.response.account.AuthContent;
+import com.skillbox.javapro21.api.response.account.AuthData;
 import com.skillbox.javapro21.exception.NotSuchUserOrWrongPasswordException;
 import com.skillbox.javapro21.exception.UserLegalException;
 import com.skillbox.javapro21.service.AuthService;
@@ -29,12 +29,11 @@ public class AuthController {
 
     @Operation(summary = "Вход через логин/пароль")
     @PostMapping("/login")
-    public ResponseEntity<DataResponse<AuthContent>> login(@RequestBody AuthRequest authRequest) throws NotSuchUserOrWrongPasswordException, UserLegalException {
+    public ResponseEntity<DataResponse<AuthData>> login(@RequestBody AuthRequest authRequest) throws NotSuchUserOrWrongPasswordException, UserLegalException {
 
         // TODO запрос на вход (лог/пасс), проверка существования юзера,
         //  выброс исключения notSuchUserExistsException. Вернуть пользователя
         log.info("Login user with email {}", authRequest.getEmail());
-
         return new ResponseEntity<>(authService.login(authRequest), HttpStatus.OK);
     }
 

@@ -25,5 +25,5 @@ public interface PersonRepository extends JpaRepository<Person, Integer> {
             "and p.isBlocked = 0 " +
             "and p.id = :id " +
             "order by p.id asc")
-    List<Integer> findBlockersId(Long id);
+    List<Long> findBlockersId(Long id);
 }
