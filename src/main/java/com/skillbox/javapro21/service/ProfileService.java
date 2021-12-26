@@ -12,4 +12,8 @@ public interface ProfileService {
     public DataResponse getPerson(long id) throws PersonNotFoundException;
     public DataResponse post(long id, long publishDate, PostRequest postRequest) throws PersonNotFoundException;
     public ListDataResponse getWall(long id, int offset, int itemPerPage);
+
+@Service
+public interface ProfileService {
+    DataResponse deletePerson(Principal principal);
 }
