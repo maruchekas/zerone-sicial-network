@@ -1,6 +1,12 @@
 package com.skillbox.javapro21.domain;
 
+import com.skillbox.javapro21.api.response.Content;
 import com.skillbox.javapro21.domain.enumeration.FriendshipStatusType;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,6 +20,7 @@ import java.time.LocalDateTime;
 @Setter
 @Getter
 @Entity
+@Accessors(chain = true)
 @Table(name = "friendship_statuses")
 public class FriendshipStatus {
 

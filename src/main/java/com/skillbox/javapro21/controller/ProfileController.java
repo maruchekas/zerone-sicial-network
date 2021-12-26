@@ -5,6 +5,7 @@ import com.skillbox.javapro21.api.response.DataResponse;
 import com.skillbox.javapro21.exception.PersonNotFoundException;
 import com.skillbox.javapro21.service.ProfileService;
 import com.skillbox.javapro21.api.response.DataResponse;
+import com.skillbox.javapro21.api.response.MessageOkContent;
 import com.skillbox.javapro21.service.ProfileService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -51,7 +52,7 @@ public class ProfileController {
     @Operation(summary = "Удаление пользователем его аккаунта", security = @SecurityRequirement(name = "jwt"))
     @DeleteMapping("/me")
     @PreAuthorize("hasAuthority('user:write')")
-    public ResponseEntity<DataResponse> deletePerson(Principal principal) {
+    public ResponseEntity<DataResponse<MessageOkContent>> deletePerson(Principal principal) {
         return new ResponseEntity<>(profileService.deletePerson(principal), HttpStatus.OK);
     }
 }

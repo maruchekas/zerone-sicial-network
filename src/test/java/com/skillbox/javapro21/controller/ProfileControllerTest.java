@@ -76,5 +76,7 @@ public class ProfileControllerTest extends AbstractTest {
                 .andExpect(MockMvcResultMatchers.status().isOk());
 
         Assertions.assertNotEquals("Пользователь не удален", verifyPerson.getEmail(), "test@test.ru");
+        Assertions.assertEquals(LocalDateTime.now().getDayOfMonth(),
+                personRepository.findByEmail(verifyPerson.getEmail()).get().getLastOnlineTime().getDayOfMonth());
     }
 }

@@ -3,6 +3,7 @@ package com.skillbox.javapro21.service.serviceImpl;
 import com.skillbox.javapro21.api.request.profile.PostRequest;
 import com.skillbox.javapro21.api.response.DataResponse;
 import com.skillbox.javapro21.api.response.ListDataResponse;
+import com.skillbox.javapro21.api.response.MessageOkContent;
 import com.skillbox.javapro21.api.response.profile.PersonContent;
 import com.skillbox.javapro21.api.response.profile.PostContent;
 import com.skillbox.javapro21.domain.Person;
@@ -42,10 +43,6 @@ public class ProfileServiceImpl extends AbstractMethodClass implements ProfileSe
     protected ProfileServiceImpl(PersonRepository personRepository) {
         super(personRepository);
         this.personRepository = personRepository;
-    }
-
-    public Person findPersonById(long id) throws PersonNotFoundException {
-        return personRepository.findById(id).orElseThrow(() -> new PersonNotFoundException());
     }
 
     public List<PostContent> getPersonPosts(long id) {
@@ -104,12 +101,12 @@ public class ProfileServiceImpl extends AbstractMethodClass implements ProfileSe
 
 
 
-    public DataResponse deletePerson(Principal principal) {
-        Person person = findPersonByEmail(principal.getName());
-        person.setIsBlocked(2);
-        person.setLastOnlineTime(LocalDateTime.now());
-        personRepository.save(person);
-        SecurityContextHolder.clearContext();
-        return getAccountResponse();
+        public DataResponse<MessageOkContent> deletePerson(Principal principal) {
+            Person person = findPersonByEmail(principal.getName())
+                    .setIsBlocked(2)
+                    .setLastOnlineTime(LocalDateTime.now());
+            personRepository.save(person);
+            SecurityContextHolder.clearContext();
+            return getMessageOkResponse();
+        }
     }
-}
