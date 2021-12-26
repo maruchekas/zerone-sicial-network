@@ -1,6 +1,7 @@
 package com.skillbox.javapro21.service.serviceImpl;
 
 import com.skillbox.javapro21.api.response.ListDataResponse;
+import com.skillbox.javapro21.domain.Person;
 import com.skillbox.javapro21.domain.Post;
 import com.skillbox.javapro21.repository.PersonRepository;
 import com.skillbox.javapro21.repository.PostRepository;
@@ -29,12 +30,19 @@ public class PostServiceImpl extends AbstractMethodClass implements PostService 
         this.postRepository = postRepository;
     }
 
-    public ListDataResponse<?> getPosts(String text, long dateFrom, long dateTo, int offset, int itemPerPage, Principal principal) {
-        Pageable pageable = PageRequest.of(offset / itemPerPage, itemPerPage);
+    public ListDataResponse<?> getPosts(String text, long dateFrom, long dateTo, int offset, int itemPerPage, String author, String tag, Principal principal) {
+        Person person = findPersonByEmail(principal.getName());
         LocalDateTime datetimeFrom = (dateFrom == -1) ? LocalDateTime.from(Instant.now()) : LocalDateTime.from(Instant.ofEpochMilli(dateFrom));
         LocalDateTime datetimeTo = (dateTo == -1) ? LocalDateTime.from(Instant.now()) : LocalDateTime.from(Instant.ofEpochMilli(dateTo));
-        Page<Post> pageablePostList = postRepository.findPostsByTextContainingByDateExcludingBlockers(text, datetimeFrom, datetimeTo, pageable);
-        return getPostsResponse(offset, itemPerPage, pageablePostList, principal);
+        List<Integer> blockers = personRepository.findBlockersId(person.getId());
+        Pageable pageable = PageRequest.of(offset / itemPerPage, itemPerPage);
+        if (tag.equals("")) {
+
+        }
+
+//        Page<Post> pageablePostList = postRepository.findPostsByTextContainingByDateExcludingBlockers(text, datetimeFrom, datetimeTo, author, tag, pageable);
+//        return getPostsResponse(offset, itemPerPage, pageablePostList, principal);
+        return null;
     }
 
     private ListDataResponse<?> getPostsResponse(int offset, int itemPerPage, Page<Post> pageablePostList, Principal principal) {
@@ -70,5 +78,4 @@ public class PostServiceImpl extends AbstractMethodClass implements PostService 
                 .setTags(null);
         return post;
     }
-
 }

@@ -1,6 +1,7 @@
 package com.skillbox.javapro21.config.security;
 
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,6 +18,7 @@ import java.io.IOException;
 
 import static org.springframework.util.StringUtils.hasText;
 
+@Slf4j
 @Component
 public class JwtFilter extends GenericFilterBean {
     public static final String AUTH_KEY = "Authorization";
@@ -37,6 +39,7 @@ public class JwtFilter extends GenericFilterBean {
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws ServletException, IOException {
         String token = getTokenFromHttpServletRequest((HttpServletRequest) servletRequest);
+        log.info(token);
         if (token != null && jwtGenerator.validateToken(token)) {
             String userLogin = jwtGenerator.getLoginFromToken(token);
             UserDetails userDetails = userDetailServiceImpl.loadUserByUsername(userLogin);

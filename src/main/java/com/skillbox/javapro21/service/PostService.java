@@ -7,5 +7,5 @@ import java.security.Principal;
 
 @Service
 public interface PostService {
-    ListDataResponse<?> getPosts(String text, long dateFrom, long dateTo, int offset, int itemPerPage, Principal principal);
+    ListDataResponse<?> getPosts(String text, long dateFrom, long dateTo, int offset, int itemPerPage, String author, String tag, Principal principal);
 }

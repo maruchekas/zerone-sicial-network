@@ -5,6 +5,7 @@ import com.skillbox.javapro21.api.request.auth.AuthRequest;
 import com.skillbox.javapro21.config.security.JwtGenerator;
 import com.skillbox.javapro21.domain.Person;
 import com.skillbox.javapro21.repository.PersonRepository;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,5 +83,10 @@ public class AuthControllerTest extends AbstractTest {
                 .andExpect(MockMvcResultMatchers.status().isBadRequest());
     }
 
-
+    @Test
+    void testToken() {
+        String bec = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJicml6Lnp1a2tlbEBnbWFpbC5jb20iLCJleHAiOjE2NDEzMzAwMDB9.S4k0Q26X3iV7AJdqMbJgtAws3NpgM-4_kyAf3m9kyPJMY2OHLQcTZHGoEgdhnRKDFCQW215bcGcd8upXvZ_ulg";
+        String front = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJicml6Lnp1a2tlbEBnbWFpbC5jb20iLCJleHAiOjE2NDEzMzAwMDB9.S4k0Q26X3iV7AJdqMbJgtAws3NpgM-4_kyAf3m9kyPJMY2OHLQcTZHGoEgdhnRKDFCQW215bcGcd8upXvZ_ulg";
+        Assertions.assertEquals(bec, front);
+    }
 }
