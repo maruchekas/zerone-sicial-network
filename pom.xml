@@ -58,11 +58,6 @@
 			<artifactId>spring-boot-starter-mail</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.mailjet</groupId>
-			<artifactId>mailjet-client</artifactId>
-			<version>4.2.0</version>
-		</dependency>
-		<dependency>
 			<groupId>org.thymeleaf.extras</groupId>
 			<artifactId>thymeleaf-extras-springsecurity5</artifactId>
 		</dependency>
@@ -178,7 +173,15 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
 				<version>2.6.1</version>
 			</plugin>
-        </plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>16</source>
+					<target>16</target>
+				</configuration>
+			</plugin>
+		</plugins>
     </build>
 
 </project>

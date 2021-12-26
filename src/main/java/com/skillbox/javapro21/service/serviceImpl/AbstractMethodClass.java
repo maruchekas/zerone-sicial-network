@@ -3,6 +3,7 @@ package com.skillbox.javapro21.service.serviceImpl;
 import com.skillbox.javapro21.api.response.DataResponse;
 import com.skillbox.javapro21.api.response.MessageOkContent;
 import com.skillbox.javapro21.domain.Person;
+import com.skillbox.javapro21.exception.PersonNotFoundException;
 import com.skillbox.javapro21.repository.PersonRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -26,6 +27,13 @@ public abstract class AbstractMethodClass {
     }
 
     /**
+     * поиск пользователя по id, если не найден выбрасывает ошибку
+     */
+    public Person findPersonById(long id) throws PersonNotFoundException {
+        return personRepository.findById(id).orElseThrow(() -> new PersonNotFoundException());
+    }
+
+    /**
      * используется для ответа 200 "message: ok"
      */
     public DataResponse<MessageOkContent> getMessageOkResponse() {
@@ -45,7 +53,6 @@ public abstract class AbstractMethodClass {
                 .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
                 .toString();
     }
-
 
     /**
      * заблокирован поьзователь или нет ?

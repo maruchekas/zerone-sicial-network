@@ -3,7 +3,6 @@ package com.skillbox.javapro21.service.serviceImpl;
 import com.skillbox.javapro21.api.request.profile.PostRequest;
 import com.skillbox.javapro21.api.response.DataResponse;
 import com.skillbox.javapro21.api.response.ListDataResponse;
-import com.skillbox.javapro21.api.response.MessageOkContent;
 import com.skillbox.javapro21.api.response.profile.PersonContent;
 import com.skillbox.javapro21.api.response.profile.PostContent;
 import com.skillbox.javapro21.domain.Person;
@@ -14,35 +13,26 @@ import com.skillbox.javapro21.repository.PostRepository;
 import com.skillbox.javapro21.service.ProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+import java.security.Principal;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.skillbox.javapro21.api.response.DataResponse;
-import com.skillbox.javapro21.domain.Person;
-import com.skillbox.javapro21.repository.PersonRepository;
-import com.skillbox.javapro21.service.ProfileService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Component;
-
-import java.security.Principal;
-import java.time.LocalDateTime;
-
 @Component
-public class ProfileServiceImpl extends AbstractMethodClass implements ProfileService.ProfileService {
-
-    private final PostRepository postRepository;
+public class ProfileServiceImpl extends AbstractMethodClass implements ProfileService {
     private final PersonRepository personRepository;
+    private final PostRepository postRepository;
 
     @Autowired
-    protected ProfileServiceImpl(PersonRepository personRepository) {
+    protected ProfileServiceImpl(PostRepository postRepository, PersonRepository personRepository) {
         super(personRepository);
         this.personRepository = personRepository;
+        this.postRepository = postRepository;
     }
 
     public List<PostContent> getPersonPosts(long id) {
@@ -78,7 +68,11 @@ public class ProfileServiceImpl extends AbstractMethodClass implements ProfileSe
         return dataResponse;
     }
 
-    public ListDataResponse getWall(long id, int offset, int itemPerPage) {
+    public ListDataResponse getWall(long id, int offset, int itemPerPage) throws PersonNotFoundException {
+        if (!personRepository.existsById(id)) {
+            throw new PersonNotFoundException();
+        }
+
         ListDataResponse<PostContent> listDataResponse = new ListDataResponse<>();
         List<PostContent> personContentList = getPersonPosts(id);
 
@@ -98,15 +92,14 @@ public class ProfileServiceImpl extends AbstractMethodClass implements ProfileSe
         post.setIsBlocked(0);
         post.setAuthor(person);
         return post;
-
-
-
-        public DataResponse<MessageOkContent> deletePerson(Principal principal) {
-            Person person = findPersonByEmail(principal.getName())
-                    .setIsBlocked(2)
-                    .setLastOnlineTime(LocalDateTime.now());
-            personRepository.save(person);
-            SecurityContextHolder.clearContext();
-            return getMessageOkResponse();
-        }
     }
+
+    public DataResponse deletePerson(Principal principal) {
+        Person person = findPersonByEmail(principal.getName());
+        person.setIsBlocked(2);
+        person.setLastOnlineTime(LocalDateTime.now());
+        personRepository.save(person);
+        SecurityContextHolder.clearContext();
+        return getMessageOkResponse();
+    }
+}
