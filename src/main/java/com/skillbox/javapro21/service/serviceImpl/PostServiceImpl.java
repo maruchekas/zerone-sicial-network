@@ -48,9 +48,6 @@ public class PostServiceImpl extends AbstractMethodClass implements PostService 
             pageablePostList = postRepository.findPostsByTextByAuthorWithoutTagsContainingByDateExcludingBlockers(text, datetimeFrom, datetimeTo, author, pageable);
         } else {
             List<Long> tags = getTags(tag);
-            log.info(getTags(tag).get(0).toString());
-            log.info(getTags(tag).get(1).toString());
-            log.info(getTags(tag).get(2).toString());
             pageablePostList = postRepository.findPostsByTextByAuthorByTagsContainingByDateExcludingBlockers(text, datetimeFrom, datetimeTo, author, tags, pageable);
         }
         return getPostsResponse(offset, itemPerPage, pageablePostList);
