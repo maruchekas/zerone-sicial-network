@@ -3,13 +3,11 @@ package com.skillbox.javapro21.service.serviceImpl;
 import com.skillbox.javapro21.api.response.DataResponse;
 import com.skillbox.javapro21.api.response.MessageOkContent;
 import com.skillbox.javapro21.api.request.profile.EditProfileRequest;
-import com.skillbox.javapro21.api.response.DataResponse;
-import com.skillbox.javapro21.api.response.profile.EditProfileResponse;
+import com.skillbox.javapro21.api.response.account.AuthData;
 import com.skillbox.javapro21.domain.Person;
 import com.skillbox.javapro21.repository.PersonRepository;
 import com.skillbox.javapro21.service.ProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
@@ -26,21 +24,21 @@ public class ProfileServiceImpl extends AbstractMethodClass implements ProfileSe
         this.personRepository = personRepository;
     }
 
-    public DataResponse<EditProfileResponse> getPerson(Principal principal) {
+    public DataResponse<AuthData> getPerson(Principal principal) {
         Person person = findPersonByEmail(principal.getName());
         return getDataResponse(person);
     }
 
-    public DataResponse<EditProfileResponse> editPerson(Principal principal, EditProfileRequest editProfileRequest) {
+    public DataResponse<AuthData> editPerson(Principal principal, EditProfileRequest editProfileRequest) {
         Person person = editPerson(editProfileRequest);
         return getDataResponse(person);
     }
 
-    private DataResponse<Person> getDataResponse(Person person) {
-        return new DataResponse<Person>()
+    private DataResponse<AuthData> getDataResponse(Person person) {
+        return new DataResponse<AuthData>()
                 .setTimestamp(LocalDateTime.now())
                 .setError("string")
-                .setData(person);
+                .setData(getAuthData(person, null));
     }
 
     private Person editPerson(EditProfileRequest editProfileRequest) {
@@ -61,8 +59,7 @@ public class ProfileServiceImpl extends AbstractMethodClass implements ProfileSe
 
     public DataResponse<MessageOkContent> deletePerson(Principal principal) {
         Person person = findPersonByEmail(principal.getName())
-                .setIsBlocked(2)
-                .setLastOnlineTime(LocalDateTime.now());
+                .setIsBlocked(2);
         personRepository.save(person);
         SecurityContextHolder.clearContext();
         return getMessageOkResponse();
