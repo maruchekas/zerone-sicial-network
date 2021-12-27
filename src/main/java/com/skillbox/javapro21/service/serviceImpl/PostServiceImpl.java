@@ -19,9 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import java.security.Principal;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -47,12 +45,15 @@ public class PostServiceImpl extends AbstractMethodClass implements PostService 
         Person person = findPersonByEmail(principal.getName());
 
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        String datetimeFromInstant = (dateFrom == -1) ? Arrays.stream(Instant.now().toString().split("T")).toList().get(0)
-                : Arrays.stream(Instant.ofEpochMilli(dateFrom/1000).toString().split("T")).toList().get(0);
-        String datetimeToInstant = (dateTo == -1) ? Arrays.stream(Instant.now().toString().split("T")).toList().get(0)
-                : Arrays.stream(Instant.ofEpochMilli(dateTo/1000).toString().split("T")).toList().get(0);
-        var datetimeFrom = LocalDate.parse(datetimeFromInstant, dtf);
-        var datetimeTo = LocalDate.parse(datetimeToInstant, dtf);
+        log.info(String.valueOf(dateFrom));
+        String datetimeFromInstant = (dateFrom == -1) ? Arrays.stream(Instant.ofEpochMilli(dateFrom/1000).toString().split("T")).toList().get(0)
+                : Arrays.stream(ZonedDateTime.now().minusYears(1).toInstant().toString().split("T")).toList().get(0);
+        log.info(datetimeFromInstant);
+        String datetimeToInstant = (dateTo == -1) ? Arrays.stream(Instant.ofEpochMilli(dateTo/1000).toString().split("T")).toList().get(0)
+                : Arrays.stream(Instant.now().toString().split("T")).toList().get(0);
+        LocalDateTime datetimeFrom = LocalDateTime.from(LocalDate.parse(datetimeFromInstant, dtf).atStartOfDay(ZoneId.systemDefault()));
+        LocalDateTime datetimeTo = LocalDateTime.from(LocalDate.parse(datetimeToInstant, dtf).atStartOfDay(ZoneId.systemDefault()));
+        log.info(String.valueOf(datetimeFrom));
 
         List<Long> blockers = personRepository.findBlockersId(person.getId());
         Pageable pageable = PageRequest.of(offset / itemPerPage, itemPerPage);

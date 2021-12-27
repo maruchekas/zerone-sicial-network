@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -22,8 +22,8 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
             "and (p.postText like '%'||:text||'%' or p.title like '%'||:text||'%') and :text != '' " +
             "group by p.id " +
             "order by p.time desc")
-    Page<Post> findPostsByTextContainingByDateExcludingBlockers(String text, LocalDate dateFrom,
-                                                                LocalDate dateTo, String author,
+    Page<Post> findPostsByTextContainingByDateExcludingBlockers(String text, LocalDateTime dateFrom,
+                                                                LocalDateTime dateTo, String author,
                                                                 List<Long> tags, Pageable pageable);
 
     @Query("select p from Post p " +
@@ -35,7 +35,7 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
             "and ( ( p.author.firstName like :author||'%' or p.author.lastName like :author||'%' ) and :author != '' ) " +
             "group by p.id " +
             "order by p.time desc")
-    Page<Post> findPostsByTextContainingByDateExcludingBlockersWithoutTags(String text, LocalDate datetimeFrom,
-                                                                           LocalDate datetimeTo, String author,
+    Page<Post> findPostsByTextContainingByDateExcludingBlockersWithoutTags(String text, LocalDateTime datetimeFrom,
+                                                                           LocalDateTime datetimeTo, String author,
                                                                            List<Long> blockers, Pageable pageable);
 }
