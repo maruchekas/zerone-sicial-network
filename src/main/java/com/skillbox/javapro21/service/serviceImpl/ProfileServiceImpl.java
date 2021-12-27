@@ -2,6 +2,7 @@ package com.skillbox.javapro21.service.serviceImpl;
 
 import com.skillbox.javapro21.api.request.profile.EditProfileRequest;
 import com.skillbox.javapro21.api.response.DataResponse;
+import com.skillbox.javapro21.api.response.profile.EditProfileResponse;
 import com.skillbox.javapro21.domain.Person;
 import com.skillbox.javapro21.repository.PersonRepository;
 import com.skillbox.javapro21.service.ProfileService;
@@ -22,12 +23,12 @@ public class ProfileServiceImpl extends AbstractMethodClass implements ProfileSe
         this.personRepository = personRepository;
     }
 
-    public DataResponse<Person> getPerson(Principal principal) {
+    public DataResponse<EditProfileResponse> getPerson(Principal principal) {
         Person person = findPersonByEmail(principal.getName());
         return getDataResponse(person);
     }
 
-    public DataResponse<Person> editPerson(Principal principal, EditProfileRequest editProfileRequest) {
+    public DataResponse<EditProfileResponse> editPerson(Principal principal, EditProfileRequest editProfileRequest) {
         Person person = editPerson(editProfileRequest);
         return getDataResponse(person);
     }

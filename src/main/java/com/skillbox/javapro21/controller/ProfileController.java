@@ -2,6 +2,7 @@ package com.skillbox.javapro21.controller;
 
 import com.skillbox.javapro21.api.response.*;
 import com.skillbox.javapro21.api.request.profile.*;
+import com.skillbox.javapro21.api.response.profile.EditProfileResponse;
 import com.skillbox.javapro21.domain.Person;
 import com.skillbox.javapro21.service.ProfileService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -31,14 +32,14 @@ public class ProfileController {
     @Operation(summary = "Получить текущего пользователя", security = @SecurityRequirement(name = "jwt"))
     @GetMapping("/me")
     @PreAuthorize("hasAuthority('user:write')")
-    public ResponseEntity<DataResponse<Person>> getPerson(Principal principal) {
+    public ResponseEntity<DataResponse<EditProfileResponse>> getPerson(Principal principal) {
         return new ResponseEntity<>(profileService.getPerson(principal), HttpStatus.OK);
     }
 
     @Operation(summary = "Редактирование текущего пользователя", security = @SecurityRequirement(name = "jwt"))
     @PutMapping("/me")
     @PreAuthorize("hasAuthority('user:write')")
-    public ResponseEntity<DataResponse<Person>> editPerson(Principal principal, @RequestBody EditProfileRequest editProfileRequest) {
+    public ResponseEntity<DataResponse<EditProfileResponse>> editPerson(Principal principal, @RequestBody EditProfileRequest editProfileRequest) {
         return new ResponseEntity<>(profileService.editPerson(principal, editProfileRequest), HttpStatus.OK);
     }
 
