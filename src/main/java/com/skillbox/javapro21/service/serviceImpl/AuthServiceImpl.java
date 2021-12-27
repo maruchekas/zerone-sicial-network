@@ -16,6 +16,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -37,7 +38,7 @@ public class AuthServiceImpl extends AbstractMethodClass implements AuthService 
         if (findPersonByEmail(authRequest.getEmail()) == null){
             throw new UserLegalException("User with email " + authRequest.getEmail() + "not found");
         }
-            Person person = findPersonByEmail(authRequest.getEmail());
+        Person person = findPersonByEmail(authRequest.getEmail());
         if (!isPersonLegal(person)) throw new UserLegalException(authRequest.getEmail());
 
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
