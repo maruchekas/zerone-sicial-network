@@ -6,7 +6,6 @@ import com.skillbox.javapro21.domain.Person;
 import com.skillbox.javapro21.repository.PersonRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.Random;
@@ -29,7 +28,7 @@ public abstract class AbstractMethodClass {
     /**
      * используется для ответа 200 "message: ok"
      */
-    public DataResponse<MessageOkContent> getAccountResponse() {
+    public DataResponse<MessageOkContent> getMessageOkResponse() {
         DataResponse<MessageOkContent> dataResponse = new DataResponse<>();
         dataResponse.setTimestamp(LocalDateTime.now());
         MessageOkContent accountData = new MessageOkContent();
@@ -46,4 +45,13 @@ public abstract class AbstractMethodClass {
                 .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
                 .toString();
     }
+
+
+    /**
+     * заблокирован поьзователь или нет ?
+     */
+    public String isBlockedPerson(Person person){
+        return person.getIsBlocked() == 0 ? "false" : "true";
+    }
+
 }

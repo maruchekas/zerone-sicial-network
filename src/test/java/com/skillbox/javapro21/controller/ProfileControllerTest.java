@@ -11,8 +11,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -22,7 +20,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import javax.script.ScriptContext;
 import java.time.LocalDateTime;
 
 @SpringBootTest
@@ -73,31 +70,13 @@ public class ProfileControllerTest extends AbstractTest {
         Assertions.assertEquals(verifyPerson.getEmail(), "test@test.ru");
 
         mockMvc.perform(MockMvcRequestBuilders
-                .delete("/api/v1/users/me")
-                .principal(() -> "test@test.ru"))
+                        .delete("/api/v1/users/me")
+                        .principal(() -> "test@test.ru"))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk());
 
         Assertions.assertNotEquals("Пользователь не удален", verifyPerson.getEmail(), "test@test.ru");
-    }
-
-
-    @Test
-    @WithMockUser(username = "test@test.ru", authorities = "user:write")
-    void getPerson() throws Exception {
-        Person person = new Person()
-                .setFirstName("Dmitriy")
-                .setLastName("Sushkov")
-                .setEmail("kkki@test.ru");
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        Assertions.assertEquals(verifyPerson.getEmail(), email);
-
-        mockMvc.perform(MockMvcRequestBuilders
-                .get("/api/v1/users/me")
-                .principal(() -> "test@test.ru"))
-                .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.status().isOk())
-        .andExpect(MockMvcResultMatchers.jsonPath("$.error").value("string"));
-
+        Assertions.assertEquals(LocalDateTime.now().getDayOfMonth(),
+                personRepository.findByEmail(verifyPerson.getEmail()).get().getLastOnlineTime().getDayOfMonth());
     }
 }

@@ -1,7 +1,6 @@
 package com.skillbox.javapro21.service.serviceImpl;
 
 import com.mailjet.client.errors.MailjetException;
-import com.mailjet.client.errors.MailjetSocketTimeoutException;
 import com.skillbox.javapro21.api.request.account.*;
 import com.skillbox.javapro21.api.response.DataResponse;
 import com.skillbox.javapro21.api.response.ListDataResponse;
@@ -20,6 +19,7 @@ import com.skillbox.javapro21.exception.UserExistException;
 import com.skillbox.javapro21.repository.NotificationTypeRepository;
 import com.skillbox.javapro21.repository.PersonRepository;
 import com.skillbox.javapro21.service.AccountService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,8 +27,10 @@ import org.springframework.stereotype.Component;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
+@Slf4j
 @Component
 public class AccountServiceImpl extends AbstractMethodClass implements AccountService {
     private final PersonRepository personRepository;
@@ -48,11 +50,11 @@ public class AccountServiceImpl extends AbstractMethodClass implements AccountSe
     }
 
     //Todo: нужна ли проверка каптчи?
-    public DataResponse<MessageOkContent> registration(RegisterRequest registerRequest) throws UserExistException, MailjetSocketTimeoutException, MailjetException {
+    public DataResponse<MessageOkContent> registration(RegisterRequest registerRequest) throws UserExistException, MailjetException {
         if (personRepository.findByEmail(registerRequest.getEmail()).isPresent()) throw new UserExistException();
         createNewPerson(registerRequest);
         mailMessageForRegistration(registerRequest);
-        return getAccountResponse();
+        return getMessageOkResponse();
     }
 
     public String verifyRegistration(String email, String code) throws TokenConfirmationException {
@@ -67,14 +69,14 @@ public class AccountServiceImpl extends AbstractMethodClass implements AccountSe
         return "Пользователь подтвержден";
     }
 
-    public String recoveryPasswordMessage(RecoveryRequest recoveryRequest) throws MailjetSocketTimeoutException, MailjetException {
+    public String recoveryPasswordMessage(RecoveryRequest recoveryRequest) throws MailjetException {
         String token = getToken();
         String text = confirmationUrl.getUrlForPasswordComplete() + "?email=" + recoveryRequest.getEmail() + "&code=" + token;
         confirmPersonAndSendEmail(recoveryRequest.getEmail(), text, token);
         return "Ссылка отправлена на почту";
     }
 
-    private void mailMessageForRegistration(RegisterRequest registerRequest) throws MailjetSocketTimeoutException, MailjetException {
+    private void mailMessageForRegistration(RegisterRequest registerRequest) throws MailjetException {
         String token = getToken();
         String text = confirmationUrl.getUrlForRegisterComplete() + "?email=" + registerRequest.getEmail() + "&code=" + token;
         confirmPersonAndSendEmail(registerRequest.getEmail(), text, token);
@@ -99,13 +101,13 @@ public class AccountServiceImpl extends AbstractMethodClass implements AccountSe
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
         person.setPassword(passwordEncoder.encode(changePasswordRequest.getPassword()));
         personRepository.save(person);
-        return getAccountResponse();
+        return getMessageOkResponse();
     }
 
     public DataResponse<MessageOkContent> changeEmail(ChangeEmailRequest changeEmailRequest, Principal principal) {
         Person person = findPersonByEmail(principal.getName());
         person.setEmail(changeEmailRequest.getEmail());
-        return getAccountResponse();
+        return getMessageOkResponse();
     }
 
     public DataResponse<MessageOkContent> changeNotifications(ChangeNotificationsRequest changeNotificationsRequest, Principal principal) {
@@ -125,7 +127,7 @@ public class AccountServiceImpl extends AbstractMethodClass implements AccountSe
             case MESSAGE -> notificationType.setMessage(changeNotificationsRequest.isEnable());
         }
         notificationTypeRepository.save(notificationType);
-        return getAccountResponse();
+        return getMessageOkResponse();
     }
 
     public ListDataResponse<NotificationSettingData> getNotifications(Principal principal) {
@@ -165,11 +167,13 @@ public class AccountServiceImpl extends AbstractMethodClass implements AccountSe
     /**
      * Отправка на почту письма с токеном
      */
-    private void confirmPersonAndSendEmail(String email, String text, String token) throws MailjetSocketTimeoutException, MailjetException {
+    private void confirmPersonAndSendEmail(String email, String text, String token) throws MailjetException {
         Person person = findPersonByEmail(email);
         person.setConfirmationCode(token);
         personRepository.save(person);
         mailMessage.send(email, text);
+        log.info(String.valueOf(email));
+        log.info(String.valueOf(text));
     }
 
     /**

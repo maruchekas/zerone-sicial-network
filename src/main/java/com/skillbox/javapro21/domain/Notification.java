@@ -1,7 +1,13 @@
 package com.skillbox.javapro21.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.skillbox.javapro21.api.response.Content;
 import lombok.*;
+import lombok.experimental.Accessors;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -11,6 +17,7 @@ import java.time.LocalDateTime;
 @Setter
 @Getter
 @Entity
+@Accessors(chain = true)
 @Table(name = "notifications")
 public class Notification {
 

@@ -1,12 +1,13 @@
 package com.skillbox.javapro21.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.skillbox.javapro21.api.response.Content;
 import lombok.*;
+import lombok.experimental.Accessors;
 import org.hibernate.Hibernate;
 
 import javax.persistence.*;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -15,8 +16,9 @@ import java.util.Set;
 @Setter
 @Getter
 @Entity
+@Accessors(chain = true)
 @Table(name = "tags")
-public class Tag {
+public class Tag implements Content {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
