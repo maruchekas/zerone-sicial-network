@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -18,7 +19,7 @@ public class NotificationsController {
 
     @Operation(summary = "Получить список уведомлений для текущего пользователя")
     @GetMapping("")
-//    @PreAuthorize("hasAuthority('user:write')")
+    @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<String> getNotifications(@RequestParam(name = "offset", defaultValue = "0") int offset,
                                                    @RequestParam(name = "item_per_page", defaultValue = "20") int itemPerPage,
                                                    Principal principal) {
@@ -28,7 +29,7 @@ public class NotificationsController {
 
     @Operation(summary = "Отметить уведомление как \"прочитанное\"")
     @PutMapping("")
-//    @PreAuthorize("hasAuthority('user:write')")
+    @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<String> verifyRegistration(@RequestParam int id,
                                                      @RequestParam boolean all,
                                                      Principal principal) {

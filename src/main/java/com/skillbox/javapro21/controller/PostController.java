@@ -19,7 +19,7 @@ import java.security.Principal;
 @Slf4j
 @RestController
 @Tag(name = "Контроллер для работы с постами")
-@RequestMapping("/api/v1/post")
+@RequestMapping("/api/v1")
 public class PostController {
     private final PostService postService;
 
@@ -29,14 +29,16 @@ public class PostController {
     }
 
     @Operation(summary = "Поиск публикации")
-    @GetMapping("/")
+    @GetMapping("/post")
     @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<ListDataResponse<?>> getPosts(@RequestParam(name = "text", defaultValue = "") String text,
                                                            @RequestParam(name = "date_from", defaultValue = "-1") long dateFrom,
                                                            @RequestParam(name = "date_to", defaultValue = "-1") long dateTo,
                                                            @RequestParam(name = "offset", defaultValue = "0") int offset,
                                                            @RequestParam(name = "item_per_page", defaultValue = "20") int itemPerPage,
+                                                           @RequestParam(name = "author", defaultValue = "") String author,
+                                                           @RequestParam(name = "tag", defaultValue = "") String tag,
                                                            Principal principal) {
-        return new ResponseEntity<>(postService.getPosts(text, dateFrom, dateTo, offset, itemPerPage, principal), HttpStatus.OK);
+        return new ResponseEntity<>(postService.getPosts(text, dateFrom, dateTo, offset, itemPerPage, author, tag, principal), HttpStatus.OK);
     }
 }

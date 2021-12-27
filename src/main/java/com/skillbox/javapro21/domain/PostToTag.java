@@ -14,8 +14,7 @@ import javax.persistence.*;
 @Entity
 @Accessors(chain = true)
 @Table(name = "post2tag")
-public class PostToTag implements Content {
-
+public class PostToTag {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")

@@ -18,7 +18,7 @@ import java.util.Objects;
 @Entity
 @Accessors(chain = true)
 @Table(name = "post_comments")
-public class PostComment implements Content {
+public class PostComment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

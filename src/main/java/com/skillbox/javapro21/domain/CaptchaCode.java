@@ -11,7 +11,7 @@ import java.sql.Timestamp;
 @Entity
 @Accessors(chain = true)
 @Table(name = "captcha_codes")
-public class CaptchaCode implements Content {
+public class CaptchaCode {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;

@@ -51,7 +51,7 @@ public class AccountServiceImpl extends AbstractMethodClass implements AccountSe
 
     //Todo: нужна ли проверка каптчи?
     public DataResponse<MessageOkContent> registration(RegisterRequest registerRequest) throws UserExistException, MailjetException {
-        if (personRepository.findByEmail(registerRequest.getEmail()).isPresent()) throw new UserExistException();
+        if (personRepository.findByEmail(registerRequest.getEmail()).isPresent()) throw new UserExistException("Пользователь с таким логином существует");
         createNewPerson(registerRequest);
         mailMessageForRegistration(registerRequest);
         return getMessageOkResponse();
@@ -65,7 +65,7 @@ public class AccountServiceImpl extends AbstractMethodClass implements AccountSe
                     .setMessagesPermission(MessagesPermission.ALL)
                     .setConfirmationCode("");
             personRepository.save(person);
-        } else throw new TokenConfirmationException();
+        } else throw new TokenConfirmationException("Не верный confirmation code");
         return "Пользователь подтвержден";
     }
 
@@ -86,7 +86,7 @@ public class AccountServiceImpl extends AbstractMethodClass implements AccountSe
         Person person = findPersonByEmail(email);
         if (person.getConfirmationCode().equals(code)) {
             return "Пользователь может приступить к изменению пароля";
-        } else throw new TokenConfirmationException();
+        } else throw new TokenConfirmationException("Не верный confirmation code");
     }
 
     public String recoveryPassword(String email, String password) {

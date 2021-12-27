@@ -2,6 +2,7 @@ package com.skillbox.javapro21.controller;
 
 import com.skillbox.javapro21.api.request.profile.PostRequest;
 import com.skillbox.javapro21.api.response.DataResponse;
+import com.skillbox.javapro21.api.response.MessageOkContent;
 import com.skillbox.javapro21.exception.PersonNotFoundException;
 import com.skillbox.javapro21.service.ProfileService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,6 +30,27 @@ public class ProfileController {
         this.profileService = profileService;
     }
 
+    @Operation(summary = "Получить текущего пользователя", security = @SecurityRequirement(name = "jwt"))
+    @GetMapping("/me")
+    @PreAuthorize("hasAuthority('user:write')")
+    public ResponseEntity<DataResponse<AuthData>> getPerson(Principal principal) {
+        return new ResponseEntity<>(profileService.getPerson(principal), HttpStatus.OK);
+    }
+
+    @Operation(summary = "Редактирование текущего пользователя", security = @SecurityRequirement(name = "jwt"))
+    @PutMapping("/me")
+    @PreAuthorize("hasAuthority('user:write')")
+    public ResponseEntity<DataResponse<AuthData>> editPerson(Principal principal, @RequestBody EditProfileRequest editProfileRequest) {
+        return new ResponseEntity<>(profileService.editPerson(principal, editProfileRequest), HttpStatus.OK);
+    }
+
+    @Operation(summary = "Удаление пользователем его аккаунта", security = @SecurityRequirement(name = "jwt"))
+    @DeleteMapping("/me")
+    @PreAuthorize("hasAuthority('user:write')")
+    public ResponseEntity<DataResponse<MessageOkContent>> deletePerson(Principal principal) {
+        return new ResponseEntity<>(profileService.deletePerson(principal), HttpStatus.OK);
+    }
+
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<DataResponse> getUser(@PathVariable long id) throws PersonNotFoundException {
@@ -44,15 +66,9 @@ public class ProfileController {
 
     @GetMapping("/{id}/wall")
     public ResponseEntity getWall(@PathVariable long id,
-                                    @RequestParam int offset,
-                                    @RequestParam int itemPerPage) throws PersonNotFoundException {
+                                  @RequestParam int offset,
+                                  @RequestParam int itemPerPage) throws PersonNotFoundException {
         return new ResponseEntity<>(profileService.getWall(id, offset, itemPerPage), HttpStatus.OK);
     }
 
-    @Operation(summary = "Удаление пользователем его аккаунта", security = @SecurityRequirement(name = "jwt"))
-    @DeleteMapping("/me")
-    @PreAuthorize("hasAuthority('user:write')")
-    public ResponseEntity<DataResponse> deletePerson(Principal principal) {
-        return new ResponseEntity<>(profileService.deletePerson(principal), HttpStatus.OK);
-    }
 }
