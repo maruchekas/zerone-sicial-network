@@ -2,7 +2,6 @@ package com.skillbox.javapro21.service.serviceImpl;
 
 import com.skillbox.javapro21.api.response.ListDataResponse;
 import com.skillbox.javapro21.api.response.post.PostData;
-import com.skillbox.javapro21.domain.Person;
 import com.skillbox.javapro21.domain.Post;
 import com.skillbox.javapro21.domain.PostLike;
 import com.skillbox.javapro21.domain.Tag;
@@ -20,7 +19,6 @@ import org.springframework.stereotype.Component;
 
 import java.security.Principal;
 import java.time.*;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -42,31 +40,18 @@ public class PostServiceImpl extends AbstractMethodClass implements PostService 
     }
 
     public ListDataResponse<PostData> getPosts(String text, long dateFrom, long dateTo, int offset, int itemPerPage, String author, String tag, Principal principal) {
-        Person person = findPersonByEmail(principal.getName());
-
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        log.info(String.valueOf(dateFrom));
-        String datetimeFromInstant = (dateFrom == -1) ? Arrays.stream(Instant.ofEpochMilli(dateFrom/1000).toString().split("T")).toList().get(0)
-                : Arrays.stream(ZonedDateTime.now().minusYears(1).toInstant().toString().split("T")).toList().get(0);
-        log.info(datetimeFromInstant);
-        String datetimeToInstant = (dateTo == -1) ? Arrays.stream(Instant.ofEpochMilli(dateTo/1000).toString().split("T")).toList().get(0)
-                : Arrays.stream(Instant.now().toString().split("T")).toList().get(0);
-        LocalDateTime datetimeFrom = LocalDateTime.from(LocalDate.parse(datetimeFromInstant, dtf).atStartOfDay(ZoneId.systemDefault()));
-        LocalDateTime datetimeTo = LocalDateTime.from(LocalDate.parse(datetimeToInstant, dtf).atStartOfDay(ZoneId.systemDefault()));
-        log.info(String.valueOf(datetimeFrom));
-
-        List<Long> blockers = personRepository.findBlockersId(person.getId());
+        LocalDateTime datetimeFrom = (dateFrom != -1) ? getLocalDateTime(dateFrom) : LocalDateTime.now().minusYears(1);
+        LocalDateTime datetimeTo = (dateTo != -1) ? getLocalDateTime(dateTo) : LocalDateTime.now();
         Pageable pageable = PageRequest.of(offset / itemPerPage, itemPerPage);
         Page<Post> pageablePostList;
         if (tag.equals("")) {
-            pageablePostList = postRepository.findPostsByTextContainingByDateExcludingBlockersWithoutTags(text, datetimeFrom, datetimeTo, author, blockers, pageable);
+            pageablePostList = postRepository.findPostsByTextByAuthorWithoutTagsContainingByDateExcludingBlockers(text, datetimeFrom, datetimeTo, author, pageable);
         } else {
-            List<Long> tags = Arrays.stream(tag.split(";"))
-                    .map(t -> tagRepository.findByTag(t).orElse(null))
-                    .filter(Objects::nonNull)
-                    .map(Tag::getId)
-                    .collect(Collectors.toList());
-            pageablePostList = postRepository.findPostsByTextContainingByDateExcludingBlockers(text, datetimeFrom, datetimeTo, author, tags, pageable);
+            List<Long> tags = getTags(tag);
+            log.info(getTags(tag).get(0).toString());
+            log.info(getTags(tag).get(1).toString());
+            log.info(getTags(tag).get(2).toString());
+            pageablePostList = postRepository.findPostsByTextByAuthorByTagsContainingByDateExcludingBlockers(text, datetimeFrom, datetimeTo, author, tags, pageable);
         }
         return getPostsResponse(offset, itemPerPage, pageablePostList);
     }
@@ -105,5 +90,13 @@ public class PostServiceImpl extends AbstractMethodClass implements PostService 
                 .setLikes(likes.size())
                 .setComments(null)
                 .setTags(collect);
+    }
+
+    private List<Long> getTags(String tag) {
+        return Arrays.stream(tag.split(";"))
+                .map(t -> tagRepository.findByTag(t).orElse(null))
+                .filter(Objects::nonNull)
+                .map(Tag::getId)
+                .collect(Collectors.toList());
     }
 }

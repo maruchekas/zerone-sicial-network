@@ -9,7 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.Map;
 import java.util.Random;
 
@@ -79,6 +82,16 @@ public abstract class AbstractMethodClass {
             authData.setCountry(Map.of("id", person.getId().toString(), "Country", person.getCountry()));
         }
         if (person.getBirthDate() != null) authData.setBirthDate(Timestamp.valueOf(person.getBirthDate()));
+
         return authData;
+    }
+
+    /**
+     * получение LocalDateTime из TimestampAccessor, который отдает фронт
+     */
+    public LocalDateTime getLocalDateTime(long dateWithTimestampAccessor) {
+        return LocalDateTime.parse(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+                        .format(new Date (dateWithTimestampAccessor)),
+                DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
     }
 }
