@@ -38,7 +38,7 @@ public class AuthServiceImpl extends AbstractMethodClass implements AuthService 
 
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
         if (!passwordEncoder.matches(authRequest.getPassword(), person.getPassword()))
-            throw new NotSuchUserOrWrongPasswordException("Не верный логин или пароль");
+            throw new NotSuchUserOrWrongPasswordException("Неверный логин или пароль");
 
         String token = jwtGenerator.generateToken(authRequest.getEmail());
         return getSuccessAuthResponse(person, token);

@@ -23,11 +23,11 @@ VALUES ('Сергей', 'Сергеев', '2021-07-30 23:30:03', '1995-08-15', '
         '$2a$12$FK1aIW0zSixz52kYMi262ufMOUs.fjSUpHs4nfQCC5gNTv7vmtLsW', 'https://robohash.org/officiaminimaalias.png?size=50x50&set=set1',
         'Если хочешь получить то, что никогда не имел, стань тем, кем никогда не был.', 'Саратов', 'Россия', '6589', 1,
         'FRIENDS', 'USER', '2021-12-12 02:32:50', 0),
-       ('Michail', 'Egre', '2021-11-11 13:18:00', '1985-09-06', 'megre2@sourceforge.net', '+62 (445) 581-2547',
-        '$2a$12$wKijLUqRzdUNMYn4XbKWjeLW74bTpyKpZQu8BR59TL3KkNXsjDRlu', 'https://robohash.org/quaeratplaceatomnis.png?size=50x50&set=set1', 'nascetur ridiculus',
-        'Janaka', 'Indonesia', '7003', 1, 'FRIENDS', 'USER', '2021-12-14 09:52:33', 0),
-       ('Trixi', 'Darrigoe', '2021-11-12 06:23:07', '1986-08-02', 'tdarrigoe3@census.gov', '+86 (175) 148-0904',
-        '$2a$12$oZjTp65BABzAQm248ItWX.lJs9/vBuqXNp8fdc.L506CMBFm7njPi', 'https://robohash.org/ullamsapienteet.png?size=50x50&set=set1', 'pellentesque ultrices mattis',
+       ('Масксим', 'Максимов', '2021-11-11 13:18:00', '1985-09-06', 'megre2@sourceforge.net', '+7 (995) 581-2547',
+        '$2a$12$wKijLUqRzdUNMYn4XbKWjeLW74bTpyKpZQu8BR59TL3KkNXsjDRlu', 'https://robohash.org/quaeratplaceatomnis.png?size=50x50&set=set1', 'Мир состоит не из черного и белого, а, скорее, из черного и серого.',
+        'Сызрань', 'Россия', '7003', 1, 'FRIENDS', 'USER', '2021-12-14 09:52:33', 0),
+       ('Юрий', 'Гагарин', '2021-11-12 06:23:07', '1986-08-02', 'tdarrigoe3@census.gov', '+7 (975) 148-0904',
+        '$2a$12$oZjTp65BABzAQm248ItWX.lJs9/vBuqXNp8fdc.L506CMBFm7njPi', 'https://robohash.org/ullamsapienteet.png?size=50x50&set=set1', 'Молодые гоняются за тем, что желают приобрести, а старики привязываются к тому, что боятся потерять.',
         'Henghe', 'China', '3426', 1, 'FRIENDS', 'USER', '2021-12-13 21:05:39', 0),
        ('Carolyn', 'Bangley', '2021-11-24 08:32:16', '1982-10-05', 'cbangley4@toplist.cz', '+261 (303) 198-4341',
         'fOpwQcEyBqy', 'https://robohash.org/molestiaecorruptiplaceat.png?size=50x50&set=set1', 'et eros vestibulum',
@@ -48,7 +48,7 @@ VALUES ('Сергей', 'Сергеев', '2021-07-30 23:30:03', '1995-08-15', '
         'cg5jZyMZaB', 'https://robohash.org/eosnumquamveritatis.png?size=50x50&set=set1',
         'adipiscing molestie hendrerit', 'Wolowona', 'Indonesia', '2453', 1, 'FRIENDS', 'USER', '2021-12-11 16:29:17', 0),
        ('Jaimie', 'Bentham', '2021-12-01 23:32:01', '1989-03-24', 'jbenthama@free.fr', '+1 (517) 228-3062',
-        'xckYQ33JqT', 'https://robohash.org/quasirecusandaevoluptatem.png?size=50x50&set=set1', 'pede justo',
+        '$2a$12$i2ypriukxO741yN1tuSaUOeN1HlGGj3Z.Of7fOe4/dbtepRO82qrq', 'https://robohash.org/quasirecusandaevoluptatem.png?size=50x50&set=set1', 'pede justo',
         'Innisfil', 'Canada', '4099', 0, 'FRIENDS', 'USER', '2021-12-09 22:04:41', 0),
        ('Ellynn', 'Ribeiro', '2021-07-07 22:05:50', '2004-07-20', 'eribeirob@nymag.com', '+86 (610) 697-9102', 'xLYhwi',
         'https://robohash.org/quiadoloribusvoluptate.png?size=50x50&set=set1', 'ut odio', 'Mishan', 'China', '6947', 1,
@@ -60,7 +60,7 @@ VALUES ('Сергей', 'Сергеев', '2021-07-30 23:30:03', '1995-08-15', '
         '+86 (324) 696-4541', 'rnQvTfh4', 'https://robohash.org/utassumendaaccusantium.png?size=50x50&set=set1',
         'aliquam lacus morbi', 'Yashiga', 'China', '8169', 0, 'ALL', 'USER', '2021-12-13 15:54:48', 0),
        ('Trevar', 'Kemet', '2021-03-30 10:20:21', '1999-11-22', 'tkemete@wunderground.com', '+62 (132) 167-3491',
-        'w6zPTF', 'https://robohash.org/voluptatemdoloremqueiste.png?size=50x50&set=set1', 'ut nunc vestibulum',
+        '$2a$12$vaQ/C1J95Qd2vqa5X53MuOYSXe50HuPXk8CatKNSNKY9.tcuNIs.S', 'https://robohash.org/voluptatemdoloremqueiste.png?size=50x50&set=set1', 'ut nunc vestibulum',
         'Mungging', 'Indonesia', '7553', 1, 'FRIENDS', 'USER', '2021-12-12 17:46:04', 1),
        ('Rudolf', 'Mackerness', '2021-11-07 07:35:42', '2002-12-17', 'rmackernessf@irs.gov', '+98 (856) 277-9907',
         'qLoWt8kZvL', 'https://robohash.org/optioaccusantiumin.png?size=50x50&set=set1', 'posuere cubilia', 'Bābolsar',
@@ -105,8 +105,9 @@ VALUES ('Сергей', 'Сергеев', '2021-07-30 23:30:03', '1995-08-15', '
         '$2a$12$YQtpyxkcONoSJzmyC3A/g.88ReF7yRkllh9CRJCxsR9PIfoCiyxDi', 'https://robohash.org/quisdolorqui.png?size=50x50&set=set1', 'ut dolor', 'Pasirmukti', 'Indonesia',
         '5750', 0, 'FRIENDS', 'USER', '2021-12-11 02:54:25', 0),
        ('Olav', 'Zuppa', '2020-12-09 21:51:45', '1988-03-12', 'ozuppat@washingtonpost.com', '+998 (164) 464-8160',
-        'aC8QVS6nRsB', 'https://robohash.org/sitrepudiandaealias.png?size=50x50&set=set1', 'aliquam non mauris',
-        'Namangan Shahri', '$2a$12$z0GGwhbxKCfPLjBSe6xOLOQjVx7H9YG8X.VjjfYhLUnUH2RbpDlDa', '4168', 0, 'ALL', 'USER', '2021-12-11 06:25:21', 0);
+        '$2a$12$0LWta8fivhb9/vYuM025reTLanYG5ggqQUnKi9/VSRWDaOM9j/SZu',
+        'https://robohash.org/sitrepudiandaealias.png?size=50x50&set=set1', 'aliquam non mauris',
+        'Namangan Shahri', 'Uzbekistan', '4168', 0, 'ALL', 'USER', '2021-12-11 06:25:21', 0);
 
 INSERT INTO tags (tag)
 VALUES ('котики'),
@@ -127,5 +128,10 @@ VALUES ('котики'),
        ('стрим'),
        ('люди');
 
-
+INSERT INTO persons (first_name, last_name, reg_date, birth_date, email, phone, password, photo, about, town, country,
+                     confirmation_code, is_approved, messages_permission, user_type, last_online_time, is_blocked)
+VALUES ('Юзер', 'Тестов', '2021-12-26 17:30:03', '1995-08-15', 'test@test.ru', '+7 (999) 111-0000', '$2a$12$KooSeqO4D9V/bDq/NYvrmO9n6OX8W0v1sAgJW8P47dE6al8OScIRK',
+        'https://robohash.org/velsaepeea.png?size=50x50&set=set1',
+        'Я тестовый пользователь. ', 'Москва', 'Россия',
+        '1111', 1, 'ALL', 'ADMIN', '2021-12-16 16:57:08', 0);
 

@@ -6,6 +6,7 @@ import com.skillbox.javapro21.config.security.JwtGenerator;
 import com.skillbox.javapro21.domain.Person;
 import com.skillbox.javapro21.repository.PersonRepository;
 import org.junit.jupiter.api.Assertions;
+import com.skillbox.javapro21.service.serviceImpl.AuthServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,8 @@ public class AuthControllerTest extends AbstractTest {
     @Autowired
     private PersonRepository personRepository;
     @Autowired
+    private AuthServiceImpl authService;
+    @Autowired
     private JwtGenerator jwtGenerator;
 
     private Person person;
@@ -39,11 +42,9 @@ public class AuthControllerTest extends AbstractTest {
     public void setup() {
         super.setup();
         String email = "test@test.ru";
-        String password = "$2a$12$0nJaevWNb/X4gdZg.xBR1OSsHSq.CpU49.F68OMz1yn3CTO5xbqZi";
+        String password = "111111111";
 
-        person = new Person()
-                .setEmail(email)
-                .setPassword(passwordEncoder.encode(password));
+        person = authService.findPersonByEmail(email);
 
     }
 
@@ -51,7 +52,7 @@ public class AuthControllerTest extends AbstractTest {
     public void loginTest() throws Exception {
         AuthRequest authRequest = new AuthRequest();
         authRequest.setEmail(person.getEmail());
-        authRequest.setPassword(person.getPassword());
+        authRequest.setPassword("111111111");
         mockMvc.perform(MockMvcRequestBuilders
                         .post("/api/v1/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -62,26 +63,35 @@ public class AuthControllerTest extends AbstractTest {
     }
 
     @Test
-    void correctPasswordTest() throws Exception {
+    public void incorrectPasswordLoginTest() throws Exception {
+        AuthRequest authRequest = new AuthRequest();
+        authRequest.setEmail(person.getEmail());
+        authRequest.setPassword("000000000");
+
         mockMvc.perform(MockMvcRequestBuilders
                         .post("/api/v1/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("email", "test@test.ru")
-                        .param("password", "123456"))
+                        .content(mapper.writeValueAsString(authRequest))
+                        .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.status().isOk());
+                .andExpect(MockMvcResultMatchers.status().is4xxClientError()).andReturn();
     }
 
     @Test
-    void incorrectPasswordTest() throws Exception {
+    public void incorrectEmailLoginTest() throws Exception {
+        AuthRequest authRequest = new AuthRequest();
+        authRequest.setEmail("test0@test.ru");
+        authRequest.setPassword("111111111");
+
         mockMvc.perform(MockMvcRequestBuilders
                         .post("/api/v1/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("email", "test@test.ru")
-                        .param("password", "1234567"))
+                        .content(mapper.writeValueAsString(authRequest))
+                        .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.status().isBadRequest());
+                .andExpect(MockMvcResultMatchers.status().is4xxClientError()).andReturn();
     }
+
 
     @Test
     void testToken() {
