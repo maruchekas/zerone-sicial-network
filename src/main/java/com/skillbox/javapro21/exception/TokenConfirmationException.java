@@ -1,4 +1,11 @@
 package com.skillbox.javapro21.exception;
 
-public class TokenConfirmationException extends Exception{
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
+
+@ResponseStatus(code = HttpStatus.BAD_REQUEST)
+public class TokenConfirmationException extends Exception {
+    public TokenConfirmationException(String message) {
+        super(message);
+    }
 }

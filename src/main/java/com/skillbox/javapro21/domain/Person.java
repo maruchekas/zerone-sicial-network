@@ -3,12 +3,17 @@ package com.skillbox.javapro21.domain;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.skillbox.javapro21.domain.enumeration.MessagesPermission;
 import com.skillbox.javapro21.domain.enumeration.UserType;
-import lombok.*;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 import lombok.experimental.Accessors;
 import org.hibernate.Hibernate;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -18,7 +23,7 @@ import java.util.Set;
 @Entity
 @Table(name = "persons")
 @Accessors(chain = true)
-public class Person {
+public class Person implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -78,7 +83,7 @@ public class Person {
     @Column(name = "user_type")
     private UserType userType;
 
-//    @OneToMany(mappedBy = "person", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    //    @OneToMany(mappedBy = "person", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 //    @JsonIgnoreProperties(value = {"post", "comment", "person"}, allowSetters = true)
 //    @ToString.Exclude
 //    private Set<BlockHistory> blocksLists = new HashSet<>();
@@ -132,7 +137,32 @@ public class Person {
     }
 
     @Override
-    public int hashCode() {
-        return getClass().hashCode();
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return this.getUserType().getAuthorities();
+    }
+
+    @Override
+    public String getUsername() {
+        return this.email;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return this.isBlocked == 0;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return this.isBlocked == 0;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return false;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return this.isApproved == 1;
     }
 }

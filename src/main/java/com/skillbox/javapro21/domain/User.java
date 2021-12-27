@@ -1,7 +1,11 @@
 package com.skillbox.javapro21.domain;
 
 import com.skillbox.javapro21.domain.enumeration.UserType;
-import lombok.*;
+import lombok.experimental.Accessors;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.Hibernate;
 
 import javax.persistence.*;
@@ -12,6 +16,7 @@ import java.util.Objects;
 @Setter
 @Getter
 @Entity
+@Accessors(chain = true)
 @Table(name = "users")
 public class User {
 
