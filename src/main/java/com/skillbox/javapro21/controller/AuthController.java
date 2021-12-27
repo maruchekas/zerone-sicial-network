@@ -31,9 +31,7 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<DataResponse<AuthContent>> login(@RequestBody AuthRequest authRequest) throws NotSuchUserOrWrongPasswordException, UserLegalException {
 
-        // TODO запрос на вход (лог/пасс), проверка существования юзера,
-        //  выброс исключения notSuchUserExistsException. Вернуть пользователя
-        log.info("Login user with email {}", authRequest.getEmail());
+        log.info("User login attempt using email {}", authRequest.getEmail());
 
         return new ResponseEntity<>(authService.login(authRequest), HttpStatus.OK);
     }

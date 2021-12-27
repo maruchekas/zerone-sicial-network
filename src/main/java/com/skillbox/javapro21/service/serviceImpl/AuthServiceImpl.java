@@ -35,12 +35,15 @@ public class AuthServiceImpl extends AbstractMethodClass implements AuthService 
     }
 
     public DataResponse<AuthContent> login(AuthRequest authRequest) throws NotSuchUserOrWrongPasswordException, UserLegalException {
-        Person person = findPersonByEmail(authRequest.getEmail());
+        if (findPersonByEmail(authRequest.getEmail()) == null){
+            throw new UserLegalException("User with email " + authRequest.getEmail() + "not found");
+        }
+            Person person = findPersonByEmail(authRequest.getEmail());
         if (!isPersonLegal(person)) throw new UserLegalException(authRequest.getEmail());
 
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
         if (!passwordEncoder.matches(authRequest.getPassword(), person.getPassword()))
-            throw new NotSuchUserOrWrongPasswordException();
+            throw new NotSuchUserOrWrongPasswordException("Incorrect mail/password combination");
 
         String token = jwtGenerator.generateToken(authRequest.getEmail());
         return getSuccessAuthResponse(person, token);
