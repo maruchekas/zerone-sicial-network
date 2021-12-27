@@ -1,8 +1,12 @@
 package com.skillbox.javapro21.controller;
 
+import com.skillbox.javapro21.api.request.profile.EditProfileRequest;
 import com.skillbox.javapro21.api.request.profile.PostRequest;
 import com.skillbox.javapro21.api.response.DataResponse;
+import com.skillbox.javapro21.api.response.ListDataResponse;
 import com.skillbox.javapro21.api.response.MessageOkContent;
+import com.skillbox.javapro21.api.response.account.AuthData;
+import com.skillbox.javapro21.api.response.profile.PostContent;
 import com.skillbox.javapro21.exception.PersonNotFoundException;
 import com.skillbox.javapro21.service.ProfileService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -33,7 +37,7 @@ public class ProfileController {
     @Operation(summary = "Получить текущего пользователя", security = @SecurityRequirement(name = "jwt"))
     @GetMapping("/me")
     @PreAuthorize("hasAuthority('user:write')")
-    public ResponseEntity<DataResponse<AuthData>> getPerson(Principal principal) {
+    public ResponseEntity<DataResponse<AuthData>> getPerson(Principal principal) throws PersonNotFoundException {
         return new ResponseEntity<>(profileService.getPerson(principal), HttpStatus.OK);
     }
 
@@ -53,21 +57,23 @@ public class ProfileController {
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('user:write')")
-    public ResponseEntity<DataResponse> getUser(@PathVariable long id) throws PersonNotFoundException {
-        return new ResponseEntity<>(profileService.getPerson(id), HttpStatus.OK);
+    public ResponseEntity<DataResponse> getPersonById(@PathVariable long id) throws PersonNotFoundException {
+        return new ResponseEntity<>(profileService.getPersonById(id), HttpStatus.OK);
     }
 
     @PostMapping("{id}/wall")
-    public ResponseEntity putPostToWall(@PathVariable long id,
-                                        @RequestParam(name = "publish_date") long publishDate,
-                                        @RequestBody PostRequest postRequest) throws PersonNotFoundException {
+    @PreAuthorize("hasAuthority('user:write')")
+    public ResponseEntity<DataResponse<PostContent>> putPost(@PathVariable long id,
+                                                               @RequestParam(name = "publish_date") long publishDate,
+                                                               @RequestBody PostRequest postRequest) throws PersonNotFoundException {
         return new ResponseEntity<>(profileService.post(id, publishDate, postRequest), HttpStatus.OK);
     }
 
     @GetMapping("/{id}/wall")
-    public ResponseEntity getWall(@PathVariable long id,
-                                  @RequestParam int offset,
-                                  @RequestParam int itemPerPage) throws PersonNotFoundException {
+    @PreAuthorize("hasAuthority('user:write')")
+    public ResponseEntity<ListDataResponse> getWall(@PathVariable long id,
+                                                                 @RequestParam int offset,
+                                                                 @RequestParam int itemPerPage) throws PersonNotFoundException {
         return new ResponseEntity<>(profileService.getWall(id, offset, itemPerPage), HttpStatus.OK);
     }
 
