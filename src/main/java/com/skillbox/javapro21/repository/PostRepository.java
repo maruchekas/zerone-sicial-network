@@ -9,10 +9,11 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface PostRepository extends JpaRepository<Post, Integer> {
-    Post findPostById(int id);
+    Optional<Post> findPostById(Long id);
 
     @Query("select p from Post p " +
             "join Person ps on ps.id = p.author.id " +

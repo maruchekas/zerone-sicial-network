@@ -1,11 +1,15 @@
 package com.skillbox.javapro21.service.serviceImpl;
 
+import com.skillbox.javapro21.api.request.post.PostRequest;
 import com.skillbox.javapro21.api.response.DataResponse;
 import com.skillbox.javapro21.api.response.ListDataResponse;
 import com.skillbox.javapro21.api.response.post.PostData;
+import com.skillbox.javapro21.domain.Person;
 import com.skillbox.javapro21.domain.Post;
 import com.skillbox.javapro21.domain.PostLike;
 import com.skillbox.javapro21.domain.Tag;
+import com.skillbox.javapro21.exception.AuthorAndUserEqualsException;
+import com.skillbox.javapro21.exception.PostNotFoundException;
 import com.skillbox.javapro21.repository.PersonRepository;
 import com.skillbox.javapro21.repository.PostLikeRepository;
 import com.skillbox.javapro21.repository.PostRepository;
@@ -54,9 +58,21 @@ public class PostServiceImpl extends AbstractMethodClass implements PostService 
         return getPostsResponse(offset, itemPerPage, pageablePostList);
     }
 
-    public DataResponse<PostData> getPostsById(int id, Principal principal) {
-        PostData postData = getPostData(postRepository.findPostById(id));
+    public DataResponse<PostData> getPostsById(Long id, Principal principal) throws PostNotFoundException {
+        PostData postData = getPostData(postRepository.findPostById(id).orElseThrow(() -> new PostNotFoundException("Поста с таким айди не существует")));
         return getDataResponse(postData);
+    }
+
+    public DataResponse<PostData> putPostByIdAndMessageInDay(Long id, long publishDate, PostRequest postRequest, Principal principal) throws PostNotFoundException, AuthorAndUserEqualsException {
+        Optional<Person> person = personRepository.findByEmail(principal.getName());
+        Post post = postRepository.findPostById(id).orElseThrow(() -> new PostNotFoundException("Поста с таким айди не существует"));
+        if (!person.get().getId().equals(post.getAuthor().getId()))
+            throw new AuthorAndUserEqualsException("Пользователь не может менять данные в этом посте");
+        post.setTitle(postRequest.getTitle())
+                .setPostText(postRequest.getPostText())
+                .setTime((publishDate == -1) ? LocalDateTime.now() : getLocalDateTime(publishDate));
+        post = postRepository.saveAndFlush(post);
+        return getDataResponse(getPostData(post));
     }
 
     private DataResponse<PostData> getDataResponse(PostData postData) {

@@ -1,6 +1,7 @@
 package com.skillbox.javapro21.controller;
 
 import com.skillbox.javapro21.AbstractTest;
+import com.skillbox.javapro21.api.request.post.PostRequest;
 import com.skillbox.javapro21.domain.Person;
 import com.skillbox.javapro21.domain.Post;
 import com.skillbox.javapro21.domain.Tag;
@@ -183,5 +184,72 @@ public class PostControllerTest extends AbstractTest {
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.total").value(2));
+    }
+
+    @Test
+    @WithMockUser(username = "test@test.ru", authorities = "user:write")
+    void getPostsByIdFor404() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/api/v1/post/{id}", 44)
+                        .principal(() -> "test@test.ru")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().is4xxClientError());
+    }
+
+    @Test
+    @WithMockUser(username = "test@test.ru", authorities = "user:write")
+    void getPostsById() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/api/v1/post/{id}", post1.getId())
+                        .principal(() -> "test@test.ru")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.id").value(post1.getId()));
+    }
+
+    @Test
+    void getPostsByIdWithoutAuthorization() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/api/v1/post/{id}", post1.getId())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(username = "test@test.rub", authorities = "user:write")
+    void putPostByIdAndMessageInDay() throws Exception {
+        PostRequest postRequest = new PostRequest()
+                .setPostText("how much u want...")
+                .setTitle("wtf");
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .put("/api/v1/post/{id}", post1.getId())
+                        .principal(() -> "test@test.rub")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(postRequest))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.id").value(post1.getId()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.post_text").value(postRequest.getPostText()));
+    }
+    @Test
+    @WithMockUser(username = "test@test.ru", authorities = "user:write")
+    void putPostByIdAndMessageInDayForBadRequest() throws Exception {
+        PostRequest postRequest = new PostRequest()
+                .setPostText("how much u want...")
+                .setTitle("wtf");
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .put("/api/v1/post/{id}", post1.getId())
+                        .principal(() -> "test@test.ru")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(postRequest))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
     }
 }
