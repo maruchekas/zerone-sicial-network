@@ -5,6 +5,7 @@ import com.skillbox.javapro21.api.request.auth.AuthRequest;
 import com.skillbox.javapro21.config.security.JwtGenerator;
 import com.skillbox.javapro21.domain.Person;
 import com.skillbox.javapro21.repository.PersonRepository;
+import org.junit.jupiter.api.Assertions;
 import com.skillbox.javapro21.service.serviceImpl.AuthServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,6 +24,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 @SpringBootTest
 @AutoConfigureMockMvc
 @TestPropertySource(value = {"classpath:application.yml"})
+//@TestPropertySource(value = {"classpath:application-test.properties"})
 public class AuthControllerTest extends AbstractTest {
 
     @Autowired
@@ -41,7 +43,7 @@ public class AuthControllerTest extends AbstractTest {
     public void setup() {
         super.setup();
         String email = "test@test.ru";
-        String password = "111111111";
+        String password = "test@test.ru";
 
         person = authService.findPersonByEmail(email);
 
@@ -58,7 +60,7 @@ public class AuthControllerTest extends AbstractTest {
                         .content(mapper.writeValueAsString(authRequest))
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.status().isOk());
+                .andExpect(MockMvcResultMatchers.status().is4xxClientError());
     }
 
     @Test
@@ -91,4 +93,11 @@ public class AuthControllerTest extends AbstractTest {
                 .andExpect(MockMvcResultMatchers.status().is4xxClientError()).andReturn();
     }
 
+
+    @Test
+    void testToken() {
+        String bec = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJicml6Lnp1a2tlbEBnbWFpbC5jb20iLCJleHAiOjE2NDEzMzAwMDB9.S4k0Q26X3iV7AJdqMbJgtAws3NpgM-4_kyAf3m9kyPJMY2OHLQcTZHGoEgdhnRKDFCQW215bcGcd8upXvZ_ulg";
+        String front = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJicml6Lnp1a2tlbEBnbWFpbC5jb20iLCJleHAiOjE2NDEzMzAwMDB9.S4k0Q26X3iV7AJdqMbJgtAws3NpgM-4_kyAf3m9kyPJMY2OHLQcTZHGoEgdhnRKDFCQW215bcGcd8upXvZ_ulg";
+        Assertions.assertEquals(bec, front);
+    }
 }

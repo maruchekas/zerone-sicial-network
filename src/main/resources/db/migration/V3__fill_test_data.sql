@@ -130,7 +130,7 @@ VALUES ('котики'),
 
 INSERT INTO persons (first_name, last_name, reg_date, birth_date, email, phone, password, photo, about, town, country,
                      confirmation_code, is_approved, messages_permission, user_type, last_online_time, is_blocked)
-VALUES ('Юзер', 'Тестов', '2021-12-26 17:30:03', '1995-08-15', 'test@test.ru', '+7 (999) 111-0000', '$2a$12$KooSeqO4D9V/bDq/NYvrmO9n6OX8W0v1sAgJW8P47dE6al8OScIRK',
+VALUES ('Юзер', 'Тестов', '2021-12-26 17:30:03', '1995-08-15', 'test@test.ru', '+7 (999) 111-0000', '$2a$12$5WH.ejcdew64amolygbU2ukDVUHEGpaHNIbCuIpPNQO5vLxfQ7i3a',
         'https://robohash.org/velsaepeea.png?size=50x50&set=set1',
         'Я тестовый пользователь. ', 'Москва', 'Россия',
         '1111', 1, 'ALL', 'ADMIN', '2021-12-16 16:57:08', 0);

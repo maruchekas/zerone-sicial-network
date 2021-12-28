@@ -18,7 +18,7 @@ import java.util.Set;
 @Entity
 @Accessors(chain = true)
 @Table(name = "tags")
-public class Tag implements Content {
+public class Tag {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

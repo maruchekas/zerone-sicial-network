@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -24,7 +25,8 @@ import java.time.LocalDateTime;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@TestPropertySource(value = {"classpath:application-test.yml"})
+@TestPropertySource(value = {"classpath:application.yml"})
+//@TestPropertySource(value = {"classpath:application-test.properties"})
 public class ProfileControllerTest extends AbstractTest {
     @Autowired
     private MockMvc mockMvc;
@@ -37,7 +39,7 @@ public class ProfileControllerTest extends AbstractTest {
     @BeforeEach
     public void setup() {
         super.setup();
-        String verifyEmail = "test@test.ru";
+        String verifyEmail = "test1@test.ru";
         String password = "1234";
         String firstName = "Arcadiy";
         String lastName = "Parovozov";
@@ -61,21 +63,43 @@ public class ProfileControllerTest extends AbstractTest {
 
     @AfterEach
     public void cleanup() {
-        personRepository.deleteAll();
+        personRepository.delete(verifyPerson);
     }
 
     @Test
-    @WithMockUser(username = "test@test.ru", authorities = "user:write")
+    @WithMockUser(username = "test1@test.ru", authorities = "user:write")
     void deletePerson() throws Exception {
-        Assertions.assertEquals(verifyPerson.getEmail(), "test@test.ru");
+        Assertions.assertEquals(verifyPerson.getEmail(), "test1@test.ru");
 
         mockMvc.perform(MockMvcRequestBuilders
                         .delete("/api/v1/users/me")
-                        .principal(() -> "test@test.ru"))
+                        .principal(() -> "test1@test.ru"))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk());
 
         Assertions.assertNotEquals("Пользователь не удален", verifyPerson.getEmail(), "test@test.ru");
+        Assertions.assertEquals(LocalDateTime.now().getDayOfMonth(),
+                personRepository.findByEmail(verifyPerson.getEmail()).get().getLastOnlineTime().getDayOfMonth());
+    }
+
+
+    @Test
+    @WithMockUser(username = "test1@test.ru", authorities = "user:write")
+    void getPerson() throws Exception {
+        Person person = new Person()
+                .setFirstName("Dmitriy")
+                .setLastName("Sushkov")
+                .setEmail("kkki@test.ru");
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        Assertions.assertEquals(verifyPerson.getEmail(), email);
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .get("/api/v1/users/me")
+                .principal(() -> "test1@test.ru"))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+        .andExpect(MockMvcResultMatchers.jsonPath("$.error").value("string"));
+
         Assertions.assertEquals(LocalDateTime.now().getDayOfMonth(),
                 personRepository.findByEmail(verifyPerson.getEmail()).get().getLastOnlineTime().getDayOfMonth());
     }

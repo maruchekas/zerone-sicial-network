@@ -11,7 +11,7 @@ import java.util.Map;
 
 @Data
 @Accessors(chain = true)
-public class AuthContent implements Content {
+public class AuthData implements Content {
     private long id;
     @JsonProperty("first_name")
     private String firstName;

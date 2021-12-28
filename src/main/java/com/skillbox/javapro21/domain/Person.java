@@ -137,28 +137,23 @@ public class Person implements UserDetails {
     }
 
     @Override
-    public int hashCode() {
-        return getClass().hashCode();
-    }
-
-    @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
+        return this.getUserType().getAuthorities();
     }
 
     @Override
     public String getUsername() {
-        return null;
+        return this.email;
     }
 
     @Override
     public boolean isAccountNonExpired() {
-        return false;
+        return this.isBlocked == 0;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return false;
+        return this.isBlocked == 0;
     }
 
     @Override
@@ -168,6 +163,6 @@ public class Person implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return false;
+        return this.isApproved == 1;
     }
 }
