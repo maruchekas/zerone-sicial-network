@@ -23,8 +23,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@TestPropertySource(value = {"classpath:application.yml"})
-//@TestPropertySource(value = {"classpath:application-test.properties"})
+//@TestPropertySource(value = {"classpath:application.yml"})
+@TestPropertySource(value = {"classpath:application-test.properties"})
 public class AuthControllerTest extends AbstractTest {
 
     @Autowired

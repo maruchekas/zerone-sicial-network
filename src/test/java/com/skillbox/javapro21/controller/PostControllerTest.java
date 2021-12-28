@@ -24,14 +24,15 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@TestPropertySource(value = {"classpath:application.yml"})
-//@TestPropertySource(value = {"classpath:application-test.properties"})
+//@TestPropertySource(value = {"classpath:application.yml"})
+@TestPropertySource(value = {"classpath:application-test.properties"})
 public class PostControllerTest extends AbstractTest {
     @Autowired
     private MockMvc mockMvc;
@@ -41,6 +42,9 @@ public class PostControllerTest extends AbstractTest {
     private PostRepository postRepository;
     @Autowired
     private TagRepository tagRepository;
+
+    String now = String.valueOf(Instant.now().getEpochSecond() * 1000);
+    String yearAgo = String.valueOf(Instant.now().minusSeconds(31536000).getEpochSecond() * 1000);
 
     private Person verifyPerson;
     private Person verifyPersonWithPost;
@@ -97,11 +101,11 @@ public class PostControllerTest extends AbstractTest {
         tagRepository.save(tag1);
         tagRepository.save(tag2);
 
-        Set<Tag> tags = new HashSet<>();
+        List<Tag> tags = new ArrayList<>();
         tags.add(tag1);
         tags.add(tag2);
 
-        Set<Tag> tag = new HashSet<>();
+        List<Tag> tag = new ArrayList<>();
         tag.add(tag2);
 
         post1 = new Post()
@@ -131,12 +135,9 @@ public class PostControllerTest extends AbstractTest {
 
     @AfterEach
     public void cleanup() {
-        personRepository.delete(verifyPerson);
-        personRepository.delete(verifyPersonWithPost);
-        postRepository.delete(post1);
-        postRepository.delete(post2);
-        tagRepository.delete(tag1);
-        tagRepository.delete(tag2);
+        personRepository.deleteAll();
+        postRepository.deleteAll();
+        tagRepository.deleteAll();
     }
 
     @Test
@@ -146,13 +147,12 @@ public class PostControllerTest extends AbstractTest {
                         .get("/api/v1/post")
                         .principal(() -> "test@test.ru")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("text", "моржей")
                         .param("author", "Arcadiy-Канефоль")
-                        .param("date_from", "1630091741000")
-                        .param("date_to", "1640591802000"))
+                        .param("date_from", yearAgo)
+                        .param("date_to", now))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.total").value(1));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.total").value(2));
     }
 
     @Test
@@ -163,11 +163,11 @@ public class PostControllerTest extends AbstractTest {
                         .principal(() -> "test@test.ru")
                         .contentType(MediaType.APPLICATION_JSON)
                         .param("tag", "морскиеКотикиИзже")
-                        .param("date_from", "1630091741000")
-                        .param("date_to", "1640591802000"))
+                        .param("date_from", yearAgo)
+                        .param("date_to", now))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.total").value(1));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.total").value(2));
     }
 
     @Test
@@ -178,10 +178,10 @@ public class PostControllerTest extends AbstractTest {
                         .principal(() -> "test@test.ru")
                         .contentType(MediaType.APPLICATION_JSON)
                         .param("tag", "моржиНавсегда;морскиеКотикиИзже")
-                        .param("date_from", "1630091741000")
-                        .param("date_to", "1640591802000"))
+                        .param("date_from", yearAgo)
+                        .param("date_to", now))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.total").value(1));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.total").value(2));
     }
 }
