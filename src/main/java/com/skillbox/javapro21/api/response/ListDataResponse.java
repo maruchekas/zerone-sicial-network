@@ -2,14 +2,15 @@ package com.skillbox.javapro21.api.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
+import lombok.experimental.Accessors;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
+@Accessors(chain = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ListDataResponse <T extends Content> {
+public class ListDataResponse<T extends Content> {
     private String error;
     private LocalDateTime timestamp;
     private int total;
