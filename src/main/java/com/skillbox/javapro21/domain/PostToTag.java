@@ -1,6 +1,5 @@
 package com.skillbox.javapro21.domain;
 
-import com.skillbox.javapro21.api.response.Content;
 import lombok.*;
 import lombok.experimental.Accessors;
 

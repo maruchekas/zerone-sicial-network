@@ -23,7 +23,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@TestPropertySource(value = {"classpath:application-test.yml"})
+@TestPropertySource(value = {"classpath:application.yml"})
+//@TestPropertySource(value = {"classpath:application-test.properties"})
 public class AuthControllerTest extends AbstractTest {
 
     @Autowired
@@ -42,7 +43,7 @@ public class AuthControllerTest extends AbstractTest {
     public void setup() {
         super.setup();
         String email = "test@test.ru";
-        String password = "111111111";
+        String password = "test@test.ru";
 
         person = authService.findPersonByEmail(email);
 
@@ -59,7 +60,7 @@ public class AuthControllerTest extends AbstractTest {
                         .content(mapper.writeValueAsString(authRequest))
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.status().isOk());
+                .andExpect(MockMvcResultMatchers.status().is4xxClientError());
     }
 
     @Test

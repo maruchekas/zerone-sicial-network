@@ -24,13 +24,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
 public class AuthController {
-
     private final AuthService authService;
 
     @Operation(summary = "Вход через логин/пароль")
     @PostMapping("/login")
     public ResponseEntity<DataResponse<AuthData>> login(@RequestBody AuthRequest authRequest) throws NotSuchUserOrWrongPasswordException, UserLegalException {
-
         // TODO запрос на вход (лог/пасс), проверка существования юзера,
         //  выброс исключения notSuchUserExistsException. Вернуть пользователя
         log.info("Login user with email {}", authRequest.getEmail());
