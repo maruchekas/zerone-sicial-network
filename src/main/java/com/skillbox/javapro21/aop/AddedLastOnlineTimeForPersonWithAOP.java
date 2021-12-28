@@ -29,7 +29,7 @@ public class AddedLastOnlineTimeForPersonWithAOP {
         this.personRepository = personRepository;
     }
 
-    @Pointcut("execution(public * com.skillbox.javapro21.service.serviceImpl.ProfileServiceImpl.*(..))")
+    @Pointcut("execution(public * com.skillbox.javapro21.service.impl.ProfileServiceImpl.*(..))")
     public void callAtServiceProfile() {
     }
 

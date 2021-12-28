@@ -1,4 +1,4 @@
-package com.skillbox.javapro21.service.serviceImpl;
+package com.skillbox.javapro21.service.impl;
 
 import com.skillbox.javapro21.api.response.DataResponse;
 import com.skillbox.javapro21.api.response.MessageOkContent;
@@ -7,6 +7,7 @@ import com.skillbox.javapro21.domain.Person;
 import com.skillbox.javapro21.repository.PersonRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -16,11 +17,12 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Random;
 
-public abstract class AbstractMethodClass {
+@Component
+public class UtilsService {
     private final PersonRepository personRepository;
 
     @Autowired
-    protected AbstractMethodClass(PersonRepository personRepository) {
+    protected UtilsService(PersonRepository personRepository) {
         this.personRepository = personRepository;
     }
 

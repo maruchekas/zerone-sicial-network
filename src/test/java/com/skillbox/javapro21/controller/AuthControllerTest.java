@@ -5,8 +5,9 @@ import com.skillbox.javapro21.api.request.auth.AuthRequest;
 import com.skillbox.javapro21.config.security.JwtGenerator;
 import com.skillbox.javapro21.domain.Person;
 import com.skillbox.javapro21.repository.PersonRepository;
+import com.skillbox.javapro21.service.impl.UtilsService;
 import org.junit.jupiter.api.Assertions;
-import com.skillbox.javapro21.service.serviceImpl.AuthServiceImpl;
+import com.skillbox.javapro21.service.impl.AuthServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import javax.swing.text.Utilities;
+
 @SpringBootTest
 @AutoConfigureMockMvc
 @TestPropertySource(value = {"classpath:application.yml"})
@@ -32,7 +35,7 @@ public class AuthControllerTest extends AbstractTest {
     @Autowired
     private PersonRepository personRepository;
     @Autowired
-    private AuthServiceImpl authService;
+    private UtilsService utilsService;
     @Autowired
     private JwtGenerator jwtGenerator;
 
@@ -45,7 +48,7 @@ public class AuthControllerTest extends AbstractTest {
         String email = "test@test.ru";
         String password = "test@test.ru";
 
-        person = authService.findPersonByEmail(email);
+        person = utilsService.findPersonByEmail(email);
 
     }
 
