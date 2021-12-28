@@ -1,5 +1,6 @@
 package com.skillbox.javapro21.service.serviceImpl;
 
+import com.skillbox.javapro21.api.response.DataResponse;
 import com.skillbox.javapro21.api.response.ListDataResponse;
 import com.skillbox.javapro21.api.response.post.PostData;
 import com.skillbox.javapro21.domain.Post;
@@ -51,6 +52,18 @@ public class PostServiceImpl extends AbstractMethodClass implements PostService 
             pageablePostList = postRepository.findPostsByTextByAuthorByTagsContainingByDateExcludingBlockers(text, datetimeFrom, datetimeTo, author, tags, pageable);
         }
         return getPostsResponse(offset, itemPerPage, pageablePostList);
+    }
+
+    public DataResponse<PostData> getPostsById(int id, Principal principal) {
+        PostData postData = getPostData(postRepository.findPostById(id));
+        return getDataResponse(postData);
+    }
+
+    private DataResponse<PostData> getDataResponse(PostData postData) {
+        return new DataResponse<PostData>()
+                .setError("")
+                .setTimestamp(LocalDateTime.now())
+                .setData(postData);
     }
 
     private ListDataResponse<PostData> getPostsResponse(int offset, int itemPerPage, Page<Post> pageablePostList) {

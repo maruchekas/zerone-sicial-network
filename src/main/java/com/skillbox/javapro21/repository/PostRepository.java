@@ -41,4 +41,6 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
     Page<Post> findPostsByTextByAuthorWithoutTagsContainingByDateExcludingBlockers(String text, LocalDateTime dateFrom,
                                                                                    LocalDateTime dateTo, String author,
                                                                                    Pageable pageable);
+
+    Post findPostById(int id);
 }

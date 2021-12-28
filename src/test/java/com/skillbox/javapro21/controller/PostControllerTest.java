@@ -102,7 +102,7 @@ public class PostControllerTest extends AbstractTest {
         tags.add(tag2);
 
         Set<Tag> tag = new HashSet<>();
-        tags.add(tag2);
+        tag.add(tag2);
 
         post1 = new Post()
                 .setTime(LocalDateTime.now().minusDays(1))
