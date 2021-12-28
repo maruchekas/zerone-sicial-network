@@ -20,7 +20,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -31,7 +30,8 @@ import java.util.Set;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@TestPropertySource(value = {"classpath:application-test.yml"})
+@TestPropertySource(value = {"classpath:application.yml"})
+//@TestPropertySource(value = {"classpath:application-test.properties"})
 public class PostControllerTest extends AbstractTest {
     @Autowired
     private MockMvc mockMvc;
@@ -46,7 +46,8 @@ public class PostControllerTest extends AbstractTest {
     private Person verifyPersonWithPost;
     private Post post1;
     private Post post2;
-
+    private Tag tag1;
+    private Tag tag2;
 
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
 
@@ -89,9 +90,9 @@ public class PostControllerTest extends AbstractTest {
         personRepository.save(verifyPerson);
         personRepository.save(verifyPersonWithPost);
 
-        Tag tag1 = new Tag()
+        tag1 = new Tag()
                 .setTag("моржиНавсегда");
-        Tag tag2 = new Tag()
+        tag2 = new Tag()
                 .setTag("морскиеКотикиИзже");
         tagRepository.save(tag1);
         tagRepository.save(tag2);
@@ -130,9 +131,12 @@ public class PostControllerTest extends AbstractTest {
 
     @AfterEach
     public void cleanup() {
-        personRepository.deleteAll();
-        postRepository.deleteAll();
-        tagRepository.deleteAll();
+        personRepository.delete(verifyPerson);
+        personRepository.delete(verifyPersonWithPost);
+        postRepository.delete(post1);
+        postRepository.delete(post2);
+        tagRepository.delete(tag1);
+        tagRepository.delete(tag2);
     }
 
     @Test
@@ -178,6 +182,6 @@ public class PostControllerTest extends AbstractTest {
                         .param("date_to", "1640591802000"))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.total").value(2));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.total").value(1));
     }
 }
