@@ -44,7 +44,7 @@ CREATE TABLE messages
     CONSTRAINT pk_messages PRIMARY KEY (id)
 );
 
-CREATE TYPE notification_name AS ENUM ('POST', 'POST_COMMENT', 'COMMENT_COMMENT', 'FRIEND_REQUEST', 'MESSAGE');
+CREATE TYPE notification_name AS ENUM ('POST', 'POST_COMMENT', 'COMMENT_COMMENT', 'FRIEND_REQUEST', 'MESSAGE', 'FRIEND_BIRTHDAY');
 
 CREATE TABLE notification_type
 (
@@ -55,6 +55,7 @@ CREATE TABLE notification_type
     comment_comment BOOLEAN,
     friends_request BOOLEAN,
     message         BOOLEAN,
+    friends_birthday BOOLEAN,
     CONSTRAINT pk_notification_type PRIMARY KEY (id)
 );
 

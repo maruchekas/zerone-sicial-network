@@ -51,7 +51,8 @@ public class AccountServiceImpl extends AbstractMethodClass implements AccountSe
 
     //Todo: нужна ли проверка каптчи?
     public DataResponse<MessageOkContent> registration(RegisterRequest registerRequest) throws UserExistException, MailjetException {
-        if (personRepository.findByEmail(registerRequest.getEmail()).isPresent()) throw new UserExistException();
+        if (personRepository.findByEmail(registerRequest.getEmail()).isPresent())
+            throw new UserExistException("Пользователь с таким логином существует");
         createNewPerson(registerRequest);
         mailMessageForRegistration(registerRequest);
         return getMessageOkResponse();
@@ -65,7 +66,7 @@ public class AccountServiceImpl extends AbstractMethodClass implements AccountSe
                     .setMessagesPermission(MessagesPermission.ALL)
                     .setConfirmationCode("");
             personRepository.save(person);
-        } else throw new TokenConfirmationException();
+        } else throw new TokenConfirmationException("Не верный confirmation code");
         return "Пользователь подтвержден";
     }
 
@@ -86,7 +87,7 @@ public class AccountServiceImpl extends AbstractMethodClass implements AccountSe
         Person person = findPersonByEmail(email);
         if (person.getConfirmationCode().equals(code)) {
             return "Пользователь может приступить к изменению пароля";
-        } else throw new TokenConfirmationException();
+        } else throw new TokenConfirmationException("Не верный confirmation code");
     }
 
     public String recoveryPassword(String email, String password) {
@@ -125,6 +126,7 @@ public class AccountServiceImpl extends AbstractMethodClass implements AccountSe
             case COMMENT_COMMENT -> notificationType.setCommentComment(changeNotificationsRequest.isEnable());
             case FRIEND_REQUEST -> notificationType.setFriendsRequest(changeNotificationsRequest.isEnable());
             case MESSAGE -> notificationType.setMessage(changeNotificationsRequest.isEnable());
+            case FRIEND_BIRTHDAY -> notificationType.setFriendsBirthday(changeNotificationsRequest.isEnable());
         }
         notificationTypeRepository.save(notificationType);
         return getMessageOkResponse();
@@ -138,7 +140,8 @@ public class AccountServiceImpl extends AbstractMethodClass implements AccountSe
                         .setPostComment(true)
                         .setCommentComment(true)
                         .setFriendsRequest(true)
-                        .setMessage(true));
+                        .setMessage(true)
+                        .setFriendsBirthday(true));
         ListDataResponse<NotificationSettingData> dataResponse = new ListDataResponse<>();
         dataResponse.setTimestamp(LocalDateTime.now());
         dataListNotification(notificationType);
@@ -161,6 +164,8 @@ public class AccountServiceImpl extends AbstractMethodClass implements AccountSe
                 .setEnable(notificationType.isFriendsRequest()));
         list.add(new NotificationSettingData().setNotificationTypeStatus(NotificationTypeStatus.MESSAGE)
                 .setEnable(notificationType.isMessage()));
+        list.add(new NotificationSettingData().setNotificationTypeStatus(NotificationTypeStatus.FRIEND_BIRTHDAY)
+                .setEnable(notificationType.isFriendsBirthday()));
         return list;
     }
 
