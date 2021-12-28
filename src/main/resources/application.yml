@@ -1,5 +1,6 @@
 server:
   port: 8080
+  base_url: http://localhost:8080
 
 spring:
   messages:
@@ -9,7 +10,7 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/SocialNetwork
     username: postgres
-    password: root
+    password: rootroot
   jpa:
     show-sql: true
     hibernate:
@@ -19,6 +20,7 @@ spring:
     port: 587
     username: jpro021social@gmail.com
     password: SocialNetwork021
+    verificationLink: localhost:8080/api/v1/account/register/complete
   flyway:
     enabled: true
 jwt:
