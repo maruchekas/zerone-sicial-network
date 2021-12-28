@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.skillbox.javapro21.domain.enumeration.MessagesPermission;
 import com.skillbox.javapro21.domain.enumeration.UserType;
 import lombok.*;
+import lombok.experimental.Accessors;
 import org.hibernate.Hibernate;
 
 import javax.persistence.*;
@@ -12,12 +13,11 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-@AllArgsConstructor
-@NoArgsConstructor
 @Setter
 @Getter
 @Entity
 @Table(name = "persons")
+@Accessors(chain = true)
 public class Person {
 
     @Id
@@ -78,50 +78,50 @@ public class Person {
     @Column(name = "user_type")
     private UserType userType;
 
-    @OneToMany(mappedBy = "person")
-    @JsonIgnoreProperties(value = {"post", "comment", "person"}, allowSetters = true)
-    @ToString.Exclude
-    private Set<BlockHistory> blocksLists = new HashSet<>();
-
-    @OneToMany(mappedBy = "srcPerson")
-    @JsonIgnoreProperties(value = {"friendshipStatus", "srcPerson", "dstPerson"}, allowSetters = true)
-    @ToString.Exclude
-    private Set<Friendship> outFriendshipRequests = new HashSet<>();
-
-    @OneToMany(mappedBy = "dstPerson")
-    @JsonIgnoreProperties(value = {"friendshipStatus", "srcPerson", "dstPerson"}, allowSetters = true)
-    @ToString.Exclude
-    private Set<Friendship> incFriendshipRequests = new HashSet<>();
-
-    @OneToMany(mappedBy = "author")
+//    @OneToMany(mappedBy = "person", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+//    @JsonIgnoreProperties(value = {"post", "comment", "person"}, allowSetters = true)
+//    @ToString.Exclude
+//    private Set<BlockHistory> blocksLists = new HashSet<>();
+//
+//    @OneToMany(mappedBy = "srcPerson")
+//    @JsonIgnoreProperties(value = {"friendshipStatus", "srcPerson", "dstPerson"}, allowSetters = true)
+//    @ToString.Exclude
+//    private Set<Friendship> outFriendshipRequests = new HashSet<>();
+//
+//    @OneToMany(mappedBy = "dstPerson")
+//    @JsonIgnoreProperties(value = {"friendshipStatus", "srcPerson", "dstPerson"}, allowSetters = true)
+//    @ToString.Exclude
+//    private Set<Friendship> incFriendshipRequests = new HashSet<>();
+//
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "author")
     @JsonIgnoreProperties(value = {"author", "recipient"}, allowSetters = true)
     @ToString.Exclude
     private Set<Message> outMessages = new HashSet<>();
 
-    @OneToMany(mappedBy = "recipient")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "recipient")
     @JsonIgnoreProperties(value = {"author", "recipient"}, allowSetters = true)
     @ToString.Exclude
     private Set<Message> incMessages = new HashSet<>();
-
-    @OneToMany(mappedBy = "author")
-    @JsonIgnoreProperties(value = {"block", "likes", "files", "comments", "tags", "author"}, allowSetters = true)
-    @ToString.Exclude
-    private Set<Post> posts = new HashSet<>();
-
-    @OneToMany(mappedBy = "person")
-    @JsonIgnoreProperties(value = {"person", "post"}, allowSetters = true)
-    @ToString.Exclude
-    private Set<PostLike> postLikes = new HashSet<>();
-
-    @OneToMany(mappedBy = "person")
-    @JsonIgnoreProperties(value = {"block", "post", "person"}, allowSetters = true)
-    @ToString.Exclude
-    private Set<PostComment> comments = new HashSet<>();
-
-    @OneToMany(mappedBy = "person")
-    @JsonIgnoreProperties(value = {"type", "person"}, allowSetters = true)
-    @ToString.Exclude
-    private Set<Notification> notifications = new HashSet<>();
+//
+//    @OneToMany(mappedBy = "author")
+//    @JsonIgnoreProperties(value = {"block", "likes", "files", "comments", "tags", "author"}, allowSetters = true)
+//    @ToString.Exclude
+//    private Set<Post> posts = new HashSet<>();
+//
+//    @OneToMany(mappedBy = "person")
+//    @JsonIgnoreProperties(value = {"person", "post"}, allowSetters = true)
+//    @ToString.Exclude
+//    private Set<PostLike> postLikes = new HashSet<>();
+//
+//    @OneToMany(mappedBy = "person")
+//    @JsonIgnoreProperties(value = {"block", "post", "person"}, allowSetters = true)
+//    @ToString.Exclude
+//    private Set<PostComment> comments = new HashSet<>();
+//
+//    @OneToMany(mappedBy = "person")
+//    @JsonIgnoreProperties(value = {"type", "person"}, allowSetters = true)
+//    @ToString.Exclude
+//    private Set<Notification> notifications = new HashSet<>();
 
     @Override
     public boolean equals(Object o) {

@@ -10,7 +10,7 @@ import javax.persistence.*;
 @Setter
 @Getter
 @Entity
-@Table(name = "friendships")
+@Table(name = "friendship")
 public class Friendship {
 
     @Id
@@ -20,7 +20,7 @@ public class Friendship {
 
     @JsonIgnoreProperties(value = {"friendship"}, allowSetters = true)
     @OneToOne
-    @JoinColumn(unique = true)
+    @JoinColumn(name = "status_id", unique = true)
     private FriendshipStatus friendshipStatus;
 
     @ManyToOne

@@ -1,27 +1,31 @@
 server:
   port: 8080
   base_url: http://localhost:8080
-
 spring:
   messages:
     basename: lang.messages
   profiles:
     active: dev
   datasource:
-    url: jdbc:postgresql://localhost:5432/SocialNetwork
+    url: jdbc:postgresql://localhost:5432/SocialNetwork?stringtype=unspecified
     username: postgres
-    password: rootroot
+    password: root
   jpa:
     show-sql: true
     hibernate:
-      ddl-auto: validate
+      ddl-auto: none
+mailjet:
   mail:
-    host: smtp.gmail.com
-    port: 587
-    username: jpro021social@gmail.com
-    password: SocialNetwork021
-    verificationLink: localhost:8080/api/v1/account/register/complete
+    key: 044badceaa9c50ffadca8bd6977ad2e2
+    from: jpro021network.zerone@mail.ru
+    secret: 9fee7f15536b6b26cc08dd0edef4785a
+    version: v3.1
   flyway:
     enabled: true
 jwt:
   secret: secret
+captcha:
+  width: 193
+  height: 57
+  image: data:captchaImage/png;base64,
+  lifespanBySec: 0

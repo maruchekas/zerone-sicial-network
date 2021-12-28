@@ -1,10 +1,7 @@
 package com.skillbox.javapro21.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import org.hibernate.Hibernate;
 
 import javax.persistence.*;
@@ -42,17 +39,17 @@ public class Post {
     @JoinColumn(unique = true)
     private BlockHistory block;
 
-    @OneToMany(mappedBy = "post")
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnoreProperties(value = {"person", "post"}, allowSetters = true)
     @ToString.Exclude
     private Set<PostLike> likes = new HashSet<>();
 
-    @OneToMany(mappedBy = "post")
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnoreProperties(value = {"post"}, allowSetters = true)
     @ToString.Exclude
     private Set<PostFile> files = new HashSet<>();
 
-    @OneToMany(mappedBy = "post")
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnoreProperties(value = {"block", "post", "person"}, allowSetters = true)
     @ToString.Exclude
     private Set<PostComment> comments = new HashSet<>();
@@ -80,6 +77,8 @@ public class Post {
             },
             allowSetters = true
     )
+
+    @JoinColumn(name = "author_id")
     private Person author;
 
     @Override

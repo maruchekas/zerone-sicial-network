@@ -1,11 +1,10 @@
 package com.skillbox.javapro21.api.response.account;
 
 import com.skillbox.javapro21.api.response.Content;
+import com.skillbox.javapro21.domain.Person;
 import lombok.Data;
 
-import java.util.Map;
-
 @Data
-public class AccountContent implements Content {
-    Map<String, String> data;
+public class AuthContent implements Content {
+    Person person;
 }

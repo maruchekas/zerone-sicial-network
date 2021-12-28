@@ -14,8 +14,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 @EnableWebSecurity
@@ -24,12 +22,9 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 последнее включает AOP (@PreAuthorize/@PostAuthorize)
 */
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
-
     private final JwtFilter jwtFilter;
-
     private final UserDetailServiceImpl userDetailServiceImpl;
 
-    @Autowired
     public SecurityConfig(JwtFilter jwtFilter, UserDetailServiceImpl userDetailServiceImpl) {
         this.jwtFilter = jwtFilter;
         this.userDetailServiceImpl = userDetailServiceImpl;
@@ -37,14 +32,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.csrf().disable()
+        http
+                .csrf().disable()
                 .cors()
                 .and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
                 .antMatchers("/**").permitAll()
-                .anyRequest().authenticated()
+                .anyRequest()
+                .authenticated()
                 .and()
                 .formLogin().disable()
                 .httpBasic().disable()

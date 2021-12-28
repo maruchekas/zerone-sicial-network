@@ -9,9 +9,8 @@ import java.time.ZoneId;
 import java.util.Date;
 
 @Component
-public class JwtDecoder {
-
-    @Value("$(jwt.secret)")
+public class JwtGenerator {
+    @Value("${jwt.secret}")
     private String SECRET_KEY;
 
     public String generateToken(String login) {

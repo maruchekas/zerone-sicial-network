@@ -8,6 +8,7 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Setter
@@ -24,22 +25,19 @@ public class PostComment {
     @Column(name = "time")
     private LocalDateTime time;
 
-    @Column(name = "parent_id")
-    private Long parentId;
+    @ManyToOne
+    @JoinColumn(name = "parent_id")
+    private PostComment parentId;
 
     @Column(name = "comment_text")
     private String commentText;
 
     @Column(name = "is_blocked")
-    private Integer isBlocked;
-
-    @JsonIgnoreProperties(value = {"post", "comment", "person"}, allowSetters = true)
-    @OneToOne
-    @JoinColumn(unique = true)
-    private BlockHistory block;
+    private int isBlocked;
 
     @ManyToOne
     @JsonIgnoreProperties(value = {"block", "likes", "files", "comments", "tags", "author"}, allowSetters = true)
+    @JoinColumn(name = "post_id")
     private Post post;
 
     @ManyToOne
@@ -57,6 +55,7 @@ public class PostComment {
             },
             allowSetters = true
     )
+    @JoinColumn(name = "author_id")
     private Person person;
 
     @Override

@@ -32,7 +32,7 @@ public class Message {
     @Column(name = "read_status")
     private ReadStatus readStatus;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JsonIgnoreProperties(
             value = {
                     "blocksLists",
@@ -47,9 +47,10 @@ public class Message {
             },
             allowSetters = true
     )
+    @JoinColumn(name = "author_id")
     private Person author;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JsonIgnoreProperties(
             value = {
                     "blocksLists",
@@ -64,6 +65,7 @@ public class Message {
             },
             allowSetters = true
     )
+//    @JoinColumn(name = "person_id")
     private Person recipient;
 
     @Override
