@@ -1,4 +1,4 @@
-package com.skillbox.javapro21.api.request;
+package com.skillbox.javapro21.api.request.profile;
 
 import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
@@ -6,6 +6,5 @@ import org.springframework.web.multipart.MultipartFile;
 @Data
 public class ChangeAvatarRequest {
 
-    private MultipartFile photo;
-
+    private MultipartFile file;
 }
