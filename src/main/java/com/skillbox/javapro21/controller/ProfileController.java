@@ -1,9 +1,13 @@
 package com.skillbox.javapro21.controller;
 
+import com.skillbox.javapro21.api.request.post.PostRequest;
 import com.skillbox.javapro21.api.response.DataResponse;
+import com.skillbox.javapro21.api.response.ListDataResponse;
 import com.skillbox.javapro21.api.response.MessageOkContent;
 import com.skillbox.javapro21.api.request.profile.*;
 import com.skillbox.javapro21.api.response.account.AuthData;
+import com.skillbox.javapro21.api.response.post.PostData;
+import com.skillbox.javapro21.exception.PersonNotFoundException;
 import com.skillbox.javapro21.service.ProfileService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -52,5 +56,31 @@ public class ProfileController {
     @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<DataResponse<MessageOkContent>> deletePerson(Principal principal) {
         return new ResponseEntity<>(profileService.deletePerson(principal), HttpStatus.OK);
+    }
+
+    @Operation(summary = "Получить текущего пользователя", security = @SecurityRequirement(name = "jwt"))
+    @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('user:write')")
+    public ResponseEntity<DataResponse<AuthData>> getPersonById(@PathVariable Long id) throws PersonNotFoundException {
+        return new ResponseEntity<>(profileService.getPersonById(id), HttpStatus.OK);
+    }
+
+    @Operation(summary = "Публикации пользователя на стене", security = @SecurityRequirement(name = "jwt"))
+    @GetMapping("/{id}/wall")
+    @PreAuthorize("hasAuthority('user:write')")
+    public ResponseEntity<ListDataResponse<PostData>> getPersonWallById(@PathVariable Long id,
+                                                                        @RequestParam(name = "offset", defaultValue = "0") int offset,
+                                                                        @RequestParam(name = "item_per_page", defaultValue = "20") int itemPerPage) {
+        return new ResponseEntity<>(profileService.getPersonWallById(id, offset, itemPerPage), HttpStatus.OK);
+    }
+
+    @Operation(summary = "Публикации пользователя на стене", security = @SecurityRequirement(name = "jwt"))
+    @PostMapping("/{id}/wall")
+    @PreAuthorize("hasAuthority('user:write')")
+    public ResponseEntity<DataResponse<PostData>> postPostOnPersonWallById(@PathVariable Long id,
+                                                                        @RequestParam(name = "publish_date", defaultValue = "-1") Long publishDate,
+                                                                        @RequestBody PostRequest postRequest,
+                                                                        Principal principal) {
+        return new ResponseEntity<>(profileService.postPostOnPersonWallById(id, publishDate, postRequest, principal), HttpStatus.OK);
     }
 }
