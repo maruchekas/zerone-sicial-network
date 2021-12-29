@@ -107,11 +107,11 @@ public class Person implements UserDetails {
     @JsonIgnoreProperties(value = {"author", "recipient"}, allowSetters = true)
     @ToString.Exclude
     private Set<Message> incMessages = new HashSet<>();
-//
-//    @OneToMany(mappedBy = "author")
-//    @JsonIgnoreProperties(value = {"block", "likes", "files", "comments", "tags", "author"}, allowSetters = true)
-//    @ToString.Exclude
-//    private Set<Post> posts = new HashSet<>();
+
+    @OneToMany(mappedBy = "author")
+    @JsonIgnoreProperties(value = {"block", "likes", "files", "comments", "tags", "author"}, allowSetters = true)
+    @ToString.Exclude
+    private Set<Post> posts = new HashSet<>();
 //
 //    @OneToMany(mappedBy = "person")
 //    @JsonIgnoreProperties(value = {"person", "post"}, allowSetters = true)
