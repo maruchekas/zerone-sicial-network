@@ -1,6 +1,5 @@
 package com.skillbox.javapro21.service.impl;
 
-import com.skillbox.javapro21.api.response.Content;
 import com.skillbox.javapro21.api.response.DataResponse;
 import com.skillbox.javapro21.api.response.MessageOkContent;
 import com.skillbox.javapro21.api.response.account.AuthData;
@@ -57,14 +56,14 @@ public class UtilsService {
 
 
     /**
-     * заблокирован поьзователь или нет ?
+     * заблокирован пользователь или нет ?
      */
     public String isBlockedPerson(Person person){
         return person.getIsBlocked() == 0 ? "false" : "true";
     }
 
     /**
-     * заполненние данных о пользователе
+     * заполнение данных о пользователе
      */
     public AuthData getAuthData(Person person, String token) {
         AuthData authData = new AuthData()

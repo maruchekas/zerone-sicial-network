@@ -32,7 +32,7 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     public DataResponse<AuthData> editPerson(Principal principal, EditProfileRequest editProfileRequest) {
-        Person person = findPersonByEmail(principal.getName());
+        Person person = utilsService.findPersonByEmail(principal.getName());
         editPerson(person, editProfileRequest);
         return getDataResponse(person);
     }

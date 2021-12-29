@@ -66,19 +66,19 @@ public class PostServiceImpl implements PostService {
     }
 
     public DataResponse<PostData> putPostByIdAndMessageInDay(Long id, long publishDate, PostRequest postRequest, Principal principal) throws PostNotFoundException, AuthorAndUserEqualsException {
-        Person person = findPersonByEmail(principal.getName());
+        Person person = utilsService.findPersonByEmail(principal.getName());
         Post post = postRepository.findPostById(id).orElseThrow(() -> new PostNotFoundException("Поста с таким айди не существует или пост заблокирован модератором"));
         if (!person.getId().equals(post.getAuthor().getId()))
             throw new AuthorAndUserEqualsException("Пользователь не может менять данные в этом посте");
         post.setTitle(postRequest.getTitle())
                 .setPostText(postRequest.getPostText())
-                .setTime((publishDate == -1) ? LocalDateTime.now() : getLocalDateTime(publishDate));
+                .setTime((publishDate == -1) ? LocalDateTime.now() : utilsService.getLocalDateTime(publishDate));
         post = postRepository.saveAndFlush(post);
         return getDataResponse(getPostData(post));
     }
 
     public DataResponse<PostDeleteResponse> deletePostById(Long id, Principal principal) throws PostNotFoundException, AuthorAndUserEqualsException {
-        Person person = findPersonByEmail(principal.getName());
+        Person person = utilsService.findPersonByEmail(principal.getName());
         Post post = postRepository.findPostById(id).orElseThrow(() -> new PostNotFoundException("Поста с таким айди не существует или пост заблокирован модератором"));
         if (!person.getId().equals(post.getAuthor().getId()))
             throw new AuthorAndUserEqualsException("Пользователь не может удалить этот пост");
@@ -92,7 +92,7 @@ public class PostServiceImpl implements PostService {
     }
 
     public DataResponse<PostData> recoverPostById(Long id, Principal principal) throws PostNotFoundException, AuthorAndUserEqualsException, PostRecoveryException {
-        Person person = findPersonByEmail(principal.getName());
+        Person person = utilsService.findPersonByEmail(principal.getName());
         Post post = postRepository.findDeletedPostById(id).orElseThrow(() -> new PostNotFoundException("Поста с таким айди не существует или пост заблокирован модератором"));
         if (!person.getId().equals(post.getAuthor().getId()))
             throw new AuthorAndUserEqualsException("Пользователь не может восстановить этот пост");
