@@ -1,7 +1,7 @@
 package com.skillbox.javapro21.controller;
 
 import com.skillbox.javapro21.api.response.captcha.CaptchaResponse;
-import com.skillbox.javapro21.service.serviceImpl.CaptchaServiceImpl;
+import com.skillbox.javapro21.service.impl.CaptchaServiceImpl;
 import lombok.Data;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
