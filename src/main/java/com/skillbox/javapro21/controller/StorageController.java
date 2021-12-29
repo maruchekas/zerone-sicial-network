@@ -1,8 +1,7 @@
 package com.skillbox.javapro21.controller;
 
-import com.skillbox.javapro21.api.request.profile.ChangeAvatarRequest;
+import com.skillbox.javapro21.api.response.Content;
 import com.skillbox.javapro21.api.response.DataResponse;
-import com.skillbox.javapro21.api.response.account.AvatarUploadData;
 import com.skillbox.javapro21.service.ResourceService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -11,14 +10,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.security.Principal;
-import java.time.LocalDateTime;
 
 @Slf4j
 @Tag(name = "Контроллер для работы с хранилищем")
@@ -37,14 +36,10 @@ public class StorageController {
     @Operation(summary = "Загрузка аватара пользователя в хранилище сервиса")
     @PreAuthorize("hasAuthority('user:write')")
     @PostMapping(value = "/storage", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<DataResponse<AvatarUploadData>> saveUserAvatar(@ModelAttribute ChangeAvatarRequest changeAvatarRequest,
-                                                                         Principal principal) throws IOException {
-        DataResponse<AvatarUploadData> response = new DataResponse<>();
-        response.setTimestamp(LocalDateTime.now());
-        AvatarUploadData data = resourceService.saveUserAvatar(changeAvatarRequest.getFile(), principal);
-        response.setData(data);
-        log.info("Пользователь {} сохранил свой аватар в хранилище", principal.getName());
+    public ResponseEntity<DataResponse<Content>> saveUserAvatar(@RequestParam("type") String type,
+                                                                @RequestParam(value = "file", required = false) MultipartFile file,
+                                                                Principal principal) throws IOException {
+        DataResponse<Content> response = resourceService.saveFileInStorage(type, file, principal);
         return ResponseEntity.ok(response);
     }
-
 }
