@@ -26,8 +26,8 @@ import javax.swing.text.Utilities;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@TestPropertySource(value = {"classpath:application.yml"})
-//@TestPropertySource(value = {"classpath:application-test.properties"})
+//@TestPropertySource(value = {"classpath:application.yml"})
+@TestPropertySource(value = {"classpath:application-test.properties"})
 public class AuthControllerTest extends AbstractTest {
 
     @Autowired

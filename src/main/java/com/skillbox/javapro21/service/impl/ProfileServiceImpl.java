@@ -32,7 +32,8 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     public DataResponse<AuthData> editPerson(Principal principal, EditProfileRequest editProfileRequest) {
-        Person person = editPerson(editProfileRequest);
+        Person person = findPersonByEmail(principal.getName());
+        editPerson(person, editProfileRequest);
         return getDataResponse(person);
     }
 
@@ -43,8 +44,8 @@ public class ProfileServiceImpl implements ProfileService {
                 .setData(utilsService.getAuthData(person, null));
     }
 
-    private Person editPerson(EditProfileRequest editProfileRequest) {
-        Person person = new Person()
+    private Person editPerson(Person person, EditProfileRequest editProfileRequest) {
+        person
                 .setFirstName(editProfileRequest.getFirstName())
                 .setLastName(editProfileRequest.getLastName())
                 .setRegDate(editProfileRequest.getRegDate())

@@ -1,10 +1,17 @@
 package com.skillbox.javapro21.service.impl;
 
+import com.skillbox.javapro21.api.request.post.PostRequest;
+import com.skillbox.javapro21.api.response.DataResponse;
 import com.skillbox.javapro21.api.response.ListDataResponse;
 import com.skillbox.javapro21.api.response.post.PostData;
+import com.skillbox.javapro21.api.response.post.PostDeleteResponse;
+import com.skillbox.javapro21.domain.Person;
 import com.skillbox.javapro21.domain.Post;
 import com.skillbox.javapro21.domain.PostLike;
 import com.skillbox.javapro21.domain.Tag;
+import com.skillbox.javapro21.exception.AuthorAndUserEqualsException;
+import com.skillbox.javapro21.exception.PostNotFoundException;
+import com.skillbox.javapro21.exception.PostRecoveryException;
 import com.skillbox.javapro21.repository.PersonRepository;
 import com.skillbox.javapro21.repository.PostLikeRepository;
 import com.skillbox.javapro21.repository.PostRepository;
@@ -18,7 +25,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import java.security.Principal;
-import java.time.*;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -51,6 +58,58 @@ public class PostServiceImpl implements PostService {
             pageablePostList = postRepository.findPostsByTextByAuthorByTagsContainingByDateExcludingBlockers(text, datetimeFrom, datetimeTo, author, tags, pageable);
         }
         return getPostsResponse(offset, itemPerPage, pageablePostList);
+    }
+
+    public DataResponse<PostData> getPostsById(Long id, Principal principal) throws PostNotFoundException {
+        PostData postData = getPostData(postRepository.findPostById(id).orElseThrow(() -> new PostNotFoundException("Поста с таким айди не существует или пост заблокирован модератором")));
+        return getDataResponse(postData);
+    }
+
+    public DataResponse<PostData> putPostByIdAndMessageInDay(Long id, long publishDate, PostRequest postRequest, Principal principal) throws PostNotFoundException, AuthorAndUserEqualsException {
+        Person person = findPersonByEmail(principal.getName());
+        Post post = postRepository.findPostById(id).orElseThrow(() -> new PostNotFoundException("Поста с таким айди не существует или пост заблокирован модератором"));
+        if (!person.getId().equals(post.getAuthor().getId()))
+            throw new AuthorAndUserEqualsException("Пользователь не может менять данные в этом посте");
+        post.setTitle(postRequest.getTitle())
+                .setPostText(postRequest.getPostText())
+                .setTime((publishDate == -1) ? LocalDateTime.now() : getLocalDateTime(publishDate));
+        post = postRepository.saveAndFlush(post);
+        return getDataResponse(getPostData(post));
+    }
+
+    public DataResponse<PostDeleteResponse> deletePostById(Long id, Principal principal) throws PostNotFoundException, AuthorAndUserEqualsException {
+        Person person = findPersonByEmail(principal.getName());
+        Post post = postRepository.findPostById(id).orElseThrow(() -> new PostNotFoundException("Поста с таким айди не существует или пост заблокирован модератором"));
+        if (!person.getId().equals(post.getAuthor().getId()))
+            throw new AuthorAndUserEqualsException("Пользователь не может удалить этот пост");
+        post.setIsBlocked(3);
+        postRepository.save(post);
+        return new DataResponse<PostDeleteResponse>()
+                .setError("")
+                .setTimestamp(LocalDateTime.now())
+                .setData(new PostDeleteResponse()
+                        .setId(post.getId()));
+    }
+
+    public DataResponse<PostData> recoverPostById(Long id, Principal principal) throws PostNotFoundException, AuthorAndUserEqualsException, PostRecoveryException {
+        Person person = findPersonByEmail(principal.getName());
+        Post post = postRepository.findDeletedPostById(id).orElseThrow(() -> new PostNotFoundException("Поста с таким айди не существует или пост заблокирован модератором"));
+        if (!person.getId().equals(post.getAuthor().getId()))
+            throw new AuthorAndUserEqualsException("Пользователь не может восстановить этот пост");
+        if (post.getIsBlocked() == 0)
+            throw new PostRecoveryException("Данный пост не заблокирован");
+        if (post.getIsBlocked() == 1)
+            throw new PostRecoveryException("Данный пост заблокирован модератором");
+        post.setIsBlocked(0);
+        postRepository.save(post);
+        return getDataResponse(getPostData(post));
+    }
+
+    private DataResponse<PostData> getDataResponse(PostData postData) {
+        return new DataResponse<PostData>()
+                .setError("")
+                .setTimestamp(LocalDateTime.now())
+                .setData(postData);
     }
 
     private ListDataResponse<PostData> getPostsResponse(int offset, int itemPerPage, Page<Post> pageablePostList) {

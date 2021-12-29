@@ -1,5 +1,6 @@
 package com.skillbox.javapro21.service.impl;
 
+import com.skillbox.javapro21.api.response.Content;
 import com.skillbox.javapro21.api.response.DataResponse;
 import com.skillbox.javapro21.api.response.MessageOkContent;
 import com.skillbox.javapro21.api.response.account.AuthData;
