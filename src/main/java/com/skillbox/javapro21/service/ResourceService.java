@@ -1,6 +1,7 @@
 package com.skillbox.javapro21.service;
 
-import com.skillbox.javapro21.api.response.account.AvatarUploadData;
+import com.skillbox.javapro21.api.response.Content;
+import com.skillbox.javapro21.api.response.DataResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -10,6 +11,5 @@ import java.security.Principal;
 @Service
 public interface ResourceService {
 
-    AvatarUploadData saveUserAvatar(MultipartFile image, Principal principal) throws IOException;
-
+    DataResponse<Content> saveFileInStorage(String type, MultipartFile image, Principal principal) throws IOException;
 }
