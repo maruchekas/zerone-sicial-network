@@ -10,9 +10,7 @@ import org.hibernate.Hibernate;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Table(name = "posts")
@@ -65,7 +63,7 @@ public class Post {
             inverseJoinColumns = @JoinColumn(name = "tag_id"))
     @JsonIgnoreProperties(value = {"posts"}, allowSetters = true)
     @ToString.Exclude
-    private Set<Tag> tags = new HashSet<>();
+    private List<Tag> tags = new ArrayList<>();
 
     @ManyToOne
     @JsonIgnoreProperties(
