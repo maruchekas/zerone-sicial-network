@@ -25,8 +25,8 @@ import java.time.LocalDateTime;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@TestPropertySource(value = {"classpath:application.yml"})
-//@TestPropertySource(value = {"classpath:application-test.properties"})
+//@TestPropertySource(value = {"classpath:application.yml"})
+@TestPropertySource(value = {"classpath:application-test.properties"})
 public class ProfileControllerTest extends AbstractTest {
     @Autowired
     private MockMvc mockMvc;
