@@ -29,6 +29,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -252,4 +253,85 @@ public class PostControllerTest extends AbstractTest {
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isBadRequest());
     }
+
+    @Test
+    @WithMockUser(username = "test@test.rub", authorities = "user:write")
+    void deletePostById() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders
+                        .delete("/api/v1/post/{id}", post1.getId())
+                        .principal(() -> "test@test.rub")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.id").value(post1.getId()));
+    }
+
+    @Test
+    @WithMockUser(username = "test@test.rub", authorities = "user:write")
+    void deletePostByIdButPostIsBlocked() throws Exception {
+        Optional<Post> post = postRepository.findPostById(post1.getId());
+        post.get().setIsBlocked(1);
+        postRepository.save(post.get());
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .delete("/api/v1/post/{id}", post1.getId())
+                        .principal(() -> "test@test.rub")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
+    }
+
+    @Test
+    @WithMockUser(username = "test@test.ru", authorities = "user:write")
+    void deletePostByIdNotAuthor() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders
+                        .delete("/api/v1/post/{id}", post1.getId())
+                        .principal(() -> "test@test.ru")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
+    }
+
+    @Test
+    @WithMockUser(username = "test@test.ru", authorities = "user:write")
+    void recoveryPostByIdNotAuthor() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders
+                        .put("/api/v1/post/{id}/recover", post1.getId())
+                        .principal(() -> "test@test.ru")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
+    }
+
+    @Test
+    @WithMockUser(username = "test@test.rub", authorities = "user:write")
+    void recoveryPostByIdPostIsBlockedModerate() throws Exception {
+        Optional<Post> postById = postRepository.findPostById(post1.getId());
+        postById.get().setIsBlocked(1);
+        postRepository.save(postById.get());
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .put("/api/v1/post/{id}/recover", post1.getId())
+                        .principal(() -> "test@test.rub")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
+    }
+
+    @Test
+    @WithMockUser(username = "test@test.rub", authorities = "user:write")
+    void recoveryPostById() throws Exception {
+        Optional<Post> postById = postRepository.findPostById(post1.getId());
+        postById.get().setIsBlocked(2);
+        postRepository.save(postById.get());
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .put("/api/v1/post/{id}/recover", post1.getId())
+                        .principal(() -> "test@test.rub")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.id").value(post1.getId()));
+    }
+
 }

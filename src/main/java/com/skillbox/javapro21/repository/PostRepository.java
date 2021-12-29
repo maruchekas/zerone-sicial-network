@@ -13,6 +13,8 @@ import java.util.Optional;
 
 @Repository
 public interface PostRepository extends JpaRepository<Post, Integer> {
+    @Query("select p from Post p " +
+            "where p.isBlocked = 0 and p.id = :id")
     Optional<Post> findPostById(Long id);
 
     @Query("select p from Post p " +
@@ -42,5 +44,7 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
     Page<Post> findPostsByTextByAuthorWithoutTagsContainingByDateExcludingBlockers(String text, LocalDateTime dateFrom,
                                                                                    LocalDateTime dateTo, String author,
                                                                                    Pageable pageable);
-
+    @Query("select p from Post p " +
+            "where p.id = :id")
+    Optional<Post> findDeletedPostById(Long id);
 }

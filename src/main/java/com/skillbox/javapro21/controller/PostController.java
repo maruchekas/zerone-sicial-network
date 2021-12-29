@@ -4,8 +4,10 @@ import com.skillbox.javapro21.api.request.post.PostRequest;
 import com.skillbox.javapro21.api.response.DataResponse;
 import com.skillbox.javapro21.api.response.ListDataResponse;
 import com.skillbox.javapro21.api.response.post.PostData;
+import com.skillbox.javapro21.api.response.post.PostDeleteResponse;
 import com.skillbox.javapro21.exception.AuthorAndUserEqualsException;
 import com.skillbox.javapro21.exception.PostNotFoundException;
+import com.skillbox.javapro21.exception.PostRecoveryException;
 import com.skillbox.javapro21.service.PostService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -62,4 +64,19 @@ public class PostController {
         return new ResponseEntity<>(postService.putPostByIdAndMessageInDay(id, publishDate, postRequest, principal), HttpStatus.OK);
     }
 
+    @Operation(summary = "Удаление публикации по id")
+    @DeleteMapping("/post/{id}")
+    @PreAuthorize("hasAuthority('user:write')")
+    public ResponseEntity<DataResponse<PostDeleteResponse>> putPostByIdAndMessageInDay(@PathVariable Long id,
+                                                                                       Principal principal) throws PostNotFoundException, AuthorAndUserEqualsException {
+        return new ResponseEntity<>(postService.deletePostById(id, principal), HttpStatus.OK);
+    }
+
+    @Operation(summary = "Восстановление публикации по id")
+    @PutMapping("/post/{id}/recover")
+    @PreAuthorize("hasAuthority('user:write')")
+    public ResponseEntity<DataResponse<PostData>> recoverPostById(@PathVariable Long id,
+                                                                  Principal principal) throws PostNotFoundException, AuthorAndUserEqualsException, PostRecoveryException {
+        return new ResponseEntity<>(postService.recoverPostById(id, principal), HttpStatus.OK);
+    }
 }
