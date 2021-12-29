@@ -278,7 +278,7 @@ public class PostControllerTest extends AbstractTest {
                         .principal(() -> "test@test.rub")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.status().isBadRequest());
+                .andExpect(MockMvcResultMatchers.status().isNotFound());
     }
 
     @Test
