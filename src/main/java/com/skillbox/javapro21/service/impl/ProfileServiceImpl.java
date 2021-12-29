@@ -1,8 +1,8 @@
 package com.skillbox.javapro21.service.impl;
 
+import com.skillbox.javapro21.api.request.profile.EditProfileRequest;
 import com.skillbox.javapro21.api.response.DataResponse;
 import com.skillbox.javapro21.api.response.MessageOkContent;
-import com.skillbox.javapro21.api.request.profile.EditProfileRequest;
 import com.skillbox.javapro21.api.response.account.AuthData;
 import com.skillbox.javapro21.domain.Person;
 import com.skillbox.javapro21.repository.PersonRepository;
@@ -15,24 +15,22 @@ import java.security.Principal;
 import java.time.LocalDateTime;
 
 @Component
-public class ProfileServiceImpl implements ProfileService {
-
-    private final UtilsService utilsService;
+public class ProfileServiceImpl extends UtilsService implements ProfileService {
     private final PersonRepository personRepository;
 
     @Autowired
-    protected ProfileServiceImpl(UtilsService utilsService, PersonRepository personRepository) {
-        this.utilsService = utilsService;
+    protected ProfileServiceImpl(PersonRepository personRepository) {
+        super(personRepository);
         this.personRepository = personRepository;
     }
 
     public DataResponse<AuthData> getPerson(Principal principal) {
-        Person person = utilsService.findPersonByEmail(principal.getName());
+        Person person = findPersonByEmail(principal.getName());
         return getDataResponse(person);
     }
 
     public DataResponse<AuthData> editPerson(Principal principal, EditProfileRequest editProfileRequest) {
-        Person person = utilsService.findPersonByEmail(principal.getName());
+        Person person = findPersonByEmail(principal.getName());
         editPerson(person, editProfileRequest);
         return getDataResponse(person);
     }
@@ -41,7 +39,7 @@ public class ProfileServiceImpl implements ProfileService {
         return new DataResponse<AuthData>()
                 .setTimestamp(LocalDateTime.now())
                 .setError("string")
-                .setData(utilsService.getAuthData(person, null));
+                .setData(getAuthData(person, null));
     }
 
     private Person editPerson(Person person, EditProfileRequest editProfileRequest) {
@@ -61,10 +59,10 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     public DataResponse<MessageOkContent> deletePerson(Principal principal) {
-        Person person = utilsService.findPersonByEmail(principal.getName())
+        Person person = findPersonByEmail(principal.getName())
                 .setIsBlocked(2);
         personRepository.save(person);
         SecurityContextHolder.clearContext();
-        return utilsService.getMessageOkResponse();
+        return getMessageOkResponse();
     }
 }

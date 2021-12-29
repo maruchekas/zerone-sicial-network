@@ -33,7 +33,6 @@ import java.util.Optional;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-//@TestPropertySource(value = {"classpath:application.yml"})
 @TestPropertySource(value = {"classpath:application-test.properties"})
 public class PostControllerTest extends AbstractTest {
     @Autowired

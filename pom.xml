@@ -7,7 +7,6 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<name>SocialNetwork</name>
 	<description>Group diploma by Skillbox Java-PRO course</description>
-
 	<properties>
 		<java.version>17</java.version>
 
@@ -152,7 +151,6 @@
 			<artifactId>cloudinary-http44</artifactId>
 			<version>1.29.0</version>
 		</dependency>
-
     </dependencies>
 
     <build>
@@ -164,5 +162,4 @@
 			</plugin>
         </plugins>
     </build>
-
 </project>
