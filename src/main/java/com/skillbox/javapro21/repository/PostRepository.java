@@ -24,8 +24,8 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
             "and p.isBlocked = 0 " +
             "and ps.isBlocked = 0 " +
             "and p.time between :dateFrom and :dateTo and p.time < CURRENT_TIMESTAMP " +
-            "and (p.title like '%'||:text||'%' or p.postText like '%'||:text||'%') " +
-            "and (ps.firstName like :author||'%' or ps.lastName like :author||'%' and :author != '' or :author = '' ) " +
+            "or ((p.title like '%'||:text||'%' or p.postText like '%'||:text||'%') " +
+            "or (ps.firstName like :author||'%' or ps.lastName like :author||'%' and :author != '' or :author = '' )) " +
             "group by p.id " +
             "order by p.time desc")
     Page<Post> findPostsByTextByAuthorByTagsContainingByDateExcludingBlockers(String text, LocalDateTime dateFrom,
@@ -37,8 +37,8 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
             "where p.isBlocked = 0 " +
             "and ps.isBlocked = 0 " +
             "and (p.time between :dateFrom and :dateTo and p.time < CURRENT_TIMESTAMP) " +
-            "and (p.title like '%'||:text||'%' or p.postText like '%'||:text||'%') " +
-            "and (ps.firstName like :author||'%' or ps.lastName like :author||'%' ) " +
+            "and ((p.title like '%'||:text||'%' or p.postText like '%'||:text||'%') " +
+            "or (ps.firstName like :author||'%' or ps.lastName like :author||'%' )) " +
             "group by p.id " +
             "order by time desc")
     Page<Post> findPostsByTextByAuthorWithoutTagsContainingByDateExcludingBlockers(String text, LocalDateTime dateFrom,
