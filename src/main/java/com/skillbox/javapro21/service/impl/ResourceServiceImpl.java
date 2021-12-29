@@ -1,4 +1,4 @@
-package com.skillbox.javapro21.service.serviceImpl;
+package com.skillbox.javapro21.service.impl;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.Transformation;
@@ -25,14 +25,13 @@ import java.util.Map;
 
 @Slf4j
 @Component
-public class ResourceServiceImpl extends AbstractMethodClass implements ResourceService {
+public class ResourceServiceImpl implements ResourceService {
 
     private final PersonRepository personRepository;
     private final Cloudinary cloudinary;
 
     @Autowired
     public ResourceServiceImpl(PersonRepository personRepository, Cloudinary cloudinary) {
-        super(personRepository);
         this.personRepository = personRepository;
         this.cloudinary = cloudinary;
     }

@@ -1,4 +1,4 @@
-package com.skillbox.javapro21.service.serviceImpl;
+package com.skillbox.javapro21.service.impl;
 
 import com.skillbox.javapro21.api.request.post.PostRequest;
 import com.skillbox.javapro21.api.response.DataResponse;
@@ -31,24 +31,24 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Component
-public class PostServiceImpl extends AbstractMethodClass implements PostService {
-    private final PersonRepository personRepository;
+public class PostServiceImpl implements PostService {
+
+    private final UtilsService utilsService;
     private final PostRepository postRepository;
     private final TagRepository tagRepository;
     private final PostLikeRepository postLikeRepository;
 
     @Autowired
-    protected PostServiceImpl(PersonRepository personRepository, PostRepository postRepository, TagRepository tagRepository, PostLikeRepository postLikeRepository) {
-        super(personRepository);
-        this.personRepository = personRepository;
+    protected PostServiceImpl(UtilsService utilsService, PostRepository postRepository, TagRepository tagRepository, PostLikeRepository postLikeRepository) {
+        this.utilsService = utilsService;
         this.postRepository = postRepository;
         this.tagRepository = tagRepository;
         this.postLikeRepository = postLikeRepository;
     }
 
     public ListDataResponse<PostData> getPosts(String text, long dateFrom, long dateTo, int offset, int itemPerPage, String author, String tag, Principal principal) {
-        LocalDateTime datetimeFrom = (dateFrom != -1) ? getLocalDateTime(dateFrom) : LocalDateTime.now().minusYears(1);
-        LocalDateTime datetimeTo = (dateTo != -1) ? getLocalDateTime(dateTo) : LocalDateTime.now();
+        LocalDateTime datetimeFrom = (dateFrom != -1) ? utilsService.getLocalDateTime(dateFrom) : LocalDateTime.now().minusYears(1);
+        LocalDateTime datetimeTo = (dateTo != -1) ? utilsService.getLocalDateTime(dateTo) : LocalDateTime.now();
         Pageable pageable = PageRequest.of(offset / itemPerPage, itemPerPage);
         Page<Post> pageablePostList;
         if (tag.equals("")) {
@@ -66,19 +66,19 @@ public class PostServiceImpl extends AbstractMethodClass implements PostService 
     }
 
     public DataResponse<PostData> putPostByIdAndMessageInDay(Long id, long publishDate, PostRequest postRequest, Principal principal) throws PostNotFoundException, AuthorAndUserEqualsException {
-        Person person = findPersonByEmail(principal.getName());
+        Person person = utilsService.findPersonByEmail(principal.getName());
         Post post = postRepository.findPostById(id).orElseThrow(() -> new PostNotFoundException("Поста с таким айди не существует или пост заблокирован модератором"));
         if (!person.getId().equals(post.getAuthor().getId()))
             throw new AuthorAndUserEqualsException("Пользователь не может менять данные в этом посте");
         post.setTitle(postRequest.getTitle())
                 .setPostText(postRequest.getPostText())
-                .setTime((publishDate == -1) ? LocalDateTime.now() : getLocalDateTime(publishDate));
+                .setTime((publishDate == -1) ? LocalDateTime.now() : utilsService.getLocalDateTime(publishDate));
         post = postRepository.saveAndFlush(post);
         return getDataResponse(getPostData(post));
     }
 
     public DataResponse<PostDeleteResponse> deletePostById(Long id, Principal principal) throws PostNotFoundException, AuthorAndUserEqualsException {
-        Person person = findPersonByEmail(principal.getName());
+        Person person = utilsService.findPersonByEmail(principal.getName());
         Post post = postRepository.findPostById(id).orElseThrow(() -> new PostNotFoundException("Поста с таким айди не существует или пост заблокирован модератором"));
         if (!person.getId().equals(post.getAuthor().getId()))
             throw new AuthorAndUserEqualsException("Пользователь не может удалить этот пост");
@@ -92,7 +92,7 @@ public class PostServiceImpl extends AbstractMethodClass implements PostService 
     }
 
     public DataResponse<PostData> recoverPostById(Long id, Principal principal) throws PostNotFoundException, AuthorAndUserEqualsException, PostRecoveryException {
-        Person person = findPersonByEmail(principal.getName());
+        Person person = utilsService.findPersonByEmail(principal.getName());
         Post post = postRepository.findDeletedPostById(id).orElseThrow(() -> new PostNotFoundException("Поста с таким айди не существует или пост заблокирован модератором"));
         if (!person.getId().equals(post.getAuthor().getId()))
             throw new AuthorAndUserEqualsException("Пользователь не может восстановить этот пост");
@@ -139,7 +139,7 @@ public class PostServiceImpl extends AbstractMethodClass implements PostService 
         return new PostData()
                 .setId(posts.getId())
                 .setTime(posts.getTime())
-                .setAuthor(getAuthData(posts.getAuthor(), null))
+                .setAuthor(utilsService.getAuthData(posts.getAuthor(), null))
                 .setTitle(posts.getTitle())
                 .setPostText(posts.getPostText())
                 .setBlocked(posts.getIsBlocked() != 0)

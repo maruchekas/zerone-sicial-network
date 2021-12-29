@@ -1,4 +1,4 @@
-package com.skillbox.javapro21.service.serviceImpl;
+package com.skillbox.javapro21.service.impl;
 
 import com.skillbox.javapro21.api.request.auth.AuthRequest;
 import com.skillbox.javapro21.api.response.DataResponse;
@@ -21,19 +21,19 @@ import java.time.LocalDateTime;
 
 @Slf4j
 @Component
-public class AuthServiceImpl extends AbstractMethodClass implements AuthService {
-    private final PersonRepository personRepository;
+public class AuthServiceImpl implements AuthService {
+
+    private final UtilsService utilsService;
     private final JwtGenerator jwtGenerator;
 
     @Autowired
-    protected AuthServiceImpl(PersonRepository personRepository, JwtGenerator jwtGenerator) {
-        super(personRepository);
-        this.personRepository = personRepository;
+    protected AuthServiceImpl(UtilsService utilsService, JwtGenerator jwtGenerator) {
+        this.utilsService = utilsService;
         this.jwtGenerator = jwtGenerator;
     }
 
     public DataResponse<AuthData> login(AuthRequest authRequest) throws NotSuchUserOrWrongPasswordException, UserLegalException {
-        Person person = findPersonByEmail(authRequest.getEmail());
+        Person person = utilsService.findPersonByEmail(authRequest.getEmail());
         if (!isPersonLegal(person)) throw new UserLegalException("User with email: " + authRequest.getEmail() + " is blocked.");
 
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
@@ -46,7 +46,7 @@ public class AuthServiceImpl extends AbstractMethodClass implements AuthService 
 
     public DataResponse<MessageOkContent> logout() {
         SecurityContextHolder.clearContext();
-        return getMessageOkResponse();
+        return utilsService.getMessageOkResponse();
     }
 
     private boolean isPersonLegal(Person person) {
@@ -59,7 +59,7 @@ public class AuthServiceImpl extends AbstractMethodClass implements AuthService 
         DataResponse<AuthData> dataResponse = new DataResponse<>();
         dataResponse.setError("ok");
         dataResponse.setTimestamp(LocalDateTime.now());
-        AuthData authData = getAuthData(person, token);
+        AuthData authData = utilsService.getAuthData(person, token);
         dataResponse.setData(authData);
         return dataResponse;
     }
