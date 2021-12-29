@@ -2,12 +2,9 @@ package com.skillbox.javapro21.controller;
 
 import com.skillbox.javapro21.AbstractTest;
 import com.skillbox.javapro21.api.request.auth.AuthRequest;
-import com.skillbox.javapro21.config.security.JwtGenerator;
 import com.skillbox.javapro21.domain.Person;
 import com.skillbox.javapro21.domain.enumeration.MessagesPermission;
 import com.skillbox.javapro21.repository.PersonRepository;
-import org.junit.jupiter.api.Assertions;
-import com.skillbox.javapro21.service.serviceImpl.AuthServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
