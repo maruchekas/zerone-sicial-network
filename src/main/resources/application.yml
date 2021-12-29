@@ -30,3 +30,7 @@ captcha:
   height: 57
   image: data:captchaImage/png;base64,
   lifespanBySec: 0
+cloudinary:
+  cloudName: ${CLOUDINARY_CLOUD_NAME}
+  apiKey: ${CLOUDINARY_API_KEY}
+  apiSecret: ${CLOUDINARY_API_SECRET}
