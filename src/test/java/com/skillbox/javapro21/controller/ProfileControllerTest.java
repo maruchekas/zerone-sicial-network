@@ -82,7 +82,6 @@ public class ProfileControllerTest extends AbstractTest {
                 personRepository.findByEmail(verifyPerson.getEmail()).get().getLastOnlineTime().getDayOfMonth());
     }
 
-
     @Test
     @WithMockUser(username = "test1@test.ru", authorities = "user:write")
     void getPerson() throws Exception {
