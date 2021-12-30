@@ -59,7 +59,8 @@ public class ProfileControllerTest extends AbstractTest {
 
     private Friendship friendshipSrc;
     private Friendship friendshipDst;
-    private FriendshipStatus friendshipStatus;
+    private FriendshipStatus friendshipStatusSrc;
+    private FriendshipStatus friendshipStatusDst;
 
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
 
@@ -101,22 +102,28 @@ public class ProfileControllerTest extends AbstractTest {
                 .setLastOnlineTime(LocalDateTime.now());
         personRepository.save(verifyPersonWithPost);
 
-        friendshipStatus = new FriendshipStatus()
-                .setFriendshipStatusType(FRIEND)
-                .setTime(LocalDateTime.now().minusDays(1));
+        friendshipStatusSrc = new FriendshipStatus();
+        friendshipStatusSrc.setFriendshipStatusType(FriendshipStatusType.FRIEND);
+        friendshipStatusSrc.setTime(LocalDateTime.now().minusDays(1));
+        friendshipStatusRepository.save(friendshipStatusSrc);
 
-        friendshipStatusRepository.save(friendshipStatus);
-        friendshipSrc = new Friendship()
-                .setSrcPerson(verifyPerson)
-                .setDstPerson(verifyPersonWithPost)
-                .setFriendshipStatus(friendshipStatus);
-        friendshipDst = new Friendship()
-                .setSrcPerson(verifyPersonWithPost)
-                .setDstPerson(verifyPerson)
-                .setFriendshipStatus(friendshipStatus);
+        friendshipStatusDst = new FriendshipStatus();
+        friendshipStatusDst.setFriendshipStatusType(FriendshipStatusType.FRIEND);
+        friendshipStatusDst.setTime(LocalDateTime.now().minusDays(1));
+        friendshipStatusRepository.save(friendshipStatusDst);
 
+        friendshipSrc = new Friendship();
+        friendshipSrc.setSrcPerson(verifyPerson);
+        friendshipSrc.setDstPerson(verifyPersonWithPost);
+        friendshipSrc.setFriendshipStatus(friendshipStatusSrc);
+
+        friendshipDst = new Friendship();
+        friendshipDst.setSrcPerson(verifyPersonWithPost);
+        friendshipDst.setDstPerson(verifyPerson);
+        friendshipDst.setFriendshipStatus(friendshipStatusDst);
 
         friendshipRepository.save(friendshipSrc);
+        friendshipRepository.save(friendshipDst);
 
         tag1 = new Tag()
                 .setTag("моржиНавсегда");
@@ -240,10 +247,10 @@ public class ProfileControllerTest extends AbstractTest {
     @Test
     @WithMockUser(username = "test1@test.ru", authorities = "user:write")
     void getPersonWallByIdButOneIsBlocked() throws Exception {
-        friendshipStatus.setFriendshipStatusType(FriendshipStatusType.BLOCKED);
-        friendshipStatus.setTime(LocalDateTime.now().minusHours(2));
-        friendshipStatusRepository.save(friendshipStatus);
-        friendshipSrc.setFriendshipStatus(friendshipStatus);
+        friendshipStatusSrc.setFriendshipStatusType(FriendshipStatusType.BLOCKED);
+        friendshipStatusSrc.setTime(LocalDateTime.now().minusHours(2));
+        friendshipStatusRepository.save(friendshipStatusSrc);
+        friendshipSrc.setFriendshipStatus(friendshipStatusSrc);
         friendshipRepository.save(friendshipSrc);
         mockMvc.perform(MockMvcRequestBuilders
                         .get("/api/v1/users/{id}/wall", verifyPersonWithPost.getId())
@@ -273,10 +280,10 @@ public class ProfileControllerTest extends AbstractTest {
     @Test
     @WithMockUser(username = "test1@test.ru", authorities = "user:write")
     void postPostOnPersonWallByIdIsBlocked() throws Exception {
-        friendshipStatus.setFriendshipStatusType(FriendshipStatusType.BLOCKED);
-        friendshipStatus.setTime(LocalDateTime.now().minusHours(2));
-        friendshipStatusRepository.save(friendshipStatus);
-        friendshipSrc.setFriendshipStatus(friendshipStatus);
+        friendshipStatusSrc.setFriendshipStatusType(FriendshipStatusType.BLOCKED);
+        friendshipStatusSrc.setTime(LocalDateTime.now().minusHours(2));
+        friendshipStatusRepository.save(friendshipStatusSrc);
+        friendshipSrc.setFriendshipStatus(friendshipStatusSrc);
         friendshipRepository.save(friendshipSrc);
         PostRequest postRequest = new PostRequest().setPostText("Mu-Mu").setTitle("Pushkin?");
 

@@ -7,9 +7,6 @@ import org.springframework.stereotype.Component;
 @Data
 @Component
 public class ConfirmationUrl {
-    @Value("${server.base_url}")
-    private String baseUrl;
-
-    private final String urlForRegisterComplete = baseUrl + "/api/v1/account/register/complete";
-    private final String urlForPasswordComplete = baseUrl + "/api/v1/account/password/recovery/complete";
+    private final String urlForRegisterComplete = "https://zerone-2022-develop.herokuapp.com/api/v1/account/register/complete";
+    private final String urlForPasswordComplete = "https://zerone-2022-develop.herokuapp.com/api/v1/account/password/recovery/complete";
 }
