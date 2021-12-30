@@ -1,21 +1,30 @@
-package com.skillbox.javapro21.service.serviceImpl;
+package com.skillbox.javapro21.service.impl;
 
-import com.skillbox.javapro21.api.response.DataResponse;
-import com.skillbox.javapro21.api.response.MessageOkContent;
+import com.skillbox.javapro21.api.request.post.PostRequest;
 import com.skillbox.javapro21.api.request.profile.EditProfileRequest;
+import com.skillbox.javapro21.api.response.DataResponse;
+import com.skillbox.javapro21.api.response.ListDataResponse;
 import com.skillbox.javapro21.api.response.account.AuthData;
+import com.skillbox.javapro21.api.response.profile.PersonContent;
+import com.skillbox.javapro21.api.response.profile.PostContent;
 import com.skillbox.javapro21.domain.Person;
+import com.skillbox.javapro21.domain.Post;
+import com.skillbox.javapro21.exception.PersonNotFoundException;
 import com.skillbox.javapro21.repository.PersonRepository;
+import com.skillbox.javapro21.repository.PostRepository;
 import com.skillbox.javapro21.service.ProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
-public class ProfileServiceImpl extends AbstractMethodClass implements ProfileService {
+public class ProfileServiceImpl extends UtilsService implements ProfileService {
     private final PersonRepository personRepository;
     private final PostRepository postRepository;
 
@@ -102,19 +111,10 @@ public class ProfileServiceImpl extends AbstractMethodClass implements ProfileSe
 
     public DataResponse<AuthData> editPerson(Principal principal, EditProfileRequest editProfileRequest) {
         Person person = findPersonByEmail(principal.getName());
-        editPerson(person, editProfileRequest);
+        editPerson(principal, editProfileRequest);
         return getDataResponse(person);
     }
 
-    private DataResponse<AuthData> getDataResponse(Person person) {
-        return new DataResponse<AuthData>()
-                .setTimestamp(LocalDateTime.now())
-                .setError("string")
-                .setData(getAuthData(person, null));
-    }
-
-    private Person editPerson(Person person, EditProfileRequest editProfileRequest) {
-        person
     private Person editPerson(EditProfileRequest editProfileRequest) {
         Person person = new Person()
                 .setFirstName(editProfileRequest.getFirstName())

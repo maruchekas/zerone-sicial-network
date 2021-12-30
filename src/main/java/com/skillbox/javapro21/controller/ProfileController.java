@@ -1,7 +1,7 @@
 package com.skillbox.javapro21.controller;
 
 import com.skillbox.javapro21.api.request.profile.EditProfileRequest;
-import com.skillbox.javapro21.api.request.profile.PostRequest;
+import com.skillbox.javapro21.api.request.post.PostRequest;
 import com.skillbox.javapro21.api.response.DataResponse;
 import com.skillbox.javapro21.api.response.ListDataResponse;
 import com.skillbox.javapro21.api.response.MessageOkContent;
@@ -56,13 +56,11 @@ public class ProfileController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<DataResponse> getPersonById(@PathVariable long id) throws PersonNotFoundException {
         return new ResponseEntity<>(profileService.getPersonById(id), HttpStatus.OK);
     }
 
     @PostMapping("{id}/wall")
-    @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<DataResponse<PostContent>> putPost(@PathVariable long id,
                                                                @RequestParam(name = "publish_date") long publishDate,
                                                                @RequestBody PostRequest postRequest) throws PersonNotFoundException {

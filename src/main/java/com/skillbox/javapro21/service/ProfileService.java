@@ -1,7 +1,7 @@
 package com.skillbox.javapro21.service;
 
+import com.skillbox.javapro21.api.request.post.PostRequest;
 import com.skillbox.javapro21.api.request.profile.EditProfileRequest;
-import com.skillbox.javapro21.api.request.profile.PostRequest;
 import com.skillbox.javapro21.api.response.DataResponse;
 import com.skillbox.javapro21.api.response.ListDataResponse;
 import com.skillbox.javapro21.api.response.MessageOkContent;
