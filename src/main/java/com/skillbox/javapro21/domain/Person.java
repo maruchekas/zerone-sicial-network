@@ -1,6 +1,7 @@
 package com.skillbox.javapro21.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.skillbox.javapro21.config.PostgreSQLEnumType;
 import com.skillbox.javapro21.domain.enumeration.MessagesPermission;
 import com.skillbox.javapro21.domain.enumeration.UserType;
 import lombok.Getter;
@@ -8,6 +9,8 @@ import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
 import org.hibernate.Hibernate;
+import org.hibernate.annotations.Type;
+import org.hibernate.annotations.TypeDef;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -21,8 +24,9 @@ import java.util.Set;
 @Setter
 @Getter
 @Entity
-@Table(name = "persons")
 @Accessors(chain = true)
+@TypeDef(name = "pgsql_enum", typeClass = PostgreSQLEnumType.class)
+@Table(name = "persons")
 public class Person implements UserDetails {
 
     @Id
@@ -70,6 +74,7 @@ public class Person implements UserDetails {
     private Integer isApproved;
 
     @Enumerated(EnumType.STRING)
+    @Type(type = "pgsql_enum")
     @Column(name = "messages_permission")
     private MessagesPermission messagesPermission;
 
@@ -80,6 +85,7 @@ public class Person implements UserDetails {
     private Integer isBlocked;
 
     @Enumerated(EnumType.STRING)
+    @Type(type = "pgsql_enum")
     @Column(name = "user_type")
     private UserType userType;
 
