@@ -7,9 +7,13 @@ import com.skillbox.javapro21.api.response.ListDataResponse;
 import com.skillbox.javapro21.api.response.MessageOkContent;
 import com.skillbox.javapro21.api.response.account.AuthData;
 import com.skillbox.javapro21.api.response.post.PostData;
+import com.skillbox.javapro21.domain.Friendship;
 import com.skillbox.javapro21.domain.Person;
 import com.skillbox.javapro21.domain.Post;
+import com.skillbox.javapro21.domain.enumeration.FriendshipStatusType;
+import com.skillbox.javapro21.exception.BlockPersonHimselfException;
 import com.skillbox.javapro21.exception.PersonNotFoundException;
+import com.skillbox.javapro21.repository.FriendshipRepository;
 import com.skillbox.javapro21.repository.PersonRepository;
 import com.skillbox.javapro21.repository.PostRepository;
 import com.skillbox.javapro21.service.ProfileService;
@@ -23,6 +27,7 @@ import org.springframework.stereotype.Component;
 import java.nio.file.ProviderNotFoundException;
 import java.security.Principal;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Component
 public class ProfileServiceImpl implements ProfileService {
@@ -31,13 +36,15 @@ public class ProfileServiceImpl implements ProfileService {
     private final PersonRepository personRepository;
     private final PostRepository postRepository;
     private final PostServiceImpl postService;
+    private final FriendshipRepository friendshipRepository;
 
     @Autowired
-    protected ProfileServiceImpl(UtilsService utilsService, PersonRepository personRepository, PostRepository postRepository, PostServiceImpl postService) {
+    protected ProfileServiceImpl(UtilsService utilsService, PersonRepository personRepository, PostRepository postRepository, PostServiceImpl postService, FriendshipRepository friendshipRepository) {
         this.utilsService = utilsService;
         this.personRepository = personRepository;
         this.postRepository = postRepository;
         this.postService = postService;
+        this.friendshipRepository = friendshipRepository;
     }
 
     public DataResponse<AuthData> getPerson(Principal principal) {
@@ -47,7 +54,7 @@ public class ProfileServiceImpl implements ProfileService {
 
     public DataResponse<AuthData> editPerson(Principal principal, EditProfileRequest editProfileRequest) {
         Person person = utilsService.findPersonByEmail(principal.getName());
-        editPerson(person, editProfileRequest);
+        savePersonByRequest(person, editProfileRequest);
         return getDataResponse(person);
     }
 
@@ -62,17 +69,44 @@ public class ProfileServiceImpl implements ProfileService {
         return postService.getPostsResponse(offset, itemPerPage, posts);
     }
 
-    //:Todo добавить проверку на заблокированых
+    //:Todo добавить проверку на заблокированных?
     public DataResponse<PostData> postPostOnPersonWallById(Long id, Long publishDate, PostRequest postRequest, Principal principal) {
+        Person person = utilsService.findPersonByEmail(principal.getName());
         Person personById = personRepository.findPersonById(id).orElseThrow(() -> new ProviderNotFoundException("Пользователя с данным id не существует"));
-        Post post = new Post()
-                .setTitle(postRequest.getTitle())
-                .setPostText(postRequest.getPostText())
-                .setTime(utilsService.getLocalDateTime(publishDate))
-                .setIsBlocked(0)
-                .setAuthor(personById);
+        Post post;
+        if (person.getId().equals(personById.getId())) {
+            post = new Post()
+                    .setTitle(postRequest.getTitle())
+                    .setPostText(postRequest.getPostText())
+                    .setTime(utilsService.getLocalDateTime(publishDate))
+                    .setIsBlocked(0)
+                    .setAuthor(personById);
+        } else {
+            post = new Post()
+                    .setTitle(postRequest.getTitle())
+                    .setPostText(postRequest.getPostText())
+                    .setTime(LocalDateTime.now())
+                    .setIsBlocked(0)
+                    .setAuthor(personById);
+        }
         postRepository.save(post);
         return postService.getDataResponse(postService.getPostData(post));
+    }
+
+    public DataResponse<MessageOkContent> blockPersonById(Long id, Principal principal) throws BlockPersonHimselfException {
+        Person person = utilsService.findPersonByEmail(principal.getName());
+        Person personByBlock = personRepository.findPersonById(id).orElseThrow(() -> new ProviderNotFoundException("Пользователя с данным id не существует"));
+        if (person.getId().equals(personByBlock.getId())) throw new BlockPersonHimselfException("Пользователь пытается заблокировать сам себя");
+        if (personByBlock.getIsBlocked() == 0) {
+            Optional<Friendship> optionalFriendship = friendshipRepository.findFriendshipBySrcPersonAndDstPerson(id, person.getId());
+        }
+        return null;
+    }
+
+    private boolean isBlockedBy(int blocker, int blocked, Optional<Friendship> optional) {
+        return optional.filter(friendship -> (blocker == friendship.getSrcPerson().getId() && friendship.getFriendshipStatus().getFriendshipStatusType().equals(FriendshipStatusType.BLOCKED))
+                || (blocked == friendship.getSrcPerson().getId() && friendship.getFriendshipStatus().getFriendshipStatusType().equals(FriendshipStatusType.BLOCKED))
+                || friendship.getFriendshipStatus().getFriendshipStatusType().equals(FriendshipStatusType.BLOCKED)).isPresent();
     }
 
     private DataResponse<AuthData> getDataResponse(Person person) {
@@ -82,7 +116,7 @@ public class ProfileServiceImpl implements ProfileService {
                 .setData(utilsService.getAuthData(person, null));
     }
 
-    private Person editPerson(Person person, EditProfileRequest editProfileRequest) {
+    private void savePersonByRequest(Person person, EditProfileRequest editProfileRequest) {
         person
                 .setFirstName(editProfileRequest.getFirstName())
                 .setLastName(editProfileRequest.getLastName())
@@ -95,7 +129,6 @@ public class ProfileServiceImpl implements ProfileService {
                 .setTown(editProfileRequest.getTown())
                 .setCountry(editProfileRequest.getCountry());
         personRepository.save(person);
-        return person;
     }
 
     public DataResponse<MessageOkContent> deletePerson(Principal principal) {

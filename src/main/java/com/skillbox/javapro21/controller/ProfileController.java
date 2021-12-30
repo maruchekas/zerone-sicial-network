@@ -65,7 +65,7 @@ public class ProfileController {
         return new ResponseEntity<>(profileService.getPersonById(id), HttpStatus.OK);
     }
 
-    @Operation(summary = "Публикации пользователя на стене", security = @SecurityRequirement(name = "jwt"))
+    @Operation(summary = "Получить публикации пользователя на стене", security = @SecurityRequirement(name = "jwt"))
     @GetMapping("/{id}/wall")
     @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<ListDataResponse<PostData>> getPersonWallById(@PathVariable Long id,
@@ -74,13 +74,20 @@ public class ProfileController {
         return new ResponseEntity<>(profileService.getPersonWallById(id, offset, itemPerPage), HttpStatus.OK);
     }
 
-    @Operation(summary = "Публикации пользователя на стене", security = @SecurityRequirement(name = "jwt"))
+    @Operation(summary = "Сделать убликацию пользователем на стене", security = @SecurityRequirement(name = "jwt"))
     @PostMapping("/{id}/wall")
     @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<DataResponse<PostData>> postPostOnPersonWallById(@PathVariable Long id,
-                                                                        @RequestParam(name = "publish_date", defaultValue = "-1") Long publishDate,
-                                                                        @RequestBody PostRequest postRequest,
-                                                                        Principal principal) {
+                                                                           @RequestParam(name = "publish_date", defaultValue = "-1") Long publishDate,
+                                                                           @RequestBody PostRequest postRequest,
+                                                                           Principal principal) {
         return new ResponseEntity<>(profileService.postPostOnPersonWallById(id, publishDate, postRequest, principal), HttpStatus.OK);
+    }
+
+    @Operation(summary = "Сделать убликацию пользователем на стене", security = @SecurityRequirement(name = "jwt"))
+    @PutMapping("block/{id}")
+    @PreAuthorize("hasAuthority('user:write')")
+    public ResponseEntity<DataResponse<MessageOkContent>> blockPersonById(@PathVariable Long id,Principal principal) {
+        return new ResponseEntity<>(profileService.blockPersonById(id, principal), HttpStatus.OK);
     }
 }

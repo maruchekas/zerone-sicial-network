@@ -7,6 +7,7 @@ import com.skillbox.javapro21.api.response.MessageOkContent;
 import com.skillbox.javapro21.api.request.profile.EditProfileRequest;
 import com.skillbox.javapro21.api.response.account.AuthData;
 import com.skillbox.javapro21.api.response.post.PostData;
+import com.skillbox.javapro21.exception.BlockPersonHimselfException;
 import com.skillbox.javapro21.exception.PersonNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -25,4 +26,6 @@ public interface ProfileService {
     ListDataResponse<PostData> getPersonWallById(Long id, int offset, int itemPerPage);
 
     DataResponse<PostData> postPostOnPersonWallById(Long id, Long publishDate, PostRequest postRequest, Principal principal);
+
+    DataResponse<MessageOkContent> blockPersonById(Long id, Principal principal) throws BlockPersonHimselfException;
 }
