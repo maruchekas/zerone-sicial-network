@@ -12,8 +12,6 @@ import java.time.LocalDateTime;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DataResponse<T extends Content> {
     private String error;
-    @JsonProperty("error_description")
-    private String errorDescription;
     private LocalDateTime timestamp;
     private T data;
 }

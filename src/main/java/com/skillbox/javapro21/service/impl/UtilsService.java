@@ -1,4 +1,4 @@
-package com.skillbox.javapro21.service.serviceImpl;
+package com.skillbox.javapro21.service.impl;
 
 import com.skillbox.javapro21.api.response.DataResponse;
 import com.skillbox.javapro21.api.response.MessageOkContent;
@@ -8,6 +8,7 @@ import com.skillbox.javapro21.exception.PersonNotFoundException;
 import com.skillbox.javapro21.repository.PersonRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -17,11 +18,12 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Random;
 
-public abstract class AbstractMethodClass {
+@Component
+public class UtilsService {
     private final PersonRepository personRepository;
 
     @Autowired
-    protected AbstractMethodClass(PersonRepository personRepository) {
+    protected UtilsService(PersonRepository personRepository) {
         this.personRepository = personRepository;
     }
 
@@ -61,14 +63,14 @@ public abstract class AbstractMethodClass {
     }
 
     /**
-     * заблокирован поьзователь или нет ?
+     * заблокирован пользователь или нет ?
      */
     public String isBlockedPerson(Person person){
         return person.getIsBlocked() == 0 ? "false" : "true";
     }
 
     /**
-     * заполненние данных о пользователе
+     * заполнение данных о пользователе
      */
     public AuthData getAuthData(Person person, String token) {
         AuthData authData = new AuthData()

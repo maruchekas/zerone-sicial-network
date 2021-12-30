@@ -15,7 +15,8 @@ public enum NotificationTypeStatus {
     POST_COMMENT("Комментарий к посту"),
     COMMENT_COMMENT("Ответ на комментарий"),
     FRIEND_REQUEST("Запрос дружбы"),
-    MESSAGE("Личное сообщение");
+    MESSAGE("Личное сообщение"),
+    FRIEND_BIRTHDAY("Дни рождения друзей");
 
     private final String name;
 }

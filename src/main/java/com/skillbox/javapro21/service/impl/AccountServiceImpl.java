@@ -1,4 +1,4 @@
-package com.skillbox.javapro21.service.serviceImpl;
+package com.skillbox.javapro21.service.impl;
 
 import com.mailjet.client.errors.MailjetException;
 import com.skillbox.javapro21.api.request.account.*;
@@ -32,7 +32,9 @@ import java.util.List;
 
 @Slf4j
 @Component
-public class AccountServiceImpl extends AbstractMethodClass implements AccountService {
+public class AccountServiceImpl implements AccountService {
+
+    private final UtilsService utilsService;
     private final PersonRepository personRepository;
     private final MailjetSender mailMessage;
     private final ConfirmationUrl confirmationUrl;
@@ -40,8 +42,8 @@ public class AccountServiceImpl extends AbstractMethodClass implements AccountSe
     private final NotificationTypeRepository notificationTypeRepository;
 
     @Autowired
-    public AccountServiceImpl(PersonRepository personRepository, MailjetSender mailMessage, ConfirmationUrl confirmationUrl, JwtGenerator jwtGenerator, NotificationTypeRepository notificationTypeRepository) {
-        super(personRepository);
+    public AccountServiceImpl(UtilsService utilsService, PersonRepository personRepository, MailjetSender mailMessage, ConfirmationUrl confirmationUrl, JwtGenerator jwtGenerator, NotificationTypeRepository notificationTypeRepository) {
+        this.utilsService = utilsService;
         this.personRepository = personRepository;
         this.mailMessage = mailMessage;
         this.confirmationUrl = confirmationUrl;
@@ -51,14 +53,15 @@ public class AccountServiceImpl extends AbstractMethodClass implements AccountSe
 
     //Todo: нужна ли проверка каптчи?
     public DataResponse<MessageOkContent> registration(RegisterRequest registerRequest) throws UserExistException, MailjetException {
-        if (personRepository.findByEmail(registerRequest.getEmail()).isPresent()) throw new UserExistException("Пользователь с таким логином существует");
+        if (personRepository.findByEmail(registerRequest.getEmail()).isPresent())
+            throw new UserExistException("Пользователь с таким логином существует");
         createNewPerson(registerRequest);
         mailMessageForRegistration(registerRequest);
-        return getMessageOkResponse();
+        return utilsService.getMessageOkResponse();
     }
 
     public String verifyRegistration(String email, String code) throws TokenConfirmationException {
-        Person person = findPersonByEmail(email);
+        Person person = utilsService.findPersonByEmail(email);
         if (person.getConfirmationCode().equals(code)) {
             person.setIsApproved(1)
                     .setUserType(UserType.USER)
@@ -70,48 +73,48 @@ public class AccountServiceImpl extends AbstractMethodClass implements AccountSe
     }
 
     public String recoveryPasswordMessage(RecoveryRequest recoveryRequest) throws MailjetException {
-        String token = getToken();
+        String token = utilsService.getToken();
         String text = confirmationUrl.getUrlForPasswordComplete() + "?email=" + recoveryRequest.getEmail() + "&code=" + token;
         confirmPersonAndSendEmail(recoveryRequest.getEmail(), text, token);
         return "Ссылка отправлена на почту";
     }
 
     private void mailMessageForRegistration(RegisterRequest registerRequest) throws MailjetException {
-        String token = getToken();
+        String token = utilsService.getToken();
         String text = confirmationUrl.getUrlForRegisterComplete() + "?email=" + registerRequest.getEmail() + "&code=" + token;
         confirmPersonAndSendEmail(registerRequest.getEmail(), text, token);
     }
 
     public String verifyRecovery(String email, String code) throws TokenConfirmationException {
-        Person person = findPersonByEmail(email);
+        Person person = utilsService.findPersonByEmail(email);
         if (person.getConfirmationCode().equals(code)) {
             return "Пользователь может приступить к изменению пароля";
         } else throw new TokenConfirmationException("Не верный confirmation code");
     }
 
     public String recoveryPassword(String email, String password) {
-        Person person = findPersonByEmail(email);
+        Person person = utilsService.findPersonByEmail(email);
         person.setPassword(password);
         personRepository.save(person);
         return "Пароль успешно изменен";
     }
 
     public DataResponse<MessageOkContent> changePassword(ChangePasswordRequest changePasswordRequest) {
-        Person person = findPersonByEmail(jwtGenerator.getLoginFromToken(changePasswordRequest.getToken()));
+        Person person = utilsService.findPersonByEmail(jwtGenerator.getLoginFromToken(changePasswordRequest.getToken()));
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
         person.setPassword(passwordEncoder.encode(changePasswordRequest.getPassword()));
         personRepository.save(person);
-        return getMessageOkResponse();
+        return utilsService.getMessageOkResponse();
     }
 
     public DataResponse<MessageOkContent> changeEmail(ChangeEmailRequest changeEmailRequest, Principal principal) {
-        Person person = findPersonByEmail(principal.getName());
+        Person person = utilsService.findPersonByEmail(principal.getName());
         person.setEmail(changeEmailRequest.getEmail());
-        return getMessageOkResponse();
+        return utilsService.getMessageOkResponse();
     }
 
     public DataResponse<MessageOkContent> changeNotifications(ChangeNotificationsRequest changeNotificationsRequest, Principal principal) {
-        Person person = findPersonByEmail(principal.getName());
+        Person person = utilsService.findPersonByEmail(principal.getName());
         NotificationType notificationType = notificationTypeRepository.findNotificationTypeByPersonId(person.getId())
                 .orElse(new NotificationType()
                         .setPost(true)
@@ -125,20 +128,22 @@ public class AccountServiceImpl extends AbstractMethodClass implements AccountSe
             case COMMENT_COMMENT -> notificationType.setCommentComment(changeNotificationsRequest.isEnable());
             case FRIEND_REQUEST -> notificationType.setFriendsRequest(changeNotificationsRequest.isEnable());
             case MESSAGE -> notificationType.setMessage(changeNotificationsRequest.isEnable());
+            case FRIEND_BIRTHDAY -> notificationType.setFriendsBirthday(changeNotificationsRequest.isEnable());
         }
         notificationTypeRepository.save(notificationType);
-        return getMessageOkResponse();
+        return utilsService.getMessageOkResponse();
     }
 
     public ListDataResponse<NotificationSettingData> getNotifications(Principal principal) {
-        Person person = findPersonByEmail(principal.getName());
+        Person person = utilsService.findPersonByEmail(principal.getName());
         NotificationType notificationType = notificationTypeRepository.findNotificationTypeByPersonId(person.getId())
                 .orElse(new NotificationType()
                         .setPost(true)
                         .setPostComment(true)
                         .setCommentComment(true)
                         .setFriendsRequest(true)
-                        .setMessage(true));
+                        .setMessage(true)
+                        .setFriendsBirthday(true));
         ListDataResponse<NotificationSettingData> dataResponse = new ListDataResponse<>();
         dataResponse.setTimestamp(LocalDateTime.now());
         dataListNotification(notificationType);
@@ -161,6 +166,8 @@ public class AccountServiceImpl extends AbstractMethodClass implements AccountSe
                 .setEnable(notificationType.isFriendsRequest()));
         list.add(new NotificationSettingData().setNotificationTypeStatus(NotificationTypeStatus.MESSAGE)
                 .setEnable(notificationType.isMessage()));
+        list.add(new NotificationSettingData().setNotificationTypeStatus(NotificationTypeStatus.FRIEND_BIRTHDAY)
+                .setEnable(notificationType.isFriendsBirthday()));
         return list;
     }
 
@@ -168,7 +175,7 @@ public class AccountServiceImpl extends AbstractMethodClass implements AccountSe
      * Отправка на почту письма с токеном
      */
     private void confirmPersonAndSendEmail(String email, String text, String token) throws MailjetException {
-        Person person = findPersonByEmail(email);
+        Person person = utilsService.findPersonByEmail(email);
         person.setConfirmationCode(token);
         personRepository.save(person);
         mailMessage.send(email, text);

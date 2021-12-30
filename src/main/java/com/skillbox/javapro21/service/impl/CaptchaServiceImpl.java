@@ -1,4 +1,4 @@
-package com.skillbox.javapro21.service.serviceImpl;
+package com.skillbox.javapro21.service.impl;
 
 import com.github.cage.Cage;
 import com.skillbox.javapro21.api.response.captcha.CaptchaResponse;

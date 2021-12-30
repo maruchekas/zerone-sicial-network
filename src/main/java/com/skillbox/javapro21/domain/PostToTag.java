@@ -1,12 +1,10 @@
 package com.skillbox.javapro21.domain;
 
-import com.skillbox.javapro21.api.response.Content;
 import lombok.*;
 import lombok.experimental.Accessors;
 
 import javax.persistence.*;
 
-@Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Setter
@@ -19,4 +17,10 @@ public class PostToTag {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private long id;
+
+    @Column(name = "post_id")
+    private long postId;
+
+    @Column(name = "tag_id")
+    private long tagId;
 }

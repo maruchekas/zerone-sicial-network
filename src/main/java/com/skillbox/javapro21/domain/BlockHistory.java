@@ -1,7 +1,6 @@
 package com.skillbox.javapro21.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.skillbox.javapro21.api.response.Content;
 import com.skillbox.javapro21.domain.enumeration.ActionType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -19,7 +18,7 @@ import java.time.LocalDateTime;
 @Entity
 @Accessors(chain = true)
 @Table(name = "block_history")
-public class BlockHistory implements Content {
+public class BlockHistory {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
