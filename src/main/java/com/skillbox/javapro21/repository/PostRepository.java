@@ -52,7 +52,7 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
             "left join Person ps on ps.id = p.author.id " +
             "left join PostComment pc on pc.post.id = p.id " +
             "where ps.id = :id " +
-            "and (ps.isBlocked = 0 and p.isBlocked = 0) and p.time <= CURRENT_TIME " +
+            "and (ps.isBlocked = 0 and p.isBlocked = 0) and p.time < CURRENT_TIMESTAMP " +
             "group by p.id " +
             "order by p.time desc")
     Page<Post> findPostsByPersonId(Long id, Pageable pageable);

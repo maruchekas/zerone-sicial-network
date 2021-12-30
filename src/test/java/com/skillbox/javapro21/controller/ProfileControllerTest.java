@@ -1,9 +1,12 @@
 package com.skillbox.javapro21.controller;
 
 import com.skillbox.javapro21.AbstractTest;
-import com.skillbox.javapro21.domain.Person;
+import com.skillbox.javapro21.api.request.post.PostRequest;
+import com.skillbox.javapro21.api.request.profile.EditProfileRequest;
+import com.skillbox.javapro21.domain.*;
+import com.skillbox.javapro21.domain.enumeration.FriendshipStatusType;
 import com.skillbox.javapro21.domain.enumeration.MessagesPermission;
-import com.skillbox.javapro21.repository.PersonRepository;
+import com.skillbox.javapro21.repository.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,7 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.http.MediaType;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -21,19 +24,43 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import javax.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import static com.skillbox.javapro21.domain.enumeration.FriendshipStatusType.FRIEND;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-//@TestPropertySource(value = {"classpath:application.yml"})
 @TestPropertySource(value = {"classpath:application-test.properties"})
 public class ProfileControllerTest extends AbstractTest {
     @Autowired
     private MockMvc mockMvc;
     @Autowired
     private PersonRepository personRepository;
+    @Autowired
+    private PostRepository postRepository;
+    @Autowired
+    private TagRepository tagRepository;
+    @Autowired
+    private FriendshipRepository friendshipRepository;
+    @Autowired
+    private FriendshipStatusRepository friendshipStatusRepository;
 
     private Person verifyPerson;
+    private Person verifyPersonWithPost;
+
+    private Post post1;
+    private Post post2;
+    private Tag tag1;
+    private Tag tag2;
+
+    private Friendship friendshipSrc;
+    private Friendship friendshipDst;
+    private FriendshipStatus friendshipStatus;
+
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
 
     @BeforeEach
@@ -59,11 +86,84 @@ public class ProfileControllerTest extends AbstractTest {
                 .setIsApproved(1)
                 .setLastOnlineTime(LocalDateTime.now());
         personRepository.save(verifyPerson);
+
+        verifyPersonWithPost = new Person()
+                .setEmail(verifyEmail + "b")
+                .setPassword(passwordEncoder.encode(password))
+                .setFirstName(firstName + "-Канефоль")
+                .setLastName(lastName)
+                .setConfirmationCode("123")
+                .setRegDate(reg_date)
+                .setConfirmationCode(conf_code)
+                .setMessagesPermission(MessagesPermission.ALL)
+                .setIsBlocked(0)
+                .setIsApproved(1)
+                .setLastOnlineTime(LocalDateTime.now());
+        personRepository.save(verifyPersonWithPost);
+
+        friendshipStatus = new FriendshipStatus()
+                .setFriendshipStatusType(FRIEND)
+                .setTime(LocalDateTime.now().minusDays(1));
+
+        friendshipStatusRepository.save(friendshipStatus);
+        friendshipSrc = new Friendship()
+                .setSrcPerson(verifyPerson)
+                .setDstPerson(verifyPersonWithPost)
+                .setFriendshipStatus(friendshipStatus);
+        friendshipDst = new Friendship()
+                .setSrcPerson(verifyPersonWithPost)
+                .setDstPerson(verifyPerson)
+                .setFriendshipStatus(friendshipStatus);
+
+
+        friendshipRepository.save(friendshipSrc);
+
+        tag1 = new Tag()
+                .setTag("моржиНавсегда");
+        tag2 = new Tag()
+                .setTag("морскиеКотикиИзже");
+        tagRepository.save(tag1);
+        tagRepository.save(tag2);
+
+        List<Tag> tags = new ArrayList<>();
+        tags.add(tag1);
+        tags.add(tag2);
+
+        List<Tag> tag = new ArrayList<>();
+        tag.add(tag2);
+
+        post1 = new Post()
+                .setTime(LocalDateTime.now().minusDays(1))
+                .setAuthor(verifyPersonWithPost)
+                .setTitle("Моржи")
+                .setPostText("Лучше моржей только тюлени")
+                .setIsBlocked(0)
+                .setLikes(null)
+                .setComments(null)
+                .setTags(tag);
+        postRepository.save(post1);
+
+        post2 = new Post()
+                .setTime(LocalDateTime.now().minusDays(1))
+                .setAuthor(verifyPersonWithPost)
+                .setTitle("Тюлени и моржи")
+                .setPostText("I think about animals every day....")
+                .setIsBlocked(0)
+                .setLikes(null)
+                .setComments(null)
+                .setTags(tags);
+
+        postRepository.save(post1);
+        postRepository.save(post2);
     }
 
     @AfterEach
     public void cleanup() {
-        personRepository.delete(verifyPerson);
+        personRepository.deleteAll();
+        postRepository.deleteAll();
+        friendshipRepository.deleteAll();
+        friendshipStatusRepository.deleteAll();
+        tagRepository.deleteAll();
     }
 
     @Test
@@ -85,13 +185,6 @@ public class ProfileControllerTest extends AbstractTest {
     @Test
     @WithMockUser(username = "test1@test.ru", authorities = "user:write")
     void getPerson() throws Exception {
-        Person person = new Person()
-                .setFirstName("Dmitriy")
-                .setLastName("Sushkov")
-                .setEmail("kkki@test.ru");
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        Assertions.assertEquals(verifyPerson.getEmail(), email);
-
         mockMvc.perform(MockMvcRequestBuilders
                 .get("/api/v1/users/me")
                 .principal(() -> "test1@test.ru"))
@@ -101,5 +194,114 @@ public class ProfileControllerTest extends AbstractTest {
 
         Assertions.assertEquals(LocalDateTime.now().getDayOfMonth(),
                 personRepository.findByEmail(verifyPerson.getEmail()).get().getLastOnlineTime().getDayOfMonth());
+    }
+
+    @Test
+    @WithMockUser(username = "test1@test.ru", authorities = "user:write")
+    void editPerson() throws Exception {
+        EditProfileRequest editProfileRequest = new EditProfileRequest();
+        editProfileRequest.setFirstName("Oleg");
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .put("/api/v1/users/me")
+                        .principal(() -> "test1@test.ru")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(editProfileRequest))
+                .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.first_name").value("Oleg"));
+    }
+
+    @Test
+    @WithMockUser(username = "test1@test.ru", authorities = "user:write")
+    void getPersonById() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/api/v1/users/{id}", verifyPerson.getId())
+                        .principal(() -> "test1@test.ru")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.first_name").value("Arcadiy"));
+    }
+
+    @Test
+    @WithMockUser(username = "test1@test.ru", authorities = "user:write")
+    void getPersonWallById() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/api/v1/users/{id}/wall", verifyPersonWithPost.getId())
+                        .principal(() -> "test1@test.ru")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.total").value(2));
+    }
+
+    @Test
+    @WithMockUser(username = "test1@test.ru", authorities = "user:write")
+    void getPersonWallByIdButOneIsBlocked() throws Exception {
+        friendshipStatus.setFriendshipStatusType(FriendshipStatusType.BLOCKED);
+        friendshipStatus.setTime(LocalDateTime.now().minusHours(2));
+        friendshipStatusRepository.save(friendshipStatus);
+        friendshipSrc.setFriendshipStatus(friendshipStatus);
+        friendshipRepository.save(friendshipSrc);
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/api/v1/users/{id}/wall", verifyPersonWithPost.getId())
+                        .principal(() -> "test1@test.ru")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().is4xxClientError());
+    }
+
+
+    @Test
+    @WithMockUser(username = "test1@test.ru", authorities = "user:write")
+    void postPostOnPersonWallById() throws Exception {
+        PostRequest postRequest = new PostRequest().setPostText("Mu-Mu").setTitle("Pushkin?");
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .post("/api/v1/users/{id}/wall", verifyPersonWithPost.getId())
+                        .principal(() -> "test1@test.ru")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(postRequest))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.title").value("Pushkin?"));
+    }
+
+    @Test
+    @WithMockUser(username = "test1@test.ru", authorities = "user:write")
+    void postPostOnPersonWallByIdIsBlocked() throws Exception {
+        friendshipStatus.setFriendshipStatusType(FriendshipStatusType.BLOCKED);
+        friendshipStatus.setTime(LocalDateTime.now().minusHours(2));
+        friendshipStatusRepository.save(friendshipStatus);
+        friendshipSrc.setFriendshipStatus(friendshipStatus);
+        friendshipRepository.save(friendshipSrc);
+        PostRequest postRequest = new PostRequest().setPostText("Mu-Mu").setTitle("Pushkin?");
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .post("/api/v1/users/{id}/wall", verifyPersonWithPost.getId())
+                        .principal(() -> "test1@test.ru")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(postRequest))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
+    }
+
+    @Test
+    @WithMockUser(username = "test1@test.ru", authorities = "user:write")
+    void blockPersonById() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders
+                        .put("/api/v1/users/block/{id}", verifyPersonWithPost.getId())
+                        .principal(() -> "test1@test.ru")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.message").value("ok"));
+
+        Optional<Friendship> friendshipBySrc = friendshipRepository.findFriendshipBySrcPersonAndDstPerson(verifyPerson.getId(), verifyPersonWithPost.getId());
+        Assertions.assertEquals(FriendshipStatusType.BLOCKED, friendshipBySrc.orElseThrow(EntityNotFoundException::new).getFriendshipStatus()) ;
     }
 }

@@ -15,4 +15,9 @@ public interface FriendshipRepository extends JpaRepository<Friendship, Integer>
             "where f.srcPerson.id = :src and f.dstPerson.id = :dst " +
             "or f.srcPerson.id = :dst and f.dstPerson.id = :src")
     Optional<Friendship> findFriendshipBySrcPersonAndDstPerson(Long src, Long dst);
+
+    @Query("select f from Friendship  f " +
+            "left join Person p on p.id = f.srcPerson.id " +
+            "where p.id = :id")
+    Friendship findByPersonId(Long id);
 }
