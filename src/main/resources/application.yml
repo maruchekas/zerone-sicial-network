@@ -1,15 +1,15 @@
 server:
-  port: 8080
-  base_url: http://localhost:8080
+  port: ${PORT:8080}
+  base_url: https://zerone2022-develop.herokuapp.com
 spring:
   messages:
     basename: lang.messages
   profiles:
     active: dev
   datasource:
-    url: jdbc:postgresql://localhost:5432/SocialNetwork?stringtype=unspecified
-    username: postgres
-    password: 1234
+    url: jdbc:postgresql://ec2-3-228-75-39.compute-1.amazonaws.com:5432/dao27bpd0aa7h7
+    username: ccrugjjcvoywty
+    password: 98165e4c5b45cb8043084a53e5c90fb4ba518aada882cc3d679b414035e662b0
   jpa:
     show-sql: false
     hibernate:
@@ -17,9 +17,9 @@ spring:
       dialect: org.hibernate.dialect.PostgreSQLDialect
 mailjet:
   mail:
-    key: 044badceaa9c50ffadca8bd6977ad2e2
-    from: jpro021network.zerone@mail.ru
-    secret: 9fee7f15536b6b26cc08dd0edef4785a
+    key: 31630259aad78bb4a4adff1902eee4c3
+    from: admin@zeronenetwork.design
+    secret: cc6adb843048afd0f1a7d9c33feb4b22
     version: v3.1
   flyway:
     enabled: true

@@ -7,6 +7,7 @@ import com.skillbox.javapro21.repository.CaptchaRepository;
 import com.skillbox.javapro21.service.CaptchaService;
 import org.imgscalr.Scalr;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.imageio.ImageIO;
@@ -19,13 +20,13 @@ import java.util.Base64;
 
 @Component
 public class CaptchaServiceImpl implements CaptchaService {
-//    @Value("${captcha.width}")
+    @Value("${captcha.width}")
     private int captchaWidth;
-//    @Value("${captcha.height}")
+    @Value("${captcha.height}")
     private int captchaHeight;
-//    @Value("${captcha.image}")
+    @Value("${captcha.image}")
     private String captchaImagePNG;
-//    @Value("${captcha.lifespanBySec}")
+    @Value("${captcha.lifespanBySec}")
     private long captchaLifespan;
 
     private final CaptchaRepository captchaRepository;
