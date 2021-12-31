@@ -1,12 +1,14 @@
 package com.skillbox.javapro21.controller;
 
 import com.skillbox.javapro21.AbstractTest;
+import com.skillbox.javapro21.api.request.post.CommentRequest;
 import com.skillbox.javapro21.domain.Person;
 import com.skillbox.javapro21.domain.Post;
 import com.skillbox.javapro21.domain.PostComment;
 import com.skillbox.javapro21.domain.Tag;
 import com.skillbox.javapro21.domain.enumeration.MessagesPermission;
 import com.skillbox.javapro21.repository.PersonRepository;
+import com.skillbox.javapro21.repository.PostCommentRepository;
 import com.skillbox.javapro21.repository.PostRepository;
 import com.skillbox.javapro21.repository.TagRepository;
 import org.junit.jupiter.api.AfterEach;
@@ -45,6 +47,8 @@ public class PostCommentControllerTest extends AbstractTest {
     private PostRepository postRepository;
     @Autowired
     private TagRepository tagRepository;
+    @Autowired
+    private PostCommentRepository postCommentRepository;
 
     private Person verifyPerson;
     private Person verifyPersonWithPost;
@@ -153,6 +157,9 @@ public class PostCommentControllerTest extends AbstractTest {
 
         post2.setComments(setComments);
         postRepository.save(post2);
+
+        postCommentRepository.save(postComment);
+        postCommentRepository.save(postCommentBlocked);
     }
 
     @AfterEach
@@ -160,6 +167,7 @@ public class PostCommentControllerTest extends AbstractTest {
         personRepository.deleteAll();
         postRepository.deleteAll();
         tagRepository.deleteAll();
+        postCommentRepository.deleteAll();
     }
 
     @Test
@@ -176,8 +184,54 @@ public class PostCommentControllerTest extends AbstractTest {
                         .get("/api/v1/post/{id}/comments", 22)
                         .principal(() -> "test@test.ru"))
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.status().isNotFound()).andReturn();
+                .andExpect(MockMvcResultMatchers.status().isNotFound());
     }
 
+    @Test
+    @WithMockUser(username = "test@test.ru", authorities = "user:write")
+    void postComments() throws Exception {
+        CommentRequest commentRequest1 = new CommentRequest().setCommentText("lol");
+        mockMvc.perform(MockMvcRequestBuilders
+                        .post("/api/v1/post/{id}/comments", post2.getId())
+                        .principal(() -> "test@test.ru")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(commentRequest1))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
 
+        CommentRequest commentRequest2 = new CommentRequest().setCommentText("lol").setParentId(1L);
+        mockMvc.perform(MockMvcRequestBuilders
+                        .post("/api/v1/post/{id}/comments", 22)
+                        .principal(() -> "test@test.ru")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(commentRequest2))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isNotFound());
+    }
+
+    @Test
+    @WithMockUser(username = "test@test.ru", authorities = "user:write")
+    void putComments() throws Exception {
+        CommentRequest commentRequest1 = new CommentRequest().setCommentText("lol");
+        mockMvc.perform(MockMvcRequestBuilders
+                        .put("/api/v1/post/{id}/comments/{comment_id}", post2.getId())
+                        .principal(() -> "test@test.ru")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(commentRequest1))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
+
+        CommentRequest commentRequest2 = new CommentRequest().setCommentText("lol").setParentId(1L);
+        mockMvc.perform(MockMvcRequestBuilders
+                        .put("/api/v1/post/{id}/comments/{comment_id}", 22L, 1L)
+                        .principal(() -> "test@test.ru")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(commentRequest2))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isNotFound());
+    }
 }

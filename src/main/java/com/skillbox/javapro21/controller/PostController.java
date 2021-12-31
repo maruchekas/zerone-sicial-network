@@ -105,7 +105,7 @@ public class PostController {
     @Operation(summary = "Редактирование комментария к посту")
     @PutMapping("/post/{id}/comments/{comment_id}")
     @PreAuthorize("hasAuthority('user:write')")
-    public ResponseEntity<DataResponse<CommentsData>> postComments(@PathVariable Long id,
+    public ResponseEntity<DataResponse<CommentsData>> putComments(@PathVariable Long id,
                                                                    @PathVariable(name = "comment_id") Long commentId,
                                                                    @RequestBody CommentRequest commentRequest,
                                                                    Principal principal) throws PostNotFoundException, CommentNotFoundException {
