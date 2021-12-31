@@ -118,11 +118,12 @@ public class AccountServiceImpl implements AccountService {
         Person person = utilsService.findPersonByEmail(principal.getName());
         NotificationType notificationType = notificationTypeRepository.findNotificationTypeByPersonId(person.getId())
                 .orElse(new NotificationType()
-                        .setPost(true)
-                        .setPostComment(true)
-                        .setCommentComment(true)
-                        .setFriendsRequest(true)
-                        .setMessage(true));
+                        .setPost(false)
+                        .setPostComment(false)
+                        .setCommentComment(false)
+                        .setFriendsRequest(false)
+                        .setMessage(false)
+                        .setFriendsBirthday(false));
         switch (changeNotificationsRequest.getNotificationTypeStatus()) {
             case POST -> notificationType.setPost(changeNotificationsRequest.isEnable());
             case POST_COMMENT -> notificationType.setPostComment(changeNotificationsRequest.isEnable());
@@ -180,8 +181,6 @@ public class AccountServiceImpl implements AccountService {
         person.setConfirmationCode(token);
         personRepository.save(person);
         mailMessage.send(email, text);
-        log.info(String.valueOf(email));
-        log.info(String.valueOf(text));
     }
 
     /**

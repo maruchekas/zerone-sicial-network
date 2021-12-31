@@ -7,11 +7,7 @@ import com.skillbox.javapro21.api.response.MessageOkContent;
 import com.skillbox.javapro21.api.request.profile.*;
 import com.skillbox.javapro21.api.response.account.AuthData;
 import com.skillbox.javapro21.api.response.post.PostData;
-import com.skillbox.javapro21.exception.FriendshipNotFoundException;
-import com.skillbox.javapro21.exception.BlockPersonHimselfException;
-import com.skillbox.javapro21.exception.InterlockedFriendshipStatusException;
-import com.skillbox.javapro21.exception.NonBlockedFriendshipException;
-import com.skillbox.javapro21.exception.PersonNotFoundException;
+import com.skillbox.javapro21.exception.*;
 import com.skillbox.javapro21.service.ProfileService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -85,7 +81,7 @@ public class ProfileController {
     public ResponseEntity<DataResponse<PostData>> postPostOnPersonWallById(@PathVariable Long id,
                                                                            @RequestParam(name = "publish_date", defaultValue = "-1") Long publishDate,
                                                                            @RequestBody PostRequest postRequest,
-                                                                           Principal principal) throws InterlockedFriendshipStatusException, PersonNotFoundException {
+                                                                           Principal principal) throws InterlockedFriendshipStatusException, PersonNotFoundException, PostNotFoundException {
         return new ResponseEntity<>(profileService.postPostOnPersonWallById(id, publishDate, postRequest, principal), HttpStatus.OK);
     }
 

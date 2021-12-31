@@ -7,7 +7,9 @@ import org.hibernate.Hibernate;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 @Data
 @AllArgsConstructor
@@ -28,8 +30,11 @@ public class PostComment {
     private LocalDateTime time;
 
     @ManyToOne
+    private PostComment parent;
+
+    @OneToMany
     @JoinColumn(name = "parent_id")
-    private PostComment parentId;
+    private Set<PostComment> postComments = new HashSet<>();
 
     @Column(name = "comment_text")
     private String commentText;
