@@ -17,9 +17,9 @@ spring:
       dialect: org.hibernate.dialect.PostgreSQLDialect
 mailjet:
   mail:
-    key: 044badceaa9c50ffadca8bd6977ad2e2
-    from: jpro021network.zerone@mail.ru
-    secret: 9fee7f15536b6b26cc08dd0edef4785a
+    from: admin@zeronenetwork.design
+    key: 31630259aad78bb4a4adff1902eee4c3
+    secret: cc6adb843048afd0f1a7d9c33feb4b22
     version: v3.1
   flyway:
     enabled: true
