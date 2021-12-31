@@ -23,7 +23,6 @@ import java.time.LocalDateTime;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-//@TestPropertySource(value = {"classpath:application.yml"})
 @TestPropertySource(value = {"classpath:application-test.properties"})
 public class AuthControllerTest extends AbstractTest {
 

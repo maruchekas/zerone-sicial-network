@@ -27,7 +27,6 @@ import java.time.LocalDateTime;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-//@TestPropertySource(value = {"classpath:application.yml"})
 @TestPropertySource(value = {"classpath:application-test.properties"})
 public class AccountControllerTest extends AbstractTest {
     @Autowired
@@ -76,8 +75,7 @@ public class AccountControllerTest extends AbstractTest {
 
     @AfterEach
     public void cleanup() {
-        personRepository.delete(verifyPerson);
-        personRepository.delete(person);
+        personRepository.deleteAll();
     }
 
     @Test
