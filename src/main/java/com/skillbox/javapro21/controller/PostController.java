@@ -11,6 +11,7 @@ import com.skillbox.javapro21.exception.PostNotFoundException;
 import com.skillbox.javapro21.exception.PostRecoveryException;
 import com.skillbox.javapro21.service.PostService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +34,7 @@ public class PostController {
         this.postService = postService;
     }
 
-    @Operation(summary = "Поиск публикации")
+    @Operation(summary = "Поиск публикации", security = @SecurityRequirement(name = "jwt"))
     @GetMapping("/post")
     @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<ListDataResponse<PostData>> getPosts(@RequestParam(name = "text", defaultValue = "") String text,
@@ -47,7 +48,7 @@ public class PostController {
         return new ResponseEntity<>(postService.getPosts(text, dateFrom, dateTo, offset, itemPerPage, author, tag, principal), HttpStatus.OK);
     }
 
-    @Operation(summary = "Поиск публикации по id")
+    @Operation(summary = "Поиск публикации по id", security = @SecurityRequirement(name = "jwt"))
     @GetMapping("/post/{id}")
     @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<DataResponse<PostData>> getPostsById(@PathVariable Long id,
@@ -55,7 +56,7 @@ public class PostController {
         return new ResponseEntity<>(postService.getPostsById(id, principal), HttpStatus.OK);
     }
 
-    @Operation(summary = "Изменение публикации по id и отложенная публикация")
+    @Operation(summary = "Изменение публикации по id и отложенная публикация", security = @SecurityRequirement(name = "jwt"))
     @PutMapping("/post/{id}")
     @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<DataResponse<PostData>> putPostByIdAndMessageInDay(@PathVariable Long id,
@@ -65,7 +66,7 @@ public class PostController {
         return new ResponseEntity<>(postService.putPostByIdAndMessageInDay(id, publishDate, postRequest, principal), HttpStatus.OK);
     }
 
-    @Operation(summary = "Удаление публикации по id")
+    @Operation(summary = "Удаление публикации по id", security = @SecurityRequirement(name = "jwt"))
     @DeleteMapping("/post/{id}")
     @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<DataResponse<PostDeleteResponse>> putPostByIdAndMessageInDay(@PathVariable Long id,
@@ -73,7 +74,7 @@ public class PostController {
         return new ResponseEntity<>(postService.deletePostById(id, principal), HttpStatus.OK);
     }
 
-    @Operation(summary = "Восстановление публикации по id")
+    @Operation(summary = "Восстановление публикации по id", security = @SecurityRequirement(name = "jwt"))
     @PutMapping("/post/{id}/recover")
     @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<DataResponse<PostData>> recoverPostById(@PathVariable Long id,

@@ -127,14 +127,14 @@ public class PostServiceImpl implements PostService {
         return null;
     }
 
-    private DataResponse<PostData> getDataResponse(PostData postData) {
+    protected DataResponse<PostData> getDataResponse(PostData postData) {
         return new DataResponse<PostData>()
                 .setError("")
                 .setTimestamp(LocalDateTime.now())
                 .setData(postData);
     }
 
-    private ListDataResponse<PostData> getPostsResponse(int offset, int itemPerPage, Page<Post> pageablePostList) {
+    protected ListDataResponse<PostData> getPostsResponse(int offset, int itemPerPage, Page<Post> pageablePostList) {
         ListDataResponse<PostData> contentListDataResponse = new ListDataResponse<>();
         contentListDataResponse.setPerPage(itemPerPage);
         contentListDataResponse.setTimestamp(LocalDateTime.now());
@@ -154,7 +154,7 @@ public class PostServiceImpl implements PostService {
     }
 
     //todo: дописать добавление комментариев, как будут готовы
-    private PostData getPostData(Post posts) {
+    protected PostData getPostData(Post posts) {
         Set<PostLike> likes = postLikeRepository.findPostLikeByPostId(posts.getId());
         List<String> collect = null;
         if (posts.getTags() != null) collect = posts.getTags().stream().map(Tag::getTag).toList();
