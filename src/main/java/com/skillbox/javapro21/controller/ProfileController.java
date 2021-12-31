@@ -7,6 +7,7 @@ import com.skillbox.javapro21.api.response.MessageOkContent;
 import com.skillbox.javapro21.api.request.profile.*;
 import com.skillbox.javapro21.api.response.account.AuthData;
 import com.skillbox.javapro21.api.response.post.PostData;
+import com.skillbox.javapro21.exception.FriendshipNotFoundException;
 import com.skillbox.javapro21.exception.BlockPersonHimselfException;
 import com.skillbox.javapro21.exception.InterlockedFriendshipStatusException;
 import com.skillbox.javapro21.exception.NonBlockedFriendshipException;
@@ -91,14 +92,14 @@ public class ProfileController {
     @Operation(summary = "Заблокировать пользователя по id", security = @SecurityRequirement(name = "jwt"))
     @PutMapping("block/{id}")
     @PreAuthorize("hasAuthority('user:write')")
-    public ResponseEntity<DataResponse<MessageOkContent>> blockPersonById(@PathVariable Long id,Principal principal) throws InterlockedFriendshipStatusException, BlockPersonHimselfException, PersonNotFoundException {
+    public ResponseEntity<DataResponse<MessageOkContent>> blockPersonById(@PathVariable Long id,Principal principal) throws InterlockedFriendshipStatusException, BlockPersonHimselfException, PersonNotFoundException, FriendshipNotFoundException {
         return new ResponseEntity<>(profileService.blockPersonById(id, principal), HttpStatus.OK);
     }
 
     @Operation(summary = "Разблокировать пользователя по id", security = @SecurityRequirement(name = "jwt"))
     @DeleteMapping("block/{id}")
     @PreAuthorize("hasAuthority('user:write')")
-    public ResponseEntity<DataResponse<MessageOkContent>> unblockPersonById(@PathVariable Long id,Principal principal) throws InterlockedFriendshipStatusException, BlockPersonHimselfException, PersonNotFoundException, NonBlockedFriendshipException {
+    public ResponseEntity<DataResponse<MessageOkContent>> unblockPersonById(@PathVariable Long id,Principal principal) throws InterlockedFriendshipStatusException, BlockPersonHimselfException, PersonNotFoundException, NonBlockedFriendshipException, FriendshipNotFoundException {
         return new ResponseEntity<>(profileService.unblockPersonById(id, principal), HttpStatus.OK);
     }
 }

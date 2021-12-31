@@ -118,14 +118,13 @@ public class UtilsService {
         return optional.filter(friendship ->
                 (blocker == friendship.getSrcPerson().getId() && friendship.getFriendshipStatus().getFriendshipStatusType().equals(FriendshipStatusType.BLOCKED))
                         || (blocked == friendship.getSrcPerson().getId() && friendship.getFriendshipStatus().getFriendshipStatusType().equals(WASBLOCKED))
-                        || friendship.getFriendshipStatus().getFriendshipStatusType().equals(INTERLOCKED)).isPresent();
+                        || friendship.getFriendshipStatus().getFriendshipStatusType().equals(INTERLOCKED)).isEmpty();
     }
 
     /**
      * создание отношений между пользователями
      */
-    public void createFriendship(Person src, Person dst, FriendshipStatusType friendshipStatusType) throws InterlockedFriendshipStatusException {
-        switch (friendshipStatusType) {
+    public void createFriendship(Person src, Person dst, FriendshipStatusType friendshipStatusType) throws InterlockedFriendshipStatusException {switch (friendshipStatusType) {
             case BLOCKED -> setFriendshipStatusBlocked(src, dst);
             case INTERLOCKED -> setFriendshipStatusBlocked(dst, src);
             case FRIEND, WASBLOCKED -> setOneFriendshipStatusTypeForSrcAndDst(src, dst, friendshipStatusType);
@@ -134,76 +133,66 @@ public class UtilsService {
     }
 
     private void setFriendshipStatusBlocked(Person src, Person dst) {
-        FriendshipStatus friendshipStatusSrc = getFriendshipStatusById(src.getId());
-        friendshipStatusSrc.setTime(LocalDateTime.now());
-        friendshipStatusSrc.setFriendshipStatusType(FriendshipStatusType.BLOCKED);
-        friendshipStatusRepository.save(friendshipStatusSrc);
+        FriendshipStatus friendshipStatusSrc = getFriendshipStatus(src.getId(), dst.getId());
+        FriendshipStatus friendshipStatusSrcAfterSave = saveFriendshipStatus(friendshipStatusSrc, BLOCKED);
+        Friendship friendshipSrc = friendshipRepository.findFriendshipBySrcPersonAndDstPerson(src.getId(), dst.getId()).orElseThrow();
+        saveFriendship(friendshipSrc, src, dst, friendshipStatusSrcAfterSave);
 
-        FriendshipStatus friendshipStatusDst = getFriendshipStatusById(dst.getId());
-        friendshipStatusDst.setTime(LocalDateTime.now());
-        friendshipStatusDst.setFriendshipStatusType(WASBLOCKED);
-        friendshipStatusRepository.save(friendshipStatusDst);
-
-        Friendship friendshipSrc = friendshipRepository.findByPersonId(src.getId());
-        friendshipSrc.setSrcPerson(src);
-        friendshipSrc.setDstPerson(dst);
-        friendshipSrc.setFriendshipStatus(friendshipStatusSrc);
-        friendshipRepository.save(friendshipSrc);
-
-        Friendship friendshipDst = friendshipRepository.findByPersonId(dst.getId());
-        friendshipSrc.setSrcPerson(dst);
-        friendshipSrc.setDstPerson(src);
-        friendshipSrc.setFriendshipStatus(friendshipStatusDst);
-        friendshipRepository.save(friendshipDst);
+        FriendshipStatus friendshipStatusDst = getFriendshipStatus(dst.getId(), src.getId());
+        FriendshipStatus friendshipStatusDstAfterSave = saveFriendshipStatus(friendshipStatusDst, WASBLOCKED);
+        Friendship friendshipDst = friendshipRepository.findFriendshipBySrcPersonAndDstPerson(dst.getId(), src.getId()).orElseThrow();
+        saveFriendship(friendshipDst, dst, src, friendshipStatusDstAfterSave);
     }
 
     private void setFriendshipStatusTypeForSrc(Person src, Person dst, FriendshipStatusType friendshipStatusType) {
         FriendshipStatusType fst = null;
-        if (friendshipStatusType.equals(FriendshipStatusType.DECLINED)) {
+        if (friendshipStatusType.equals(DECLINED)) {
             fst = DECLINED;
         } else if (friendshipStatusType.equals(SUBSCRIBED)) {
             fst = SUBSCRIBED;
         } else if (friendshipStatusType.equals(REQUEST)) {
             fst = REQUEST;
         }
-        FriendshipStatus friendshipStatusSrcDst = getFriendshipStatusById(src.getId());
-        friendshipStatusSrcDst.setTime(LocalDateTime.now());
-        friendshipStatusSrcDst.setFriendshipStatusType(fst);
-        friendshipStatusRepository.save(friendshipStatusSrcDst);
-
-        Friendship friendship = friendshipRepository.findByPersonId(src.getId());
-        friendship.setSrcPerson(src);
-        friendship.setDstPerson(dst);
-        friendship.setFriendshipStatus(friendshipStatusSrcDst);
-        friendshipRepository.save(friendship);
+        FriendshipStatus friendshipStatusSrcDst = getFriendshipStatus(src.getId(), dst.getId());
+        FriendshipStatus friendshipStatusSrcAfterSave = saveFriendshipStatus(friendshipStatusSrcDst, fst);
+        Friendship friendshipSrc = friendshipRepository.findFriendshipBySrcPersonAndDstPerson(src.getId(), dst.getId()).orElseThrow();
+        saveFriendship(friendshipSrc, src, dst, friendshipStatusSrcAfterSave);
     }
 
     private void setOneFriendshipStatusTypeForSrcAndDst(Person src, Person dst, FriendshipStatusType friendshipStatusType) {
         FriendshipStatusType fst = null;
-        if (friendshipStatusType.equals(FriendshipStatusType.WASBLOCKED)) {
+        if (friendshipStatusType.equals(WASBLOCKED)) {
             fst = INTERLOCKED;
         } else if (friendshipStatusType.equals(FRIEND)) {
             fst = FRIEND;
         }
-        FriendshipStatus friendshipStatusSrcDst = getFriendshipStatusById(src.getId());
-        friendshipStatusSrcDst.setTime(LocalDateTime.now());
-        friendshipStatusSrcDst.setFriendshipStatusType(fst);
-        friendshipStatusRepository.save(friendshipStatusSrcDst);
+        FriendshipStatus friendshipStatusSrc = getFriendshipStatus(src.getId(), dst.getId());
+        FriendshipStatus friendshipStatusSrcAfterSave = saveFriendshipStatus(friendshipStatusSrc, fst);
+        Friendship friendshipSrc = friendshipRepository.findFriendshipBySrcPersonAndDstPerson(src.getId(), dst.getId()).orElseThrow();
+        saveFriendship(friendshipSrc, src, dst, friendshipStatusSrcAfterSave);
 
-        Friendship friendshipSrc = friendshipRepository.findByPersonId(src.getId());
-        friendshipSrc.setSrcPerson(src);
-        friendshipSrc.setDstPerson(dst);
-        friendshipSrc.setFriendshipStatus(friendshipStatusSrcDst);
-        friendshipRepository.save(friendshipSrc);
-
-        Friendship friendshipDst = friendshipRepository.findByPersonId(dst.getId());
-        friendshipDst.setSrcPerson(dst);
-        friendshipDst.setDstPerson(src);
-        friendshipDst.setFriendshipStatus(friendshipStatusSrcDst);
-        friendshipRepository.save(friendshipDst);
+        FriendshipStatus friendshipStatusDst = getFriendshipStatus(dst.getId(), src.getId());
+        FriendshipStatus friendshipStatusDstAfterSave = saveFriendshipStatus(friendshipStatusDst, fst);
+        Friendship friendshipDst = friendshipRepository.findFriendshipBySrcPersonAndDstPerson(src.getId(), dst.getId()).orElseThrow();
+        saveFriendship(friendshipDst, src, dst, friendshipStatusDstAfterSave);
     }
 
-    private FriendshipStatus getFriendshipStatusById(Long id) {
-        return friendshipStatusRepository.findFriendshipStatusByPersonId(id);
+    private FriendshipStatus saveFriendshipStatus(FriendshipStatus friendshipStatus, FriendshipStatusType type) {
+        friendshipStatus.setFriendshipStatusType(type).setTime(LocalDateTime.now());
+        return friendshipStatusRepository.save(friendshipStatus);
+    }
+
+    /**
+     * метод поиска статуса искателя к искомому
+     */
+    public FriendshipStatus getFriendshipStatus(Long p1, Long p2) {
+        return friendshipStatusRepository.findFriendshipStatusByPersonsSrcAndDstId(p1, p2);
+    }
+
+    private void saveFriendship(Friendship friendship, Person src, Person dst, FriendshipStatus friendshipStatusSrcAfterSave) {
+        friendship.setSrcPerson(src);
+        friendship.setDstPerson(dst);
+        friendship.setFriendshipStatus(friendshipStatusSrcAfterSave);
+        friendshipRepository.save(friendship);
     }
 }

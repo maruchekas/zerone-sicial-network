@@ -7,6 +7,7 @@ import com.skillbox.javapro21.domain.*;
 import com.skillbox.javapro21.domain.enumeration.FriendshipStatusType;
 import com.skillbox.javapro21.domain.enumeration.MessagesPermission;
 import com.skillbox.javapro21.repository.*;
+import com.skillbox.javapro21.service.impl.UtilsService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,13 +25,12 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import javax.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
-import static com.skillbox.javapro21.domain.enumeration.FriendshipStatusType.FRIEND;
+import static com.skillbox.javapro21.domain.enumeration.FriendshipStatusType.BLOCKED;
+import static com.skillbox.javapro21.domain.enumeration.FriendshipStatusType.WASBLOCKED;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -48,6 +48,8 @@ public class ProfileControllerTest extends AbstractTest {
     private FriendshipRepository friendshipRepository;
     @Autowired
     private FriendshipStatusRepository friendshipStatusRepository;
+    @Autowired
+    private UtilsService utilsService;
 
     private Person verifyPerson;
     private Person verifyPersonWithPost;
@@ -116,13 +118,12 @@ public class ProfileControllerTest extends AbstractTest {
         friendshipSrc.setSrcPerson(verifyPerson);
         friendshipSrc.setDstPerson(verifyPersonWithPost);
         friendshipSrc.setFriendshipStatus(friendshipStatusSrc);
+        friendshipRepository.save(friendshipSrc);
 
         friendshipDst = new Friendship();
         friendshipDst.setSrcPerson(verifyPersonWithPost);
         friendshipDst.setDstPerson(verifyPerson);
         friendshipDst.setFriendshipStatus(friendshipStatusDst);
-
-        friendshipRepository.save(friendshipSrc);
         friendshipRepository.save(friendshipDst);
 
         tag1 = new Tag()
@@ -247,7 +248,7 @@ public class ProfileControllerTest extends AbstractTest {
     @Test
     @WithMockUser(username = "test1@test.ru", authorities = "user:write")
     void getPersonWallByIdButOneIsBlocked() throws Exception {
-        friendshipStatusSrc.setFriendshipStatusType(FriendshipStatusType.BLOCKED);
+        friendshipStatusSrc.setFriendshipStatusType(BLOCKED);
         friendshipStatusSrc.setTime(LocalDateTime.now().minusHours(2));
         friendshipStatusRepository.save(friendshipStatusSrc);
         friendshipSrc.setFriendshipStatus(friendshipStatusSrc);
@@ -280,7 +281,7 @@ public class ProfileControllerTest extends AbstractTest {
     @Test
     @WithMockUser(username = "test1@test.ru", authorities = "user:write")
     void postPostOnPersonWallByIdIsBlocked() throws Exception {
-        friendshipStatusSrc.setFriendshipStatusType(FriendshipStatusType.BLOCKED);
+        friendshipStatusSrc.setFriendshipStatusType(BLOCKED);
         friendshipStatusSrc.setTime(LocalDateTime.now().minusHours(2));
         friendshipStatusRepository.save(friendshipStatusSrc);
         friendshipSrc.setFriendshipStatus(friendshipStatusSrc);
@@ -307,8 +308,30 @@ public class ProfileControllerTest extends AbstractTest {
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.data.message").value("ok"));
+        Assertions.assertEquals(BLOCKED, utilsService.getFriendshipStatus(verifyPerson.getId(), verifyPersonWithPost.getId()).getFriendshipStatusType());
+        Assertions.assertEquals(WASBLOCKED, utilsService.getFriendshipStatus(verifyPersonWithPost.getId(), verifyPerson.getId()).getFriendshipStatusType());
+    }
 
-        Optional<Friendship> friendshipBySrc = friendshipRepository.findFriendshipBySrcPersonAndDstPerson(verifyPerson.getId(), verifyPersonWithPost.getId());
-        Assertions.assertEquals(FriendshipStatusType.BLOCKED, friendshipBySrc.orElseThrow(EntityNotFoundException::new).getFriendshipStatus()) ;
+    @Test
+    @WithMockUser(username = "test1@test.ru", authorities = "user:write")
+    void unblockPersonById() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders
+                        .put("/api/v1/users/block/{id}", verifyPersonWithPost.getId())
+                        .principal(() -> "test1@test.ru")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.message").value("ok")).andReturn();
+        Assertions.assertEquals(BLOCKED, utilsService.getFriendshipStatus(verifyPerson.getId(), verifyPersonWithPost.getId()).getFriendshipStatusType());
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .delete("/api/v1/users/block/{id}", verifyPersonWithPost.getId())
+                        .principal(() -> "test1@test.ru")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.message").value("ok"));
+        Assertions.assertEquals(null, utilsService.getFriendshipStatus(verifyPerson.getId(), verifyPersonWithPost.getId()));
+        Assertions.assertEquals(null, utilsService.getFriendshipStatus(verifyPersonWithPost.getId(), verifyPerson.getId()));
     }
 }

@@ -141,7 +141,7 @@ public class PostServiceImpl implements PostService {
                 .setAuthor(utilsService.getAuthData(posts.getAuthor(), null))
                 .setTitle(posts.getTitle())
                 .setPostText(posts.getPostText())
-                .setBlocked(posts.getIsBlocked() != 0)
+                .setBlocked(posts.getIsBlocked() != 0) 
                 .setLikes(likes.size())
                 .setComments(null)
                 .setTags(collect);

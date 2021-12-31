@@ -8,9 +8,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface FriendshipStatusRepository extends JpaRepository<FriendshipStatus, Integer> {
 
-    @Query("select fs from FriendshipStatus  fs " +
-            "left join Friendship f on f.friendshipStatus.id = fs.id " +
-            "left join Person p on p.id = f.srcPerson.id " +
-            "where p.id = :id")
-    FriendshipStatus findFriendshipStatusByPersonId(Long id);
+    @Query("select fs from FriendshipStatus fs " +
+            "left join Friendship f on fs.id = f.friendshipStatus.id " +
+            "where ( f.srcPerson.id = :src ) and ( f.dstPerson.id = :dst )")
+    FriendshipStatus findFriendshipStatusByPersonsSrcAndDstId(Long src, Long dst);
 }

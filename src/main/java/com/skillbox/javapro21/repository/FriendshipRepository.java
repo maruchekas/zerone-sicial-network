@@ -11,13 +11,7 @@ import java.util.Optional;
 public interface FriendshipRepository extends JpaRepository<Friendship, Integer> {
 
     @Query("select f from Friendship f " +
-            "left join FriendshipStatus fs on fs.id = f.id " +
-            "where f.srcPerson.id = :src and f.dstPerson.id = :dst " +
-            "or f.srcPerson.id = :dst and f.dstPerson.id = :src")
+            "left join FriendshipStatus fs on f.friendshipStatus.id  = fs.id " +
+            "where f.srcPerson.id = :src and f.dstPerson.id = :dst")
     Optional<Friendship> findFriendshipBySrcPersonAndDstPerson(Long src, Long dst);
-
-    @Query("select f from Friendship  f " +
-            "left join Person p on p.id = f.srcPerson.id " +
-            "where p.id = :id")
-    Friendship findByPersonId(Long id);
 }

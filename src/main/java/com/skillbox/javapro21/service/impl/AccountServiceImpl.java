@@ -34,6 +34,8 @@ import java.util.List;
 @Component
 public class AccountServiceImpl implements AccountService {
 
+    private static int countRegisterPost = 0;
+
     private final UtilsService utilsService;
     private final PersonRepository personRepository;
     private final MailjetSender mailMessage;
@@ -51,12 +53,20 @@ public class AccountServiceImpl implements AccountService {
         this.notificationTypeRepository = notificationTypeRepository;
     }
 
-    //Todo: нужна ли проверка каптчи?
     public DataResponse<MessageOkContent> registration(RegisterRequest registerRequest) throws UserExistException, MailjetException {
-        if (personRepository.findByEmail(registerRequest.getEmail()).isPresent())
-            throw new UserExistException("Пользователь с таким логином существует");
-        createNewPerson(registerRequest);
-        mailMessageForRegistration(registerRequest);
+        if (personRepository.findByEmail(registerRequest.getEmail()).isPresent()) {
+            countRegisterPost = countRegisterPost + 1;
+            if (countRegisterPost < 3) {
+                Person personInBD = personRepository.findByEmail(registerRequest.getEmail()).orElseThrow();
+                updateNewPerson(personInBD, registerRequest);
+                mailMessageForRegistration(registerRequest);
+            } else {
+                throw new UserExistException("Слишком много попыток пройти регистрацию по одному email");
+            }
+        } else {
+            createNewPerson(registerRequest);
+            mailMessageForRegistration(registerRequest);
+        }
         return utilsService.getMessageOkResponse();
     }
 
@@ -74,14 +84,14 @@ public class AccountServiceImpl implements AccountService {
 
     public String recoveryPasswordMessage(RecoveryRequest recoveryRequest) throws MailjetException {
         String token = utilsService.getToken();
-        String text = confirmationUrl.getUrlForPasswordComplete() + "?email=" + recoveryRequest.getEmail() + "&code=" + token;
+        String text = confirmationUrl.getBaseUrl() + "/api/v1/account/password/recovery/complete?email=" + recoveryRequest.getEmail() + "&code=" + token;
         confirmPersonAndSendEmail(recoveryRequest.getEmail(), text, token);
         return "Ссылка отправлена на почту";
     }
 
     private void mailMessageForRegistration(RegisterRequest registerRequest) throws MailjetException {
         String token = utilsService.getToken();
-        String text = confirmationUrl.getUrlForRegisterComplete() + "?email=" + registerRequest.getEmail() + "&code=" + token;
+        String text = confirmationUrl.getBaseUrl() + "/api/v1/account/register/complete?email=" + registerRequest.getEmail() + "&code=" + token;
         confirmPersonAndSendEmail(registerRequest.getEmail(), text, token);
     }
 
@@ -189,6 +199,26 @@ public class AccountServiceImpl implements AccountService {
     private void createNewPerson(RegisterRequest registerRequest) {
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
         Person person = new Person()
+                .setEmail(registerRequest.getEmail())
+                .setFirstName(registerRequest.getFirstName())
+                .setLastName(registerRequest.getLastName())
+                .setConfirmationCode(registerRequest.getCode())
+                .setIsApproved(0)
+                .setPassword(passwordEncoder.encode(registerRequest.getPasswd1()))
+                .setRegDate(LocalDateTime.now())
+                .setLastOnlineTime(LocalDateTime.now())
+                .setIsBlocked(0)
+                .setMessagesPermission(MessagesPermission.NOBODY);
+        personRepository.save(person);
+        globalNotificationsSettings(person);
+    }
+
+    /**
+     * обновление пользователя без верификации
+     */
+    private void updateNewPerson(Person person, RegisterRequest registerRequest) {
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
+        person
                 .setEmail(registerRequest.getEmail())
                 .setFirstName(registerRequest.getFirstName())
                 .setLastName(registerRequest.getLastName())

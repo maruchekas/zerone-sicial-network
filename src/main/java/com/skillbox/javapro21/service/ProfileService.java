@@ -7,6 +7,7 @@ import com.skillbox.javapro21.api.response.MessageOkContent;
 import com.skillbox.javapro21.api.request.profile.EditProfileRequest;
 import com.skillbox.javapro21.api.response.account.AuthData;
 import com.skillbox.javapro21.api.response.post.PostData;
+import com.skillbox.javapro21.exception.FriendshipNotFoundException;
 import com.skillbox.javapro21.exception.BlockPersonHimselfException;
 import com.skillbox.javapro21.exception.InterlockedFriendshipStatusException;
 import com.skillbox.javapro21.exception.NonBlockedFriendshipException;
@@ -29,7 +30,7 @@ public interface ProfileService {
 
     DataResponse<PostData> postPostOnPersonWallById(Long id, Long publishDate, PostRequest postRequest, Principal principal) throws InterlockedFriendshipStatusException, PersonNotFoundException;
 
-    DataResponse<MessageOkContent> blockPersonById(Long id, Principal principal) throws BlockPersonHimselfException, InterlockedFriendshipStatusException, PersonNotFoundException;
+    DataResponse<MessageOkContent> blockPersonById(Long id, Principal principal) throws BlockPersonHimselfException, InterlockedFriendshipStatusException, PersonNotFoundException, FriendshipNotFoundException;
 
-    DataResponse<MessageOkContent> unblockPersonById(Long id, Principal principal) throws PersonNotFoundException, BlockPersonHimselfException, NonBlockedFriendshipException;
+    DataResponse<MessageOkContent> unblockPersonById(Long id, Principal principal) throws PersonNotFoundException, BlockPersonHimselfException, NonBlockedFriendshipException, InterlockedFriendshipStatusException, FriendshipNotFoundException;
 }
