@@ -19,8 +19,8 @@ import com.skillbox.javapro21.exception.UserExistException;
 import com.skillbox.javapro21.repository.NotificationTypeRepository;
 import com.skillbox.javapro21.repository.PersonRepository;
 import com.skillbox.javapro21.service.AccountService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -32,6 +32,7 @@ import java.util.List;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class AccountServiceImpl implements AccountService {
 
     private final UtilsService utilsService;
@@ -40,16 +41,6 @@ public class AccountServiceImpl implements AccountService {
     private final ConfirmationUrl confirmationUrl;
     private final JwtGenerator jwtGenerator;
     private final NotificationTypeRepository notificationTypeRepository;
-
-    @Autowired
-    public AccountServiceImpl(UtilsService utilsService, PersonRepository personRepository, MailjetSender mailMessage, ConfirmationUrl confirmationUrl, JwtGenerator jwtGenerator, NotificationTypeRepository notificationTypeRepository) {
-        this.utilsService = utilsService;
-        this.personRepository = personRepository;
-        this.mailMessage = mailMessage;
-        this.confirmationUrl = confirmationUrl;
-        this.jwtGenerator = jwtGenerator;
-        this.notificationTypeRepository = notificationTypeRepository;
-    }
 
     //Todo: нужна ли проверка каптчи?
     public DataResponse<MessageOkContent> registration(RegisterRequest registerRequest) throws UserExistException, MailjetException {

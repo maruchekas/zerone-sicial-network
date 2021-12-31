@@ -3,22 +3,20 @@ package com.skillbox.javapro21.service.impl;
 import com.skillbox.javapro21.api.request.post.PostRequest;
 import com.skillbox.javapro21.api.response.DataResponse;
 import com.skillbox.javapro21.api.response.ListDataResponse;
+import com.skillbox.javapro21.api.response.post.CommentsData;
 import com.skillbox.javapro21.api.response.post.PostData;
 import com.skillbox.javapro21.api.response.post.PostDeleteResponse;
-import com.skillbox.javapro21.domain.Person;
-import com.skillbox.javapro21.domain.Post;
-import com.skillbox.javapro21.domain.PostLike;
-import com.skillbox.javapro21.domain.Tag;
+import com.skillbox.javapro21.domain.*;
 import com.skillbox.javapro21.exception.AuthorAndUserEqualsException;
 import com.skillbox.javapro21.exception.PostNotFoundException;
 import com.skillbox.javapro21.exception.PostRecoveryException;
-import com.skillbox.javapro21.repository.PersonRepository;
+import com.skillbox.javapro21.repository.PostCommentRepository;
 import com.skillbox.javapro21.repository.PostLikeRepository;
 import com.skillbox.javapro21.repository.PostRepository;
 import com.skillbox.javapro21.repository.TagRepository;
 import com.skillbox.javapro21.service.PostService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -31,20 +29,14 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class PostServiceImpl implements PostService {
 
     private final UtilsService utilsService;
     private final PostRepository postRepository;
     private final TagRepository tagRepository;
     private final PostLikeRepository postLikeRepository;
-
-    @Autowired
-    protected PostServiceImpl(UtilsService utilsService, PostRepository postRepository, TagRepository tagRepository, PostLikeRepository postLikeRepository) {
-        this.utilsService = utilsService;
-        this.postRepository = postRepository;
-        this.tagRepository = tagRepository;
-        this.postLikeRepository = postLikeRepository;
-    }
+    private final PostCommentRepository postCommentRepository;
 
     public ListDataResponse<PostData> getPosts(String text, long dateFrom, long dateTo, int offset, int itemPerPage, String author, String tag, Principal principal) {
         LocalDateTime datetimeFrom = (dateFrom != -1) ? utilsService.getLocalDateTime(dateFrom) : LocalDateTime.now().minusYears(1);
@@ -103,6 +95,36 @@ public class PostServiceImpl implements PostService {
         post.setIsBlocked(0);
         postRepository.save(post);
         return getDataResponse(getPostData(post));
+    }
+
+    public ListDataResponse<CommentsData> getComments(Long id, int offset, int itemPerPage, Principal principal) throws PostNotFoundException {
+        Person person = utilsService.findPersonByEmail(principal.getName());
+        Post post = postRepository.findPostById(id).orElseThrow(() -> new PostNotFoundException("Поста с данным айди нет"));
+        Pageable pageable = PageRequest.of(offset / itemPerPage, itemPerPage);
+        return getListDataResponseWithComments(person, pageable, post);
+    }
+
+    private ListDataResponse<CommentsData> getListDataResponseWithComments(Person person, Pageable pageable, Post post) {
+        Page<PostComment> pageablePostComments = postCommentRepository.findPostCommentsByPotId(post.getId(), pageable);
+        return getPostCommentResponse(pageablePostComments, person, pageable);
+    }
+
+    private ListDataResponse<CommentsData> getPostCommentResponse(Page<PostComment> pageablePostComments, Person person, Pageable pageable) {
+        return new ListDataResponse<CommentsData>()
+                .setPerPage(pageable.getPageSize())
+                .setTimestamp(LocalDateTime.now())
+                .setOffset((int) pageable.getOffset())
+                .setTotal(pageablePostComments.getTotalPages())
+                .setData(getCommentDataForResponse(pageablePostComments.toList(), person));
+    }
+
+    private List<CommentsData> getCommentDataForResponse(List<PostComment> comments, Person person) {
+        List<CommentsData> commentsDataArrayList = new ArrayList<>();
+        comments.forEach(postComment -> {
+//            CommentsData commentsData = getCommentsData(postComment, person);
+//            postComment.getParentId()
+        });
+        return null;
     }
 
     private DataResponse<PostData> getDataResponse(PostData postData) {

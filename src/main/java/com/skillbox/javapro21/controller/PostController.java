@@ -3,6 +3,7 @@ package com.skillbox.javapro21.controller;
 import com.skillbox.javapro21.api.request.post.PostRequest;
 import com.skillbox.javapro21.api.response.DataResponse;
 import com.skillbox.javapro21.api.response.ListDataResponse;
+import com.skillbox.javapro21.api.response.post.CommentsData;
 import com.skillbox.javapro21.api.response.post.PostData;
 import com.skillbox.javapro21.api.response.post.PostDeleteResponse;
 import com.skillbox.javapro21.exception.AuthorAndUserEqualsException;
@@ -78,5 +79,15 @@ public class PostController {
     public ResponseEntity<DataResponse<PostData>> recoverPostById(@PathVariable Long id,
                                                                   Principal principal) throws PostNotFoundException, AuthorAndUserEqualsException, PostRecoveryException {
         return new ResponseEntity<>(postService.recoverPostById(id, principal), HttpStatus.OK);
+    }
+
+    @Operation(summary = "Получение комментариев к посту")
+    @GetMapping("/post/{id/comments}")
+    @PreAuthorize("hasAuthority('user:write')")
+    public ResponseEntity<ListDataResponse<CommentsData>> getComments(@PathVariable Long id,
+                                                                      @RequestParam(name = "offset", defaultValue = "0") int offset,
+                                                                      @RequestParam(name = "item_per_page", defaultValue = "20") int itemPerPage,
+                                                                      Principal principal) {
+        return new ResponseEntity<>(postService.getComments(id, offset, itemPerPage, principal), HttpStatus.OK);
     }
 }

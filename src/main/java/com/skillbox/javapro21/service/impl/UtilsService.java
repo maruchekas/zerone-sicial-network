@@ -22,7 +22,7 @@ public class UtilsService {
     private final PersonRepository personRepository;
 
     @Autowired
-    protected UtilsService(PersonRepository personRepository) {
+    protected UtilsService() {
         this.personRepository = personRepository;
     }
 
