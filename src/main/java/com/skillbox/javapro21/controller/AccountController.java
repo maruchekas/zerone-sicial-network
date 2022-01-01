@@ -44,8 +44,7 @@ public class AccountController {
     @Operation(summary = "Подтверждение регистрации")
     @GetMapping("/register/complete")
     public ResponseEntity<String> verifyRegistration(@RequestParam String email,
-                                                     @RequestParam String code,
-                                                     @RequestParam String target) throws TokenConfirmationException {
+                                                     @RequestParam String code) throws TokenConfirmationException {
         return new ResponseEntity<>(accountService.verifyRegistration(email, code), HttpStatus.OK);
     }
 
