@@ -25,14 +25,13 @@ public class AddedLastOnlineTimeForPersonWithAOP {
     public Object setLastActivity(ProceedingJoinPoint joinPoint) throws Throwable {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String email = auth.getName();
-
         Object proceed = joinPoint.proceed();
-
-        Person person = personRepository.findByEmail(email).orElseThrow();
-        person.setLastOnlineTime(LocalDateTime.now());
-        personRepository.save(person);
-        log.info(email + "; " + "LastActivity: " + personRepository.findByEmail(email).get().getLastOnlineTime() + "; Класс контроллера: " + joinPoint.getTarget());
-
+        if (email.matches("^(.+)@(.+)$")) {
+            Person person = personRepository.findByEmail(email).orElseThrow();
+            person.setLastOnlineTime(LocalDateTime.now());
+            personRepository.save(person);
+            log.info(email + "; " + "LastActivity: " + personRepository.findByEmail(email).get().getLastOnlineTime() + "; Класс контроллера: " + joinPoint.getTarget().getClass());
+        }
         return proceed;
     }
 }

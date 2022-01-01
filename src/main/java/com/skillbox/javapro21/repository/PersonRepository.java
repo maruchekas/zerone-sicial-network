@@ -10,7 +10,7 @@ import java.util.Optional;
 @Repository
 public interface PersonRepository extends JpaRepository<Person, Integer> {
     @Query("SELECT p FROM Person p " +
-            "WHERE p.email = ?1")
+            "WHERE p.email = :email")
     Optional<Person> findByEmail(String email);
 
     @Query("SELECT p from Person p where p.id = :id and p.isBlocked = 0")

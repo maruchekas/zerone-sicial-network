@@ -132,4 +132,13 @@ public class AuthControllerTest extends AbstractTest {
         Assertions.assertEquals(LocalDateTime.now().getDayOfMonth(),
                 personRepository.findByEmail(verifyPerson.getEmail()).get().getLastOnlineTime().getDayOfMonth());
     }
+
+    @Test
+    public void logoutTestLastActivityWithoutAuthorize() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders
+                        .post("/api/v1/auth/logout"))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk());
+
+    }
 }
