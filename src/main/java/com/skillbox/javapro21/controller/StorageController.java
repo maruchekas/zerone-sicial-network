@@ -1,5 +1,6 @@
 package com.skillbox.javapro21.controller;
 
+import com.skillbox.javapro21.aop.LastActivity;
 import com.skillbox.javapro21.api.response.Content;
 import com.skillbox.javapro21.api.response.DataResponse;
 import com.skillbox.javapro21.service.ResourceService;
@@ -36,6 +37,7 @@ public class StorageController {
     @Operation(summary = "Загрузка аватара пользователя в хранилище сервиса")
     @PreAuthorize("hasAuthority('user:write')")
     @PostMapping(value = "/storage", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    @LastActivity
     public ResponseEntity<DataResponse<Content>> saveUserAvatar(@RequestParam("type") String type,
                                                                 @RequestParam(value = "file", required = false) MultipartFile file,
                                                                 Principal principal) throws IOException {

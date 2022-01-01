@@ -1,5 +1,6 @@
 package com.skillbox.javapro21.controller;
 
+import com.skillbox.javapro21.aop.LastActivity;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +31,7 @@ public class NotificationsController {
     @Operation(summary = "Отметить уведомление как \"прочитанное\"")
     @PutMapping("")
     @PreAuthorize("hasAuthority('user:write')")
+    @LastActivity
     public ResponseEntity<String> verifyRegistration(@RequestParam int id,
                                                      @RequestParam boolean all,
                                                      Principal principal) {

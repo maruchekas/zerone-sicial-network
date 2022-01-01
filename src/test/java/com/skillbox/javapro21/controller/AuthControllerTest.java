@@ -5,6 +5,8 @@ import com.skillbox.javapro21.api.request.auth.AuthRequest;
 import com.skillbox.javapro21.domain.Person;
 import com.skillbox.javapro21.domain.enumeration.MessagesPermission;
 import com.skillbox.javapro21.repository.PersonRepository;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -64,8 +67,13 @@ public class AuthControllerTest extends AbstractTest {
                 .setMessagesPermission(MessagesPermission.ALL)
                 .setIsBlocked(0)
                 .setIsApproved(1)
-                .setLastOnlineTime(LocalDateTime.now());
+                .setLastOnlineTime(LocalDateTime.now().minusDays(2));
         personRepository.save(verifyPerson);
+    }
+
+    @AfterEach
+    public void cleanup() {
+        personRepository.deleteAll();
     }
 
     @Test
@@ -110,5 +118,18 @@ public class AuthControllerTest extends AbstractTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().is4xxClientError()).andReturn();
+    }
+
+    @Test
+    @WithMockUser(username = "test@test.ru")
+    public void logoutTestLastActivity() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders
+                        .post("/api/v1/auth/logout")
+                        .principal(() -> "test@test.ru"))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
+
+        Assertions.assertEquals(LocalDateTime.now().getDayOfMonth(),
+                personRepository.findByEmail(verifyPerson.getEmail()).get().getLastOnlineTime().getDayOfMonth());
     }
 }

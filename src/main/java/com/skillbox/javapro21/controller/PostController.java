@@ -1,6 +1,7 @@
 package com.skillbox.javapro21.controller;
 
 import com.mailjet.client.errors.MailjetException;
+import com.skillbox.javapro21.aop.LastActivity;
 import com.skillbox.javapro21.api.request.post.CommentRequest;
 import com.skillbox.javapro21.api.request.post.PostRequest;
 import com.skillbox.javapro21.api.response.DataResponse;
@@ -39,6 +40,7 @@ public class PostController {
     @Operation(summary = "Поиск публикации", security = @SecurityRequirement(name = "jwt"))
     @GetMapping("/post")
     @PreAuthorize("hasAuthority('user:write')")
+    @LastActivity
     public ResponseEntity<ListDataResponse<PostData>> getPosts(@RequestParam(name = "text", defaultValue = "") String text,
                                                                @RequestParam(name = "date_from", defaultValue = "-1") long dateFrom,
                                                                @RequestParam(name = "date_to", defaultValue = "-1") long dateTo,
@@ -53,6 +55,7 @@ public class PostController {
     @Operation(summary = "Поиск публикации по id", security = @SecurityRequirement(name = "jwt"))
     @GetMapping("/post/{id}")
     @PreAuthorize("hasAuthority('user:write')")
+    @LastActivity
     public ResponseEntity<DataResponse<PostData>> getPostsById(@PathVariable Long id,
                                                                Principal principal) throws PostNotFoundException {
         return new ResponseEntity<>(postService.getPostsById(id, principal), HttpStatus.OK);
@@ -61,6 +64,7 @@ public class PostController {
     @Operation(summary = "Изменение публикации по id и отложенная публикация", security = @SecurityRequirement(name = "jwt"))
     @PutMapping("/post/{id}")
     @PreAuthorize("hasAuthority('user:write')")
+    @LastActivity
     public ResponseEntity<DataResponse<PostData>> putPostByIdAndMessageInDay(@PathVariable Long id,
                                                                              @RequestParam(name = "publish_date", defaultValue = "-1") long publishDate,
                                                                              @RequestBody PostRequest postRequest,
@@ -71,6 +75,7 @@ public class PostController {
     @Operation(summary = "Удаление публикации по id", security = @SecurityRequirement(name = "jwt"))
     @DeleteMapping("/post/{id}")
     @PreAuthorize("hasAuthority('user:write')")
+    @LastActivity
     public ResponseEntity<DataResponse<PostDeleteResponse>> putPostByIdAndMessageInDay(@PathVariable Long id,
                                                                                        Principal principal) throws PostNotFoundException, AuthorAndUserEqualsException {
         return new ResponseEntity<>(postService.deletePostById(id, principal), HttpStatus.OK);
@@ -79,6 +84,7 @@ public class PostController {
     @Operation(summary = "Восстановление публикации по id", security = @SecurityRequirement(name = "jwt"))
     @PutMapping("/post/{id}/recover")
     @PreAuthorize("hasAuthority('user:write')")
+    @LastActivity
     public ResponseEntity<DataResponse<PostData>> recoverPostById(@PathVariable Long id,
                                                                   Principal principal) throws PostNotFoundException, AuthorAndUserEqualsException, PostRecoveryException {
         return new ResponseEntity<>(postService.recoverPostById(id, principal), HttpStatus.OK);
@@ -87,6 +93,7 @@ public class PostController {
     @Operation(summary = "Получение комментариев к посту")
     @GetMapping("/post/{id}/comments")
     @PreAuthorize("hasAuthority('user:write')")
+    @LastActivity
     public ResponseEntity<ListDataResponse<CommentsData>> getComments(@PathVariable Long id,
                                                                       @RequestParam(name = "offset", defaultValue = "0") int offset,
                                                                       @RequestParam(name = "item_per_page", defaultValue = "5") int itemPerPage) throws PostNotFoundException {
@@ -96,6 +103,7 @@ public class PostController {
     @Operation(summary = "Добавление комментариев к посту")
     @PostMapping("/post/{id}/comments")
     @PreAuthorize("hasAuthority('user:write')")
+    @LastActivity
     public ResponseEntity<DataResponse<CommentsData>> postComments(@PathVariable Long id,
                                                                        @RequestBody CommentRequest commentRequest,
                                                                        Principal principal) throws PostNotFoundException, CommentNotFoundException {
@@ -105,6 +113,7 @@ public class PostController {
     @Operation(summary = "Редактирование комментария к посту")
     @PutMapping("/post/{id}/comments/{comment_id}")
     @PreAuthorize("hasAuthority('user:write')")
+    @LastActivity
     public ResponseEntity<DataResponse<CommentsData>> putComments(@PathVariable Long id,
                                                                    @PathVariable(name = "comment_id") Long commentId,
                                                                    @RequestBody CommentRequest commentRequest,
@@ -115,6 +124,7 @@ public class PostController {
     @Operation(summary = "Удаление комментария")
     @DeleteMapping("/post/{id}/comments/{comment_id}")
     @PreAuthorize("hasAuthority('user:write')")
+    @LastActivity
     public ResponseEntity<DataResponse<CommentDelete>> deleteComments(@PathVariable Long id,
                                                                       @PathVariable(name = "comment_id") Long commentId,
                                                                       Principal principal) throws PostNotFoundException, CommentNotFoundException, CommentNotAuthorException {
@@ -124,6 +134,7 @@ public class PostController {
     @Operation(summary = "Восстановление комментария")
     @PutMapping("/post/{id}/comments/{comment_id}/recover")
     @PreAuthorize("hasAuthority('user:write')")
+    @LastActivity
     public ResponseEntity<DataResponse<CommentsData>> recoverComments(@PathVariable Long id,
                                                                       @PathVariable(name = "comment_id") Long commentId,
                                                                       Principal principal) throws PostNotFoundException, CommentNotFoundException, CommentNotAuthorException {
@@ -133,6 +144,7 @@ public class PostController {
     @Operation(summary = "Жалоба на пост")
     @PostMapping("/post/{id}/report")
     @PreAuthorize("hasAuthority('user:write')")
+    @LastActivity
     public ResponseEntity<DataResponse<MessageOkContent>> ratPostController(@PathVariable Long id,
                                                                         Principal principal) throws PostNotFoundException, CommentNotFoundException, CommentNotAuthorException, MailjetException {
         return new ResponseEntity<>(postService.ratPostController(id, principal), HttpStatus.OK);
@@ -141,6 +153,7 @@ public class PostController {
     @Operation(summary = "Восстановление комментария")
     @PostMapping("/post/{id}/comments/{comment_id}/report")
     @PreAuthorize("hasAuthority('user:write')")
+    @LastActivity
     public ResponseEntity<DataResponse<MessageOkContent>> ratCommentController(@PathVariable Long id,
                                                                                @PathVariable(name = "comment_id") Long commentId,
                                                                         Principal principal) throws PostNotFoundException, CommentNotFoundException, CommentNotAuthorException, MailjetException {
