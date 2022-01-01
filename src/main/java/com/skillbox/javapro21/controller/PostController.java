@@ -108,7 +108,7 @@ public class PostController {
     public ResponseEntity<DataResponse<CommentsData>> putComments(@PathVariable Long id,
                                                                    @PathVariable(name = "comment_id") Long commentId,
                                                                    @RequestBody CommentRequest commentRequest,
-                                                                   Principal principal) throws PostNotFoundException, CommentNotFoundException {
+                                                                   Principal principal) throws PostNotFoundException, CommentNotFoundException, CommentNotAuthorException {
         return new ResponseEntity<>(postService.putComments(id, commentId, commentRequest, principal), HttpStatus.OK);
     }
 

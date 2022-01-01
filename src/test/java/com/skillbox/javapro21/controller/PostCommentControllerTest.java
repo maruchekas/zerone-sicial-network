@@ -27,7 +27,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -213,16 +212,16 @@ public class PostCommentControllerTest extends AbstractTest {
 
     @Test
     @WithMockUser(username = "test@test.ru", authorities = "user:write")
-    void putComments() throws Exception {
+    void putCommentsNoAuthor() throws Exception {
         CommentRequest commentRequest1 = new CommentRequest().setCommentText("lol");
         mockMvc.perform(MockMvcRequestBuilders
-                        .put("/api/v1/post/{id}/comments/{comment_id}", post2.getId())
+                        .put("/api/v1/post/{id}/comments/{comment_id}", post2.getId(), postComment.getId())
                         .principal(() -> "test@test.ru")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(commentRequest1))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
+                .andExpect(MockMvcResultMatchers.status().isForbidden()).andReturn();
 
         CommentRequest commentRequest2 = new CommentRequest().setCommentText("lol").setParentId(1L);
         mockMvc.perform(MockMvcRequestBuilders
@@ -232,6 +231,104 @@ public class PostCommentControllerTest extends AbstractTest {
                         .content(mapper.writeValueAsString(commentRequest2))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isNotFound()).andReturn();
+    }
+
+    @Test
+    @WithMockUser(username = "test@test.rub", authorities = "user:write")
+    void putCommentsWithAuthor() throws Exception {
+        CommentRequest commentRequest1 = new CommentRequest().setCommentText("lol");
+        mockMvc.perform(MockMvcRequestBuilders
+                        .put("/api/v1/post/{id}/comments/{comment_id}", post2.getId(), postComment.getId())
+                        .principal(() -> "test@test.rub")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(commentRequest1))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
+
+        CommentRequest commentRequest2 = new CommentRequest().setCommentText("lol").setParentId(1L);
+        mockMvc.perform(MockMvcRequestBuilders
+                        .put("/api/v1/post/{id}/comments/{comment_id}", post2.getId(), postCommentBlocked.getId())
+                        .principal(() -> "test@test.rub")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(commentRequest2))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isNotFound()).andReturn();
+
+        CommentRequest commentRequest3 = new CommentRequest().setCommentText("lol").setParentId(1L);
+        mockMvc.perform(MockMvcRequestBuilders
+                        .put("/api/v1/post/{id}/comments/{comment_id}", 22L, 1L)
+                        .principal(() -> "test@test.rub")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(commentRequest3))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isNotFound()).andReturn();
+    }
+
+
+    @Test
+    @WithMockUser(username = "test@test.rub", authorities = "user:write")
+    void deleteCommentAuthor() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders
+                        .delete("/api/v1/post/{id}/comments/{comment_id}", post2.getId(), postComment.getId())
+                        .principal(() -> "test@test.rub"))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.id").value( postComment.getId())).andReturn();
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .delete("/api/v1/post/{id}/comments/{comment_id}", post2.getId(), postCommentBlocked.getId())
+                        .principal(() -> "test@test.rub"))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isNotFound()).andReturn();
+    }
+
+    @Test
+    @WithMockUser(username = "test@test.ru", authorities = "user:write")
+    void deleteCommentNoAuthor() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders
+                        .delete("/api/v1/post/{id}/comments/{comment_id}", post2.getId(), postComment.getId())
+                        .principal(() -> "test@test.ru"))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isForbidden());
+
+    }
+
+    @Test
+    @WithMockUser(username = "test@test.rub", authorities = "user:write")
+    void recoveryCommentAuthor() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders
+                        .put("/api/v1/post/{id}/comments/{comment_id}/recover", post2.getId(), postCommentBlocked.getId())
+                        .principal(() -> "test@test.rub"))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.id").value(postCommentBlocked.getId()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.comment_text").value(postCommentBlocked.getCommentText())).andReturn();
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .put("/recover", post2.getId(), postComment.getId())
+                        .principal(() -> "test@test.rub"))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isNotFound()).andReturn();
+    }
+
+    @Test
+    @WithMockUser(username = "test@test.ru", authorities = "user:write")
+    void recoveryCommentNoAuthor() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders
+                        .put("/api/v1/post/{id}/comments/{comment_id}/recover", post2.getId(), postCommentBlocked.getId())
+                        .principal(() -> "test@test.ru"))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isForbidden()).andReturn();
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .put("/api/v1/post/{id}/comments/{comment_id}/recover", post2.getId(), postComment.getId())
+                        .principal(() -> "test@test.ru"))
+                .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isNotFound());
+
     }
 }

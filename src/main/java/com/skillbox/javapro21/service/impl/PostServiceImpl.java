@@ -6,7 +6,6 @@ import com.skillbox.javapro21.api.request.post.PostRequest;
 import com.skillbox.javapro21.api.response.DataResponse;
 import com.skillbox.javapro21.api.response.ListDataResponse;
 import com.skillbox.javapro21.api.response.MessageOkContent;
-import com.skillbox.javapro21.api.response.captcha.CaptchaResponse;
 import com.skillbox.javapro21.api.response.post.CommentDelete;
 import com.skillbox.javapro21.api.response.post.CommentsData;
 import com.skillbox.javapro21.api.response.post.PostData;
@@ -129,24 +128,28 @@ public class PostServiceImpl implements PostService {
         return getCommentResponse(postComment);
     }
 
-    public DataResponse<CommentsData> putComments(Long id, Long commentId, CommentRequest commentRequest, Principal principal) throws PostNotFoundException, CommentNotFoundException {
+    public DataResponse<CommentsData> putComments(Long id, Long commentId, CommentRequest commentRequest, Principal principal) throws PostNotFoundException, CommentNotFoundException, CommentNotAuthorException {
+        Person person = utilsService.findPersonByEmail(principal.getName());
         PostComment postComment = null;
         if (commentRequest.getParentId() != null) {
-            postComment = postCommentRepository.findPostCommentByIdAndParentId(commentId, id)
+            postComment = postCommentRepository.findPostCommentByIdAndPostId(id, commentId)
                     .orElseThrow(() -> new CommentNotFoundException("Комментария с данным parent_id не существует"));
-        } else {
+        } else
             postComment = postCommentRepository.findById(commentId)
                     .orElseThrow(() -> new CommentNotFoundException("Комментария с данным id не существует"));
-        }
+
+        if (!person.getId().equals(postComment.getPerson().getId()))
+            throw new CommentNotAuthorException("Пользователь не имеет прав редактировать данный комментарий");
         postComment
                 .setCommentText(commentRequest.getCommentText())
                 .setTime(LocalDateTime.now());
-         return getCommentResponse(postComment);
+        postCommentRepository.save(postComment);
+        return getCommentResponse(postComment);
     }
 
     public DataResponse<CommentDelete> deleteComments(Long id, Long commentId, Principal principal) throws CommentNotFoundException, CommentNotAuthorException {
         Person person = utilsService.findPersonByEmail(principal.getName());
-        PostComment postComment = postCommentRepository.findPostCommentByIdAndParentId(commentId, id)
+        PostComment postComment = postCommentRepository.findPostCommentByIdAndPostId(commentId, id)
                 .orElseThrow(() -> new CommentNotFoundException("Комментария с данным parent_id не существует"));
         if (postComment.getPerson().getId().equals(person.getId())) {
             postComment.setIsBlocked(2);
@@ -162,7 +165,7 @@ public class PostServiceImpl implements PostService {
     public DataResponse<CommentsData> recoverComments(Long id, Long commentId, Principal principal) throws CommentNotFoundException, CommentNotAuthorException {
         Person person = utilsService.findPersonByEmail(principal.getName());
         PostComment postComment = postCommentRepository.findPostCommentByIdAndParentIdWhichIsDelete(commentId, id)
-                .orElseThrow(() -> new CommentNotFoundException("Комментария не существует"));
+                .orElseThrow(() -> new CommentNotFoundException("Подходящий комментарий не найден"));
         if (postComment.getPerson().getId().equals(person.getId())) {
             postComment.setIsBlocked(0);
             postCommentRepository.save(postComment);
@@ -178,7 +181,7 @@ public class PostServiceImpl implements PostService {
     }
 
     public DataResponse<MessageOkContent> ratCommentController(Long id, Long commentId, Principal principal) throws CommentNotFoundException, MailjetException {
-        PostComment postComment = postCommentRepository.findPostCommentByIdAndParentId(commentId, id)
+        PostComment postComment = postCommentRepository.findPostCommentByIdAndPostId(commentId, id)
                 .orElseThrow(() -> new CommentNotFoundException("Комментария с данным parent_id не существует"));
         String message = "Жалоба от " + principal.getName() + " на комментарий с id: " + postComment.getId() + "\n и текстом " + postComment.getCommentText();
         sendMessageForAdministration(message);
@@ -186,7 +189,7 @@ public class PostServiceImpl implements PostService {
     }
 
     private void sendMessageForAdministration(String message) throws MailjetException {
-        mailjetSender.send( adminEmail, message);
+        mailjetSender.send(adminEmail, message);
     }
 
     private DataResponse<CommentsData> getCommentResponse(PostComment postComment) {
@@ -196,7 +199,7 @@ public class PostServiceImpl implements PostService {
     }
 
     private ListDataResponse<CommentsData> getListDataResponseWithComments(Pageable pageable, Post post) {
-        Page<PostComment> pageablePostComments = postCommentRepository.findPostCommentsByPotId(post.getId(), pageable);
+        Page<PostComment> pageablePostComments = postCommentRepository.findPostCommentsByPostId(post.getId(), pageable);
         return getPostCommentResponse(pageablePostComments, pageable);
     }
 
@@ -228,7 +231,7 @@ public class PostServiceImpl implements PostService {
                 .setTime(postComment.getTime())
                 .setAuthor(utilsService.getAuthData(postComment.getPerson(), null))
                 .setBlocked(postComment.getIsBlocked() == 0);
-         if (postComment.getParent() != null) commentsData.setParentId(postComment.getParent().getId());
+        if (postComment.getParent() != null) commentsData.setParentId(postComment.getParent().getId());
         return commentsData;
     }
 
