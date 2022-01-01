@@ -22,10 +22,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
 
 import static com.skillbox.javapro21.domain.enumeration.FriendshipStatusType.*;
-import static com.skillbox.javapro21.domain.enumeration.FriendshipStatusType.SUBSCRIBED;
 
 @Component
 public class UtilsService {
@@ -63,11 +61,8 @@ public class UtilsService {
      * создание рандомного токена
      */
     public String getToken() {
-        return new Random().ints(10, 33, 122)
-                .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
-                .toString();
+        return String.valueOf((int) (Math.random() * (-1000 - 1000 + 1)) + 1000);
     }
-
 
     /**
      * заблокирован пользователь или нет ?

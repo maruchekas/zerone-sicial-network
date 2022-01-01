@@ -44,15 +44,14 @@ public class AccountController {
     @Operation(summary = "Подтверждение регистрации")
     @GetMapping("/register/complete")
     public ResponseEntity<String> verifyRegistration(@RequestParam String email,
-                                                     @RequestParam String code) throws TokenConfirmationException {
-        log.info("Регистрация для email {} пройдена.", email);
+                                                     @RequestParam String code,
+                                                     @RequestParam String target) throws TokenConfirmationException {
         return new ResponseEntity<>(accountService.verifyRegistration(email, code), HttpStatus.OK);
     }
 
     @Operation(summary = "Отправка ссылки на почту для восстановления пароля")
     @PutMapping("/password/send_recovery_massage")
     public ResponseEntity<String> recoveryPasswordMessage(@RequestBody RecoveryRequest recoveryRequest) throws MailjetException {
-        log.info("Отправка на email: {} пиьсма с сылкой на регистрацию", recoveryRequest.getEmail());
         return new ResponseEntity<>(accountService.recoveryPasswordMessage(recoveryRequest), HttpStatus.OK);
     }
 
@@ -60,7 +59,6 @@ public class AccountController {
     @GetMapping("/password/recovery/complete")
     public ResponseEntity<String> verifyRecovery(@RequestParam String email,
                                                  @RequestParam String code) throws TokenConfirmationException {
-        log.info("Can`t verify user with email {}", email);
         return new ResponseEntity<>(accountService.verifyRecovery(email, code), HttpStatus.OK);
     }
 
@@ -68,7 +66,6 @@ public class AccountController {
     @PutMapping("/password/recovery")
     public ResponseEntity<String> recoveryPassword(@RequestParam String email,
                                                    @RequestParam String password) {
-        log.info("Измение пароля для email {}.", email);
         return new ResponseEntity<>(accountService.recoveryPassword(email, password), HttpStatus.OK);
     }
 
@@ -77,7 +74,6 @@ public class AccountController {
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
     public ResponseEntity<DataResponse<MessageOkContent>> changePassword(@RequestBody ChangePasswordRequest changePasswordRequest) {
-        log.info("Измение пароля авторизованным пользователем.");
         return new ResponseEntity<>(accountService.changePassword(changePasswordRequest), HttpStatus.OK);
     }
 
@@ -87,7 +83,6 @@ public class AccountController {
     @LastActivity
     public ResponseEntity<DataResponse<MessageOkContent>> changeEmail(@RequestBody ChangeEmailRequest changeEmailRequest,
                                                                       Principal principal) {
-        log.info("Смена email авторизованным пользователем {}.", principal.getName());
         return new ResponseEntity<>(accountService.changeEmail(changeEmailRequest, principal), HttpStatus.OK);
     }
 
@@ -97,7 +92,6 @@ public class AccountController {
     @LastActivity
     public ResponseEntity<DataResponse<MessageOkContent>> changeNotifications(@RequestBody ChangeNotificationsRequest changeNotificationsRequest,
                                                                               Principal principal) {
-        log.info("Редактирование настроек оповещения. Email {}.", principal.getName());
         return new ResponseEntity<>(accountService.changeNotifications(changeNotificationsRequest, principal), HttpStatus.OK);
     }
 
@@ -106,7 +100,6 @@ public class AccountController {
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
     public ResponseEntity<ListDataResponse<NotificationSettingData>> getNotifications(Principal principal) {
-        log.info("Получение настроек оповещения. Email {}.", principal.getName());
         return new ResponseEntity<>(accountService.getNotifications(principal), HttpStatus.OK);
     }
 }

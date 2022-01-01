@@ -34,7 +34,6 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class AccountServiceImpl implements AccountService {
-
     private static int countRegisterPost = 0;
 
     private final UtilsService utilsService;
@@ -47,12 +46,12 @@ public class AccountServiceImpl implements AccountService {
     public DataResponse<MessageOkContent> registration(RegisterRequest registerRequest) throws UserExistException, MailjetException {
         if (personRepository.findByEmail(registerRequest.getEmail()).isPresent()) {
             countRegisterPost = countRegisterPost + 1;
-            if (countRegisterPost < 3) {
-                Person personInBD = personRepository.findByEmail(registerRequest.getEmail()).orElseThrow();
+            Person personInBD = personRepository.findByEmail(registerRequest.getEmail()).orElseThrow();
+            if (countRegisterPost < 3 && personInBD.getIsApproved() == 0) {
                 updateNewPerson(personInBD, registerRequest);
                 mailMessageForRegistration(registerRequest);
             } else {
-                throw new UserExistException("Слишком много попыток пройти регистрацию по одному email");
+                throw new UserExistException("Пользователь с данным email уже подтвержден или слишком много попыток пройти регистрацию по одному email");
             }
         } else {
             createNewPerson(registerRequest);
@@ -64,7 +63,8 @@ public class AccountServiceImpl implements AccountService {
     public String verifyRegistration(String email, String code) throws TokenConfirmationException {
         Person person = utilsService.findPersonByEmail(email);
         if (person.getConfirmationCode().equals(code)) {
-            person.setIsApproved(1)
+            person
+                    .setIsApproved(1)
                     .setUserType(UserType.USER)
                     .setMessagesPermission(MessagesPermission.ALL)
                     .setConfirmationCode("");

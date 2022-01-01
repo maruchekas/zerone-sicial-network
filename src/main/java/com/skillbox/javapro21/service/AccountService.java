@@ -8,7 +8,6 @@ import com.skillbox.javapro21.api.response.MessageOkContent;
 import com.skillbox.javapro21.api.response.account.NotificationSettingData;
 import com.skillbox.javapro21.exception.TokenConfirmationException;
 import com.skillbox.javapro21.exception.UserExistException;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
