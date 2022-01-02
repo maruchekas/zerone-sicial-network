@@ -11,6 +11,7 @@ import com.skillbox.javapro21.exception.InterlockedFriendshipStatusException;
 import com.skillbox.javapro21.repository.FriendshipRepository;
 import com.skillbox.javapro21.repository.FriendshipStatusRepository;
 import com.skillbox.javapro21.repository.PersonRepository;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
@@ -61,7 +62,7 @@ public class UtilsService {
      * создание рандомного токена
      */
     public String getToken() {
-        return String.valueOf((int) (Math.random() * (-1000 - 1000 + 1)) + 1000);
+        return RandomStringUtils.randomAlphanumeric(6);
     }
 
     /**
