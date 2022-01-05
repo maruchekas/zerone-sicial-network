@@ -1,6 +1,7 @@
 package com.skillbox.javapro21.controller;
 
 import com.mailjet.client.errors.MailjetException;
+import com.skillbox.javapro21.aop.LastActivity;
 import com.skillbox.javapro21.api.request.account.*;
 import com.skillbox.javapro21.api.response.DataResponse;
 import com.skillbox.javapro21.api.response.ListDataResponse;
@@ -74,6 +75,7 @@ public class AccountController {
     @Operation(summary = "Смена пароля", security = @SecurityRequirement(name = "jwt"))
     @PutMapping("/password/set")
     @PreAuthorize("hasAuthority('user:write')")
+    @LastActivity
     public ResponseEntity<DataResponse<MessageOkContent>> changePassword(@RequestBody ChangePasswordRequest changePasswordRequest) {
         log.info("Измение пароля авторизованным пользователем.");
         return new ResponseEntity<>(accountService.changePassword(changePasswordRequest), HttpStatus.OK);
@@ -82,6 +84,7 @@ public class AccountController {
     @Operation(summary = "Смена email", security = @SecurityRequirement(name = "jwt"))
     @PutMapping("/email")
     @PreAuthorize("hasAuthority('user:write')")
+    @LastActivity
     public ResponseEntity<DataResponse<MessageOkContent>> changeEmail(@RequestBody ChangeEmailRequest changeEmailRequest,
                                                                       Principal principal) {
         log.info("Смена email авторизованным пользователем {}.", principal.getName());
@@ -91,6 +94,7 @@ public class AccountController {
     @Operation(summary = "Редактирование настроек оповещения", security = @SecurityRequirement(name = "jwt"))
     @PutMapping("/notifications")
     @PreAuthorize("hasAuthority('user:write')")
+    @LastActivity
     public ResponseEntity<DataResponse<MessageOkContent>> changeNotifications(@RequestBody ChangeNotificationsRequest changeNotificationsRequest,
                                                                               Principal principal) {
         log.info("Редактирование настроек оповещения. Email {}.", principal.getName());
@@ -100,6 +104,7 @@ public class AccountController {
     @Operation(summary = "Получение настроек оповещения", security = @SecurityRequirement(name = "jwt"))
     @GetMapping("/notifications")
     @PreAuthorize("hasAuthority('user:write')")
+    @LastActivity
     public ResponseEntity<ListDataResponse<NotificationSettingData>> getNotifications(Principal principal) {
         log.info("Получение настроек оповещения. Email {}.", principal.getName());
         return new ResponseEntity<>(accountService.getNotifications(principal), HttpStatus.OK);

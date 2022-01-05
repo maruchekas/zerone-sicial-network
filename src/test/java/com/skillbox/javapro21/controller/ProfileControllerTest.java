@@ -101,7 +101,7 @@ public class ProfileControllerTest extends AbstractTest {
                 .setMessagesPermission(MessagesPermission.ALL)
                 .setIsBlocked(0)
                 .setIsApproved(1)
-                .setLastOnlineTime(LocalDateTime.now());
+                .setLastOnlineTime(LocalDateTime.now().minusDays(2));
         personRepository.save(verifyPersonWithPost);
 
         friendshipStatusSrc = new FriendshipStatus();

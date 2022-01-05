@@ -12,6 +12,7 @@ import com.skillbox.javapro21.repository.PostCommentRepository;
 import com.skillbox.javapro21.repository.PostRepository;
 import com.skillbox.javapro21.repository.TagRepository;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -94,7 +95,7 @@ public class PostCommentControllerTest extends AbstractTest {
                 .setMessagesPermission(MessagesPermission.ALL)
                 .setIsBlocked(0)
                 .setIsApproved(1)
-                .setLastOnlineTime(LocalDateTime.now());
+                .setLastOnlineTime(LocalDateTime.now().minusDays(2));
 
         personRepository.save(verifyPerson);
         personRepository.save(verifyPersonWithPost);
@@ -313,6 +314,9 @@ public class PostCommentControllerTest extends AbstractTest {
                         .principal(() -> "test@test.rub"))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isNotFound()).andReturn();
+
+        Assertions.assertEquals(LocalDateTime.now().getDayOfMonth(), personRepository.findByEmail(verifyPersonWithPost.getEmail()).get().getLastOnlineTime().getDayOfMonth());
+        System.out.println(personRepository.findByEmail(verifyPersonWithPost.getEmail()).get().getLastOnlineTime().getDayOfMonth());
     }
 
     @Test
@@ -329,6 +333,7 @@ public class PostCommentControllerTest extends AbstractTest {
                         .principal(() -> "test@test.ru"))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isNotFound());
-
     }
+
+
 }
