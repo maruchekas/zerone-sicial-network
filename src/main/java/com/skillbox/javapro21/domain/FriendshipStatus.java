@@ -1,17 +1,11 @@
 package com.skillbox.javapro21.domain;
 
-import com.skillbox.javapro21.api.response.Content;
 import com.skillbox.javapro21.domain.enumeration.FriendshipStatusType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
 import javax.persistence.*;
 import java.time.LocalDateTime;
 

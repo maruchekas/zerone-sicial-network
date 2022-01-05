@@ -40,11 +40,20 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
             "and ((p.title like '%'||:text||'%' or p.postText like '%'||:text||'%') " +
             "or (ps.firstName like :author||'%' or ps.lastName like :author||'%' )) " +
             "group by p.id " +
-            "order by time desc")
+            "order by p.time desc")
     Page<Post> findPostsByTextByAuthorWithoutTagsContainingByDateExcludingBlockers(String text, LocalDateTime dateFrom,
                                                                                    LocalDateTime dateTo, String author,
                                                                                    Pageable pageable);
     @Query("select p from Post p " +
             "where p.id = :id")
     Optional<Post> findDeletedPostById(Long id);
+
+    @Query("select p from Post p " +
+            "left join Person ps on ps.id = p.author.id " +
+            "left join PostComment pc on pc.post.id = p.id " +
+            "where ps.id = :id " +
+            "and (ps.isBlocked = 0 and p.isBlocked = 0) and p.time < CURRENT_TIMESTAMP " +
+            "group by p.id " +
+            "order by p.time desc")
+    Page<Post> findPostsByPersonId(Long id, Pageable pageable);
 }

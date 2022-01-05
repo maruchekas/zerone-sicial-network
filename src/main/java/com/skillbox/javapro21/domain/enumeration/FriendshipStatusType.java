@@ -12,7 +12,9 @@ public enum FriendshipStatusType {
     FRIEND("Друзья"),
     BLOCKED("Пользователь в черном списке"),
     DECLINED("Запрос на добавление в друзья отклонен"),
-    SUBSCRIBED("Подписан");
+    SUBSCRIBED("Подписан"),
+    WASBLOCKED("Заблокирован пользователем"),
+    INTERLOCKED("Взаимная блокировка");
 
     private final String name;
 }

@@ -8,7 +8,6 @@ import com.skillbox.javapro21.config.security.JwtGenerator;
 import com.skillbox.javapro21.domain.Person;
 import com.skillbox.javapro21.exception.NotSuchUserOrWrongPasswordException;
 import com.skillbox.javapro21.exception.UserLegalException;
-import com.skillbox.javapro21.repository.PersonRepository;
 import com.skillbox.javapro21.service.AuthService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
