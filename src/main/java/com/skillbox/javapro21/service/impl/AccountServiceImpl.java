@@ -19,8 +19,8 @@ import com.skillbox.javapro21.exception.UserExistException;
 import com.skillbox.javapro21.repository.NotificationTypeRepository;
 import com.skillbox.javapro21.repository.PersonRepository;
 import com.skillbox.javapro21.service.AccountService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -32,6 +32,7 @@ import java.util.List;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class AccountServiceImpl implements AccountService {
 
     private static int countRegisterPost = 0;
@@ -42,16 +43,6 @@ public class AccountServiceImpl implements AccountService {
     private final ConfirmationUrl confirmationUrl;
     private final JwtGenerator jwtGenerator;
     private final NotificationTypeRepository notificationTypeRepository;
-
-    @Autowired
-    public AccountServiceImpl(UtilsService utilsService, PersonRepository personRepository, MailjetSender mailMessage, ConfirmationUrl confirmationUrl, JwtGenerator jwtGenerator, NotificationTypeRepository notificationTypeRepository) {
-        this.utilsService = utilsService;
-        this.personRepository = personRepository;
-        this.mailMessage = mailMessage;
-        this.confirmationUrl = confirmationUrl;
-        this.jwtGenerator = jwtGenerator;
-        this.notificationTypeRepository = notificationTypeRepository;
-    }
 
     public DataResponse<MessageOkContent> registration(RegisterRequest registerRequest) throws UserExistException, MailjetException {
         if (personRepository.findByEmail(registerRequest.getEmail()).isPresent()) {
@@ -127,11 +118,12 @@ public class AccountServiceImpl implements AccountService {
         Person person = utilsService.findPersonByEmail(principal.getName());
         NotificationType notificationType = notificationTypeRepository.findNotificationTypeByPersonId(person.getId())
                 .orElse(new NotificationType()
-                        .setPost(true)
-                        .setPostComment(true)
-                        .setCommentComment(true)
-                        .setFriendsRequest(true)
-                        .setMessage(true));
+                        .setPost(false)
+                        .setPostComment(false)
+                        .setCommentComment(false)
+                        .setFriendsRequest(false)
+                        .setMessage(false)
+                        .setFriendsBirthday(false));
         switch (changeNotificationsRequest.getNotificationTypeStatus()) {
             case POST -> notificationType.setPost(changeNotificationsRequest.isEnable());
             case POST_COMMENT -> notificationType.setPostComment(changeNotificationsRequest.isEnable());
@@ -189,8 +181,6 @@ public class AccountServiceImpl implements AccountService {
         person.setConfirmationCode(token);
         personRepository.save(person);
         mailMessage.send(email, text);
-        log.info(String.valueOf(email));
-        log.info(String.valueOf(text));
     }
 
     /**

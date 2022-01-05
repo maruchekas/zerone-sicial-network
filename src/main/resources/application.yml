@@ -7,7 +7,7 @@ spring:
   profiles:
     active: dev
   datasource:
-    url: jdbc:postgresql://localhost:5432/SocialNetwork?stringtype=unspecified
+    url: jdbc:postgresql://localhost:5432/SocialNetwork
     username: postgres
     password: root
   jpa:
@@ -21,6 +21,7 @@ mailjet:
     key: 31630259aad78bb4a4adff1902eee4c3
     secret: cc6adb843048afd0f1a7d9c33feb4b22
     version: v3.1
+    email_admin: briz.zukkel@gmail.com
   flyway:
     enabled: true
 jwt:

@@ -1,13 +1,16 @@
 package com.skillbox.javapro21.controller;
 
+import com.mailjet.client.errors.MailjetException;
+import com.skillbox.javapro21.api.request.post.CommentRequest;
 import com.skillbox.javapro21.api.request.post.PostRequest;
 import com.skillbox.javapro21.api.response.DataResponse;
 import com.skillbox.javapro21.api.response.ListDataResponse;
+import com.skillbox.javapro21.api.response.MessageOkContent;
+import com.skillbox.javapro21.api.response.post.CommentDelete;
+import com.skillbox.javapro21.api.response.post.CommentsData;
 import com.skillbox.javapro21.api.response.post.PostData;
 import com.skillbox.javapro21.api.response.post.PostDeleteResponse;
-import com.skillbox.javapro21.exception.AuthorAndUserEqualsException;
-import com.skillbox.javapro21.exception.PostNotFoundException;
-import com.skillbox.javapro21.exception.PostRecoveryException;
+import com.skillbox.javapro21.exception.*;
 import com.skillbox.javapro21.service.PostService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -79,5 +82,68 @@ public class PostController {
     public ResponseEntity<DataResponse<PostData>> recoverPostById(@PathVariable Long id,
                                                                   Principal principal) throws PostNotFoundException, AuthorAndUserEqualsException, PostRecoveryException {
         return new ResponseEntity<>(postService.recoverPostById(id, principal), HttpStatus.OK);
+    }
+
+    @Operation(summary = "Получение комментариев к посту")
+    @GetMapping("/post/{id}/comments")
+    @PreAuthorize("hasAuthority('user:write')")
+    public ResponseEntity<ListDataResponse<CommentsData>> getComments(@PathVariable Long id,
+                                                                      @RequestParam(name = "offset", defaultValue = "0") int offset,
+                                                                      @RequestParam(name = "item_per_page", defaultValue = "5") int itemPerPage) throws PostNotFoundException {
+        return new ResponseEntity<>(postService.getComments(id, offset, itemPerPage), HttpStatus.OK);
+    }
+
+    @Operation(summary = "Добавление комментариев к посту")
+    @PostMapping("/post/{id}/comments")
+    @PreAuthorize("hasAuthority('user:write')")
+    public ResponseEntity<DataResponse<CommentsData>> postComments(@PathVariable Long id,
+                                                                       @RequestBody CommentRequest commentRequest,
+                                                                       Principal principal) throws PostNotFoundException, CommentNotFoundException {
+        return new ResponseEntity<>(postService.postComments(id, commentRequest, principal), HttpStatus.OK);
+    }
+
+    @Operation(summary = "Редактирование комментария к посту")
+    @PutMapping("/post/{id}/comments/{comment_id}")
+    @PreAuthorize("hasAuthority('user:write')")
+    public ResponseEntity<DataResponse<CommentsData>> putComments(@PathVariable Long id,
+                                                                   @PathVariable(name = "comment_id") Long commentId,
+                                                                   @RequestBody CommentRequest commentRequest,
+                                                                   Principal principal) throws PostNotFoundException, CommentNotFoundException, CommentNotAuthorException {
+        return new ResponseEntity<>(postService.putComments(id, commentId, commentRequest, principal), HttpStatus.OK);
+    }
+
+    @Operation(summary = "Удаление комментария")
+    @DeleteMapping("/post/{id}/comments/{comment_id}")
+    @PreAuthorize("hasAuthority('user:write')")
+    public ResponseEntity<DataResponse<CommentDelete>> deleteComments(@PathVariable Long id,
+                                                                      @PathVariable(name = "comment_id") Long commentId,
+                                                                      Principal principal) throws PostNotFoundException, CommentNotFoundException, CommentNotAuthorException {
+        return new ResponseEntity<>(postService.deleteComments(id, commentId, principal), HttpStatus.OK);
+    }
+
+    @Operation(summary = "Восстановление комментария")
+    @PutMapping("/post/{id}/comments/{comment_id}/recover")
+    @PreAuthorize("hasAuthority('user:write')")
+    public ResponseEntity<DataResponse<CommentsData>> recoverComments(@PathVariable Long id,
+                                                                      @PathVariable(name = "comment_id") Long commentId,
+                                                                      Principal principal) throws PostNotFoundException, CommentNotFoundException, CommentNotAuthorException {
+        return new ResponseEntity<>(postService.recoverComments(id, commentId, principal), HttpStatus.OK);
+    }
+
+    @Operation(summary = "Жалоба на пост")
+    @PostMapping("/post/{id}/report")
+    @PreAuthorize("hasAuthority('user:write')")
+    public ResponseEntity<DataResponse<MessageOkContent>> ratPostController(@PathVariable Long id,
+                                                                        Principal principal) throws PostNotFoundException, CommentNotFoundException, CommentNotAuthorException, MailjetException {
+        return new ResponseEntity<>(postService.ratPostController(id, principal), HttpStatus.OK);
+    }
+
+    @Operation(summary = "Восстановление комментария")
+    @PostMapping("/post/{id}/comments/{comment_id}/report")
+    @PreAuthorize("hasAuthority('user:write')")
+    public ResponseEntity<DataResponse<MessageOkContent>> ratCommentController(@PathVariable Long id,
+                                                                               @PathVariable(name = "comment_id") Long commentId,
+                                                                        Principal principal) throws PostNotFoundException, CommentNotFoundException, CommentNotAuthorException, MailjetException {
+        return new ResponseEntity<>(postService.ratCommentController(id, commentId, principal), HttpStatus.OK);
     }
 }

@@ -98,7 +98,6 @@ public class UtilsService {
             authData.setCountry(Map.of("id", person.getId().toString(), "Country", person.getCountry()));
         }
         if (person.getBirthDate() != null) authData.setBirthDate(Timestamp.valueOf(person.getBirthDate()));
-
         return authData;
     }
 
@@ -124,7 +123,8 @@ public class UtilsService {
     /**
      * создание отношений между пользователями
      */
-    public void createFriendship(Person src, Person dst, FriendshipStatusType friendshipStatusType) throws InterlockedFriendshipStatusException {switch (friendshipStatusType) {
+    public void createFriendship(Person src, Person dst, FriendshipStatusType friendshipStatusType) throws InterlockedFriendshipStatusException {
+        switch (friendshipStatusType) {
             case BLOCKED -> setFriendshipStatusBlocked(src, dst);
             case INTERLOCKED -> setFriendshipStatusBlocked(dst, src);
             case FRIEND, WASBLOCKED -> setOneFriendshipStatusTypeForSrcAndDst(src, dst, friendshipStatusType);

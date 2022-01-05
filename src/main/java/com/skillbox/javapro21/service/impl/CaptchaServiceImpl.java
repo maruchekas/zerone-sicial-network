@@ -5,8 +5,8 @@ import com.skillbox.javapro21.api.response.captcha.CaptchaResponse;
 import com.skillbox.javapro21.domain.CaptchaCode;
 import com.skillbox.javapro21.repository.CaptchaRepository;
 import com.skillbox.javapro21.service.CaptchaService;
+import lombok.RequiredArgsConstructor;
 import org.imgscalr.Scalr;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -19,6 +19,7 @@ import java.time.LocalDateTime;
 import java.util.Base64;
 
 @Component
+@RequiredArgsConstructor
 public class CaptchaServiceImpl implements CaptchaService {
     @Value("${captcha.width}")
     private int captchaWidth;
@@ -30,10 +31,6 @@ public class CaptchaServiceImpl implements CaptchaService {
     private long captchaLifespan;
 
     private final CaptchaRepository captchaRepository;
-    @Autowired
-    public CaptchaServiceImpl(CaptchaRepository captchaRepository) {
-        this.captchaRepository = captchaRepository;
-    }
 
     public CaptchaResponse getNewCaptcha() {
         Timestamp timeThreshold = Timestamp.valueOf(LocalDateTime.now()

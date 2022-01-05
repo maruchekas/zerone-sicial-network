@@ -2,7 +2,6 @@ package com.skillbox.javapro21.service.impl;
 
 import com.skillbox.javapro21.api.request.post.PostRequest;
 import com.skillbox.javapro21.api.request.profile.EditProfileRequest;
-import com.skillbox.javapro21.api.request.profile.EditProfileRequest;
 import com.skillbox.javapro21.api.response.DataResponse;
 import com.skillbox.javapro21.api.response.ListDataResponse;
 import com.skillbox.javapro21.api.response.MessageOkContent;
@@ -18,6 +17,7 @@ import com.skillbox.javapro21.repository.FriendshipStatusRepository;
 import com.skillbox.javapro21.repository.PersonRepository;
 import com.skillbox.javapro21.repository.PostRepository;
 import com.skillbox.javapro21.service.ProfileService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -32,6 +32,7 @@ import java.util.Optional;
 import static com.skillbox.javapro21.domain.enumeration.FriendshipStatusType.*;
 
 @Component
+@RequiredArgsConstructor
 public class ProfileServiceImpl implements ProfileService {
 
     private final UtilsService utilsService;
@@ -40,16 +41,6 @@ public class ProfileServiceImpl implements ProfileService {
     private final PostServiceImpl postService;
     private final FriendshipRepository friendshipRepository;
     private final FriendshipStatusRepository friendshipStatusRepository;
-
-    @Autowired
-    protected ProfileServiceImpl(UtilsService utilsService, PersonRepository personRepository, PostRepository postRepository, PostServiceImpl postService, FriendshipRepository friendshipRepository, FriendshipStatusRepository friendshipStatusRepository) {
-        this.utilsService = utilsService;
-        this.personRepository = personRepository;
-        this.postRepository = postRepository;
-        this.postService = postService;
-        this.friendshipRepository = friendshipRepository;
-        this.friendshipStatusRepository = friendshipStatusRepository;
-    }
 
     public DataResponse<AuthData> getPerson(Principal principal) {
         Person person = utilsService.findPersonByEmail(principal.getName());
@@ -87,7 +78,7 @@ public class ProfileServiceImpl implements ProfileService {
         throw new InterlockedFriendshipStatusException("Полльзователь заблокирован и не может смотреть посты");
     }
 
-    public DataResponse<PostData> postPostOnPersonWallById(Long id, Long publishDate, PostRequest postRequest, Principal principal) throws InterlockedFriendshipStatusException, PersonNotFoundException {
+    public DataResponse<PostData> postPostOnPersonWallById(Long id, Long publishDate, PostRequest postRequest, Principal principal) throws InterlockedFriendshipStatusException, PersonNotFoundException, PostNotFoundException {
         Person src = utilsService.findPersonByEmail(principal.getName());
         Person dst = personRepository.findPersonById(id).orElseThrow(() -> new PersonNotFoundException("Пользователя с данным id не существует"));
         Post post;
@@ -178,5 +169,4 @@ public class ProfileServiceImpl implements ProfileService {
                         ? editProfileRequest.getCountry() : person.getCountry());
         personRepository.save(person);
     }
-
 }

@@ -7,11 +7,7 @@ import com.skillbox.javapro21.api.response.MessageOkContent;
 import com.skillbox.javapro21.api.request.profile.EditProfileRequest;
 import com.skillbox.javapro21.api.response.account.AuthData;
 import com.skillbox.javapro21.api.response.post.PostData;
-import com.skillbox.javapro21.exception.FriendshipNotFoundException;
-import com.skillbox.javapro21.exception.BlockPersonHimselfException;
-import com.skillbox.javapro21.exception.InterlockedFriendshipStatusException;
-import com.skillbox.javapro21.exception.NonBlockedFriendshipException;
-import com.skillbox.javapro21.exception.PersonNotFoundException;
+import com.skillbox.javapro21.exception.*;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
@@ -28,7 +24,7 @@ public interface ProfileService {
 
     ListDataResponse<PostData> getPersonWallById(Long id, int offset, int itemPerPage, Principal principal) throws PersonNotFoundException, InterlockedFriendshipStatusException;
 
-    DataResponse<PostData> postPostOnPersonWallById(Long id, Long publishDate, PostRequest postRequest, Principal principal) throws InterlockedFriendshipStatusException, PersonNotFoundException;
+    DataResponse<PostData> postPostOnPersonWallById(Long id, Long publishDate, PostRequest postRequest, Principal principal) throws InterlockedFriendshipStatusException, PersonNotFoundException, PostNotFoundException;
 
     DataResponse<MessageOkContent> blockPersonById(Long id, Principal principal) throws BlockPersonHimselfException, InterlockedFriendshipStatusException, PersonNotFoundException, FriendshipNotFoundException;
 
