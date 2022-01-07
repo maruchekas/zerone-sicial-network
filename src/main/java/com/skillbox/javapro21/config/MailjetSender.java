@@ -7,11 +7,11 @@ import com.mailjet.client.MailjetResponse;
 import com.mailjet.client.errors.MailjetException;
 import com.mailjet.client.resource.Emailv31;
 import com.skillbox.javapro21.config.properties.MailjetRegistrationParam;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -21,11 +21,20 @@ import java.util.Arrays;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class MailjetSender {
     private final MailjetRegistrationParam mailjet;
+    private final String register;
+    private final String recovery;
     private String htmlTextRegister;
     private String htmlTextRecovery;
+
+    public MailjetSender(MailjetRegistrationParam mailjet,
+                         @Value(value = "${html.file.register}") String register,
+                         @Value(value = "${html.file.recovery}") String recovery) {
+        this.mailjet = mailjet;
+        this.register = register;
+        this.recovery = recovery;
+    }
 
     public void send(String emailTo, String message) throws MailjetException, IOException {
         MailjetClient client;
@@ -60,7 +69,7 @@ public class MailjetSender {
 
     @PostConstruct
     private void getFileByPathRegister() {
-        File htmlMessageFile = new File("./src/main/resources/messages/register.html");
+        File htmlMessageFile = new File(register);
         try {
             htmlTextRegister = FileUtils.readFileToString(htmlMessageFile);
         } catch (IOException e) {
@@ -70,7 +79,7 @@ public class MailjetSender {
 
     @PostConstruct
     private void getFileByPathRecovery() {
-        File htmlMessageFile = new File("./src/main/resources/messages/recovery.html");
+        File htmlMessageFile = new File(recovery);
         try {
             htmlTextRecovery = FileUtils.readFileToString(htmlMessageFile);
         } catch (IOException e) {
