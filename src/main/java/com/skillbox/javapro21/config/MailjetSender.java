@@ -7,22 +7,25 @@ import com.mailjet.client.MailjetResponse;
 import com.mailjet.client.errors.MailjetException;
 import com.mailjet.client.resource.Emailv31;
 import com.skillbox.javapro21.config.properties.MailjetRegistrationParam;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 
 @Slf4j
-@Service
-@AllArgsConstructor
+@Component
+@RequiredArgsConstructor
 public class MailjetSender {
     private final MailjetRegistrationParam mailjet;
+    private String htmlTextRegister;
+    private String htmlTextRecovery;
 
     public void send(String emailTo, String message) throws MailjetException, IOException {
         MailjetClient client;
@@ -31,15 +34,9 @@ public class MailjetSender {
         String messageResponse = null;
         String[] split = message.split("/");
         if (Arrays.asList(split).contains("register")) {
-            File htmlMessageFile = new File("./src/main/resources/messages/register.html");
-            String htmlString = FileUtils.readFileToString(htmlMessageFile);
-            htmlString = htmlString.replace("$message", message);
-            messageResponse = htmlString;
+            messageResponse = htmlTextRegister.replace("$message", message);
         } else if (Arrays.asList(split).contains("recovery")) {
-            File htmlMessageFile = new File("./src/main/resources/messages/recovery.html");
-            String htmlString = FileUtils.readFileToString(htmlMessageFile);
-            htmlString = htmlString.replace("$message", message);
-            messageResponse = htmlString;
+            messageResponse = htmlTextRecovery.replace("$message", message);
         } else messageResponse = message;
         client = new MailjetClient(ClientOptions.builder().apiKey(mailjet.getKey()).apiSecretKey(mailjet.getSecret()).build());
         request = new MailjetRequest(Emailv31.resource)
@@ -60,5 +57,26 @@ public class MailjetSender {
         log.info(String.valueOf(response.getStatus()));
         log.info(String.valueOf(response.getData()));
     }
+
+    @PostConstruct
+    private void getFileByPathRegister() {
+        File htmlMessageFile = new File("./src/main/resources/messages/register.html");
+        try {
+            htmlTextRegister = FileUtils.readFileToString(htmlMessageFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @PostConstruct
+    private void getFileByPathRecovery() {
+        File htmlMessageFile = new File("./src/main/resources/messages/recovery.html");
+        try {
+            htmlTextRecovery = FileUtils.readFileToString(htmlMessageFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 }
 
