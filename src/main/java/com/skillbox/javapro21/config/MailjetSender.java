@@ -69,23 +69,14 @@ public class MailjetSender {
 
     @PostConstruct
     private void getFileByPathRegister() {
-        File htmlMessageFile = new File(register);
+        File htmlMessageFileRegister = new File(register);
+        File htmlMessageFileRecovery = new File(recovery);
         try {
-            htmlTextRegister = FileUtils.readFileToString(htmlMessageFile);
+            htmlTextRegister = FileUtils.readFileToString(htmlMessageFileRegister);
+            htmlTextRecovery = FileUtils.readFileToString(htmlMessageFileRecovery);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-
-    @PostConstruct
-    private void getFileByPathRecovery() {
-        File htmlMessageFile = new File(recovery);
-        try {
-            htmlTextRecovery = FileUtils.readFileToString(htmlMessageFile);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
 }
 
