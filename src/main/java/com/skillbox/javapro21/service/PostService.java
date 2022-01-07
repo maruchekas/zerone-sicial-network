@@ -13,6 +13,7 @@ import com.skillbox.javapro21.api.response.post.PostDeleteResponse;
 import com.skillbox.javapro21.exception.*;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.security.Principal;
 
 @Service
@@ -37,7 +38,7 @@ public interface PostService {
 
     DataResponse<CommentsData> recoverComments(Long id, Long commentId, Principal principal) throws CommentNotFoundException, CommentNotAuthorException;
 
-    DataResponse<MessageOkContent> ratPostController(Long id, Principal principal) throws PostNotFoundException, MailjetException;
+    DataResponse<MessageOkContent> ratPostController(Long id, Principal principal) throws PostNotFoundException, MailjetException, IOException;
 
-    DataResponse<MessageOkContent> ratCommentController(Long id, Long commentId, Principal principal) throws CommentNotFoundException, MailjetException;
+    DataResponse<MessageOkContent> ratCommentController(Long id, Long commentId, Principal principal) throws CommentNotFoundException, MailjetException, IOException;
 }

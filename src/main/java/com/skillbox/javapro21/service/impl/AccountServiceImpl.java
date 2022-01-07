@@ -25,6 +25,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -43,7 +44,7 @@ public class AccountServiceImpl implements AccountService {
     private final JwtGenerator jwtGenerator;
     private final NotificationTypeRepository notificationTypeRepository;
 
-    public DataResponse<MessageOkContent> registration(RegisterRequest registerRequest) throws UserExistException, MailjetException {
+    public DataResponse<MessageOkContent> registration(RegisterRequest registerRequest) throws UserExistException, MailjetException, IOException {
         if (personRepository.findByEmail(registerRequest.getEmail()).isPresent()) {
             countRegisterPost = countRegisterPost + 1;
             Person personInBD = personRepository.findByEmail(registerRequest.getEmail()).orElseThrow();
@@ -73,14 +74,14 @@ public class AccountServiceImpl implements AccountService {
         return "Пользователь подтвержден";
     }
 
-    public String recoveryPasswordMessage(RecoveryRequest recoveryRequest) throws MailjetException {
+    public String recoveryPasswordMessage(RecoveryRequest recoveryRequest) throws MailjetException, IOException {
         String token = utilsService.getToken();
         String text = confirmationUrl.getBaseUrl() + "/api/v1/account/password/recovery/complete?email=" + recoveryRequest.getEmail() + "&code=" + token;
         confirmPersonAndSendEmail(recoveryRequest.getEmail(), text, token);
         return "Ссылка отправлена на почту";
     }
 
-    private void mailMessageForRegistration(RegisterRequest registerRequest) throws MailjetException {
+    private void mailMessageForRegistration(RegisterRequest registerRequest) throws MailjetException, IOException {
         String token = utilsService.getToken();
         String text = confirmationUrl.getBaseUrl() + "/api/v1/account/register/complete?email=" + registerRequest.getEmail() + "&code=" + token;
         confirmPersonAndSendEmail(registerRequest.getEmail(), text, token);
@@ -176,7 +177,7 @@ public class AccountServiceImpl implements AccountService {
     /**
      * Отправка на почту письма с токеном
      */
-    private void confirmPersonAndSendEmail(String email, String text, String token) throws MailjetException {
+    private void confirmPersonAndSendEmail(String email, String text, String token) throws MailjetException, IOException {
         Person person = utilsService.findPersonByEmail(email);
         person.setConfirmationCode(token);
         personRepository.save(person);

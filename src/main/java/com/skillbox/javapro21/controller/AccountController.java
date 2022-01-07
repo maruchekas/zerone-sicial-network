@@ -20,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.security.Principal;
 
 @Slf4j
@@ -36,7 +37,7 @@ public class AccountController {
 
     @Operation(summary = "Регистрация")
     @PostMapping("/register")
-    public ResponseEntity<DataResponse<MessageOkContent>> registration(@RequestBody RegisterRequest registerRequest) throws UserExistException, MailjetException {
+    public ResponseEntity<DataResponse<MessageOkContent>> registration(@RequestBody RegisterRequest registerRequest) throws UserExistException, MailjetException, IOException {
         log.info("Вызван метод регистрации по почте {}", registerRequest.getEmail());
         return new ResponseEntity<>(accountService.registration(registerRequest), HttpStatus.OK);
     }
@@ -50,7 +51,7 @@ public class AccountController {
 
     @Operation(summary = "Отправка ссылки на почту для восстановления пароля")
     @PutMapping("/password/send_recovery_massage")
-    public ResponseEntity<String> recoveryPasswordMessage(@RequestBody RecoveryRequest recoveryRequest) throws MailjetException {
+    public ResponseEntity<String> recoveryPasswordMessage(@RequestBody RecoveryRequest recoveryRequest) throws MailjetException, IOException {
         return new ResponseEntity<>(accountService.recoveryPasswordMessage(recoveryRequest), HttpStatus.OK);
     }
 

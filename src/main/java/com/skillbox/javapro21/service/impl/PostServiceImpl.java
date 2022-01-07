@@ -26,6 +26,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -173,14 +174,14 @@ public class PostServiceImpl implements PostService {
         return getCommentResponse(postComment);
     }
 
-    public DataResponse<MessageOkContent> ratPostController(Long id, Principal principal) throws PostNotFoundException, MailjetException {
+    public DataResponse<MessageOkContent> ratPostController(Long id, Principal principal) throws PostNotFoundException, MailjetException, IOException {
         Post post = postRepository.findPostById(id).orElseThrow(() -> new PostNotFoundException("Пост не существует"));
         String message = "Жалоба от " + principal.getName() + " на пост с id: " + post.getId() + ", \n с названием: " + post.getTitle() + "\n и текстом " + post.getPostText();
         sendMessageForAdministration(message);
         return utilsService.getMessageOkResponse();
     }
 
-    public DataResponse<MessageOkContent> ratCommentController(Long id, Long commentId, Principal principal) throws CommentNotFoundException, MailjetException {
+    public DataResponse<MessageOkContent> ratCommentController(Long id, Long commentId, Principal principal) throws CommentNotFoundException, MailjetException, IOException {
         PostComment postComment = postCommentRepository.findPostCommentByIdAndPostId(commentId, id)
                 .orElseThrow(() -> new CommentNotFoundException("Комментария с данным parent_id не существует"));
         String message = "Жалоба от " + principal.getName() + " на комментарий с id: " + postComment.getId() + "\n и текстом " + postComment.getCommentText();
@@ -188,7 +189,7 @@ public class PostServiceImpl implements PostService {
         return utilsService.getMessageOkResponse();
     }
 
-    private void sendMessageForAdministration(String message) throws MailjetException {
+    private void sendMessageForAdministration(String message) throws MailjetException, IOException {
         mailjetSender.send(adminEmail, message);
     }
 

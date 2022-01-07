@@ -10,15 +10,16 @@ import com.skillbox.javapro21.exception.TokenConfirmationException;
 import com.skillbox.javapro21.exception.UserExistException;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.security.Principal;
 
 @Service
 public interface AccountService {
-    DataResponse<MessageOkContent> registration(RegisterRequest registerRequest) throws UserExistException, MailjetException;
+    DataResponse<MessageOkContent> registration(RegisterRequest registerRequest) throws UserExistException, MailjetException, IOException;
 
     String verifyRegistration(String email, String code) throws TokenConfirmationException;
 
-    String recoveryPasswordMessage(RecoveryRequest recoveryRequest) throws MailjetException;
+    String recoveryPasswordMessage(RecoveryRequest recoveryRequest) throws MailjetException, IOException;
 
     String verifyRecovery(String email, String code) throws TokenConfirmationException;
 
