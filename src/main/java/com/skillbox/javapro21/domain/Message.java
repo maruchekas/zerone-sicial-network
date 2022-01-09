@@ -78,6 +78,10 @@ public class Message {
 //    @JoinColumn(name = "person_id")
     private Person recipient;
 
+    @ManyToOne
+    @JoinColumn(name = "dialog_id")
+    private Dialog dialog;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

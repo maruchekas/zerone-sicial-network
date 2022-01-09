@@ -1,7 +1,10 @@
 package com.skillbox.javapro21.controller;
 
+import com.skillbox.javapro21.api.request.dialogs.DialogRequestForCreate;
+import com.skillbox.javapro21.api.response.DataResponse;
 import com.skillbox.javapro21.api.response.ListDataResponse;
 import com.skillbox.javapro21.api.response.dialogs.DialogsData;
+import com.skillbox.javapro21.exception.PersonNotFoundException;
 import com.skillbox.javapro21.service.DialogsService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -28,5 +31,12 @@ private final DialogsService dialogsService;
                                                                     @RequestParam String query,
                                                                     Principal principal) {
         return new ResponseEntity<>(dialogsService.getDialogs(query, offset, itemPerPage, principal), HttpStatus.OK);
+    }
+
+    @PostMapping("")
+    @PreAuthorize("hasAuthority('user:write')")
+    public ResponseEntity<DataResponse<DialogsData>> createDialog(@RequestBody DialogRequestForCreate dialogRequestForCreate,
+                                                                  Principal principal) throws PersonNotFoundException {
+        return new ResponseEntity<>(dialogsService.createDialog(dialogRequestForCreate, principal), HttpStatus.OK);
     }
 }

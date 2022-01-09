@@ -10,9 +10,9 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DialogsData implements Content {
-    private Long id;
+    private int id;
     @JsonProperty(value = "unread_count")
-    private int unreadCount;
+    private long unreadCount;
     @JsonProperty(value = "last_message")
     private MessageData lastMessage;
 }

@@ -151,7 +151,7 @@ public class PostController {
         return new ResponseEntity<>(postService.ratPostController(id, principal), HttpStatus.OK);
     }
 
-    @Operation(summary = "Восстановление комментария")
+    @Operation(summary = "Жалоба на комментарий к посту")
     @PostMapping("/post/{id}/comments/{comment_id}/report")
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity

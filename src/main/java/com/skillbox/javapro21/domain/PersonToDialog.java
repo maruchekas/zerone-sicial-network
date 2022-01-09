@@ -5,6 +5,7 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -16,9 +17,12 @@ public class PersonToDialog {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(name = "person_id")
-    private long personId;
+    @OneToOne
+    private Person person;
 
-    @Column(name = "dialog_id")
-    private long dialogId;
+    @OneToOne
+    private Dialog dialog;
+
+    @Column(name = "last_check")
+    private LocalDateTime lastCheck;
 }

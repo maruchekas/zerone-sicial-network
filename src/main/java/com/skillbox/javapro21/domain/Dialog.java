@@ -23,6 +23,9 @@ public class Dialog {
     @OneToMany(cascade = CascadeType.ALL)
     private Set<Message> messages;
 
+    @Column(name = "is_blocked")
+    private int isBlocked;
+
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(name = "person2dialog",
             joinColumns = {@JoinColumn(name = "dialog_id")},
