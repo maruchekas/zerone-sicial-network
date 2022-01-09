@@ -1,5 +1,6 @@
 package com.skillbox.javapro21.controller;
 
+import com.skillbox.javapro21.aop.LastActivity;
 import com.skillbox.javapro21.api.request.auth.AuthRequest;
 import com.skillbox.javapro21.api.response.DataResponse;
 import com.skillbox.javapro21.api.response.MessageOkContent;
@@ -37,6 +38,7 @@ public class AuthController {
 
     @Operation(summary = "Выход")
     @PostMapping("/logout")
+    @LastActivity
     public ResponseEntity<DataResponse<MessageOkContent>> logOut() {
         log.info("User has logout");
         return new ResponseEntity<>(authService.logout(), HttpStatus.OK);

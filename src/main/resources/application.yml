@@ -1,15 +1,15 @@
 server:
   port: 8080
-  base_url: ${BASE_URL}
+  base_url: http://localhost:8080
 spring:
   messages:
     basename: lang.messages
   profiles:
     active: dev
   datasource:
-    url: ${JDBC_DATABASE_URL}
-    username: ${JDBC_DATABASE_USERNAME}
-    password: ${JDBC_DATABASE_PASSWORD}
+    url: jdbc:postgresql://localhost:5432/SocialNetwork
+    username: postgres
+    password: root
   jpa:
     show-sql: false
     hibernate:
@@ -17,20 +17,25 @@ spring:
       dialect: org.hibernate.dialect.PostgreSQLDialect
 mailjet:
   mail:
-    key: ${MAIlJET_MAIL_KEY}
-    from: ${MAIlJET_MAIL_FROM}
-    secret: ${MAIlJET_MAIL_SECRET}
+    from: admin@zeronenetwork.design
+    key: 31630259aad78bb4a4adff1902eee4c3
+    secret: cc6adb843048afd0f1a7d9c33feb4b22
     version: v3.1
+    email_admin: briz.zukkel@gmail.com
   flyway:
     enabled: true
 jwt:
-  secret: ${JWT_SECRET}
+  secret: secret
 captcha:
   width: 193
   height: 57
   image: data:captchaImage/png;base64,
   lifespanBySec: 0
 cloudinary:
-  cloudName: ${CLOUDINARY_CLOUD_NAME}
-  apiKey: ${CLOUDINARY_API_KEY}
-  apiSecret: ${CLOUDINARY_API_SECRET}
+  cloudName: dcn3kveee
+  apiKey: 695884337247625
+  apiSecret: U4D89gdUoSYLhK1eBCPCTOo1TvE
+html:
+  file:
+    register: ./src/main/resources/messages/register.html
+    recovery: ./src/main/resources/messages/recovery.html

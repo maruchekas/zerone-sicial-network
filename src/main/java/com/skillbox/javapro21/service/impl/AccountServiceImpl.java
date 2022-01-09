@@ -19,12 +19,13 @@ import com.skillbox.javapro21.exception.UserExistException;
 import com.skillbox.javapro21.repository.NotificationTypeRepository;
 import com.skillbox.javapro21.repository.PersonRepository;
 import com.skillbox.javapro21.service.AccountService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -32,7 +33,9 @@ import java.util.List;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class AccountServiceImpl implements AccountService {
+    private static int countRegisterPost = 0;
 
     private final UtilsService utilsService;
     private final PersonRepository personRepository;
@@ -41,29 +44,28 @@ public class AccountServiceImpl implements AccountService {
     private final JwtGenerator jwtGenerator;
     private final NotificationTypeRepository notificationTypeRepository;
 
-    @Autowired
-    public AccountServiceImpl(UtilsService utilsService, PersonRepository personRepository, MailjetSender mailMessage, ConfirmationUrl confirmationUrl, JwtGenerator jwtGenerator, NotificationTypeRepository notificationTypeRepository) {
-        this.utilsService = utilsService;
-        this.personRepository = personRepository;
-        this.mailMessage = mailMessage;
-        this.confirmationUrl = confirmationUrl;
-        this.jwtGenerator = jwtGenerator;
-        this.notificationTypeRepository = notificationTypeRepository;
-    }
-
-    //Todo: нужна ли проверка каптчи?
-    public DataResponse<MessageOkContent> registration(RegisterRequest registerRequest) throws UserExistException, MailjetException {
-        if (personRepository.findByEmail(registerRequest.getEmail()).isPresent())
-            throw new UserExistException("Пользователь с таким логином существует");
-        createNewPerson(registerRequest);
-        mailMessageForRegistration(registerRequest);
+    public DataResponse<MessageOkContent> registration(RegisterRequest registerRequest) throws UserExistException, MailjetException, IOException {
+        if (personRepository.findByEmail(registerRequest.getEmail()).isPresent()) {
+            countRegisterPost = countRegisterPost + 1;
+            Person personInBD = personRepository.findByEmail(registerRequest.getEmail()).orElseThrow();
+            if (countRegisterPost < 3 && personInBD.getIsApproved() == 0) {
+                updateNewPerson(personInBD, registerRequest);
+                mailMessageForRegistration(registerRequest);
+            } else {
+                throw new UserExistException("Пользователь с данным email уже подтвержден или слишком много попыток пройти регистрацию по одному email");
+            }
+        } else {
+            createNewPerson(registerRequest);
+            mailMessageForRegistration(registerRequest);
+        }
         return utilsService.getMessageOkResponse();
     }
 
     public String verifyRegistration(String email, String code) throws TokenConfirmationException {
         Person person = utilsService.findPersonByEmail(email);
         if (person.getConfirmationCode().equals(code)) {
-            person.setIsApproved(1)
+            person
+                    .setIsApproved(1)
                     .setUserType(UserType.USER)
                     .setMessagesPermission(MessagesPermission.ALL)
                     .setConfirmationCode("");
@@ -72,16 +74,16 @@ public class AccountServiceImpl implements AccountService {
         return "Пользователь подтвержден";
     }
 
-    public String recoveryPasswordMessage(RecoveryRequest recoveryRequest) throws MailjetException {
+    public String recoveryPasswordMessage(RecoveryRequest recoveryRequest) throws MailjetException, IOException {
         String token = utilsService.getToken();
-        String text = confirmationUrl.getUrlForPasswordComplete() + "?email=" + recoveryRequest.getEmail() + "&code=" + token;
+        String text = confirmationUrl.getBaseUrl() + "/api/v1/account/password/recovery/complete?email=" + recoveryRequest.getEmail() + "&code=" + token;
         confirmPersonAndSendEmail(recoveryRequest.getEmail(), text, token);
         return "Ссылка отправлена на почту";
     }
 
-    private void mailMessageForRegistration(RegisterRequest registerRequest) throws MailjetException {
+    private void mailMessageForRegistration(RegisterRequest registerRequest) throws MailjetException, IOException {
         String token = utilsService.getToken();
-        String text = confirmationUrl.getUrlForRegisterComplete() + "?email=" + registerRequest.getEmail() + "&code=" + token;
+        String text = confirmationUrl.getBaseUrl() + "/api/v1/account/register/complete?email=" + registerRequest.getEmail() + "&code=" + token;
         confirmPersonAndSendEmail(registerRequest.getEmail(), text, token);
     }
 
@@ -117,11 +119,12 @@ public class AccountServiceImpl implements AccountService {
         Person person = utilsService.findPersonByEmail(principal.getName());
         NotificationType notificationType = notificationTypeRepository.findNotificationTypeByPersonId(person.getId())
                 .orElse(new NotificationType()
-                        .setPost(true)
-                        .setPostComment(true)
-                        .setCommentComment(true)
-                        .setFriendsRequest(true)
-                        .setMessage(true));
+                        .setPost(false)
+                        .setPostComment(false)
+                        .setCommentComment(false)
+                        .setFriendsRequest(false)
+                        .setMessage(false)
+                        .setFriendsBirthday(false));
         switch (changeNotificationsRequest.getNotificationTypeStatus()) {
             case POST -> notificationType.setPost(changeNotificationsRequest.isEnable());
             case POST_COMMENT -> notificationType.setPostComment(changeNotificationsRequest.isEnable());
@@ -174,13 +177,11 @@ public class AccountServiceImpl implements AccountService {
     /**
      * Отправка на почту письма с токеном
      */
-    private void confirmPersonAndSendEmail(String email, String text, String token) throws MailjetException {
+    private void confirmPersonAndSendEmail(String email, String text, String token) throws MailjetException, IOException {
         Person person = utilsService.findPersonByEmail(email);
         person.setConfirmationCode(token);
         personRepository.save(person);
         mailMessage.send(email, text);
-        log.info(String.valueOf(email));
-        log.info(String.valueOf(text));
     }
 
     /**
@@ -189,6 +190,26 @@ public class AccountServiceImpl implements AccountService {
     private void createNewPerson(RegisterRequest registerRequest) {
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
         Person person = new Person()
+                .setEmail(registerRequest.getEmail())
+                .setFirstName(registerRequest.getFirstName())
+                .setLastName(registerRequest.getLastName())
+                .setConfirmationCode(registerRequest.getCode())
+                .setIsApproved(0)
+                .setPassword(passwordEncoder.encode(registerRequest.getPasswd1()))
+                .setRegDate(LocalDateTime.now())
+                .setLastOnlineTime(LocalDateTime.now())
+                .setIsBlocked(0)
+                .setMessagesPermission(MessagesPermission.NOBODY);
+        personRepository.save(person);
+        globalNotificationsSettings(person);
+    }
+
+    /**
+     * обновление пользователя без верификации
+     */
+    private void updateNewPerson(Person person, RegisterRequest registerRequest) {
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
+        person
                 .setEmail(registerRequest.getEmail())
                 .setFirstName(registerRequest.getFirstName())
                 .setLastName(registerRequest.getLastName())

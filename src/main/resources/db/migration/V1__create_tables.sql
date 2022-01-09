@@ -11,7 +11,7 @@ CREATE TABLE block_history
     CONSTRAINT pk_block_history PRIMARY KEY (id)
 );
 
-CREATE TYPE status_name AS ENUM ('REQUEST', 'FRIEND', 'BLOCKED', 'DECLINED', 'SUBSCRIBED');
+CREATE TYPE status_name AS ENUM ('REQUEST', 'FRIEND', 'BLOCKED', 'DECLINED', 'SUBSCRIBED', 'WASBLOCKED', 'INTERLOCKED');
 
 CREATE TABLE friendship_statuses
 (
