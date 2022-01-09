@@ -11,6 +11,7 @@ import com.skillbox.javapro21.exception.InterlockedFriendshipStatusException;
 import com.skillbox.javapro21.repository.FriendshipRepository;
 import com.skillbox.javapro21.repository.FriendshipStatusRepository;
 import com.skillbox.javapro21.repository.PersonRepository;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
@@ -22,10 +23,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
 
 import static com.skillbox.javapro21.domain.enumeration.FriendshipStatusType.*;
-import static com.skillbox.javapro21.domain.enumeration.FriendshipStatusType.SUBSCRIBED;
 
 @Component
 public class UtilsService {
@@ -63,11 +62,8 @@ public class UtilsService {
      * создание рандомного токена
      */
     public String getToken() {
-        return new Random().ints(10, 33, 122)
-                .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
-                .toString();
+        return RandomStringUtils.randomAlphanumeric(6);
     }
-
 
     /**
      * заблокирован пользователь или нет ?

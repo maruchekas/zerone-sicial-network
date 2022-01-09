@@ -23,6 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.security.Principal;
 
 @Slf4j
@@ -146,7 +147,7 @@ public class PostController {
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
     public ResponseEntity<DataResponse<MessageOkContent>> ratPostController(@PathVariable Long id,
-                                                                        Principal principal) throws PostNotFoundException, CommentNotFoundException, CommentNotAuthorException, MailjetException {
+                                                                        Principal principal) throws PostNotFoundException, CommentNotFoundException, CommentNotAuthorException, MailjetException, IOException {
         return new ResponseEntity<>(postService.ratPostController(id, principal), HttpStatus.OK);
     }
 
@@ -156,7 +157,7 @@ public class PostController {
     @LastActivity
     public ResponseEntity<DataResponse<MessageOkContent>> ratCommentController(@PathVariable Long id,
                                                                                @PathVariable(name = "comment_id") Long commentId,
-                                                                        Principal principal) throws PostNotFoundException, CommentNotFoundException, CommentNotAuthorException, MailjetException {
+                                                                        Principal principal) throws PostNotFoundException, CommentNotFoundException, CommentNotAuthorException, MailjetException, IOException {
         return new ResponseEntity<>(postService.ratCommentController(id, commentId, principal), HttpStatus.OK);
     }
 }

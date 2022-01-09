@@ -25,6 +25,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -34,7 +35,6 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class AccountServiceImpl implements AccountService {
-
     private static int countRegisterPost = 0;
 
     private final UtilsService utilsService;
@@ -44,15 +44,15 @@ public class AccountServiceImpl implements AccountService {
     private final JwtGenerator jwtGenerator;
     private final NotificationTypeRepository notificationTypeRepository;
 
-    public DataResponse<MessageOkContent> registration(RegisterRequest registerRequest) throws UserExistException, MailjetException {
+    public DataResponse<MessageOkContent> registration(RegisterRequest registerRequest) throws UserExistException, MailjetException, IOException {
         if (personRepository.findByEmail(registerRequest.getEmail()).isPresent()) {
             countRegisterPost = countRegisterPost + 1;
-            if (countRegisterPost < 3) {
-                Person personInBD = personRepository.findByEmail(registerRequest.getEmail()).orElseThrow();
+            Person personInBD = personRepository.findByEmail(registerRequest.getEmail()).orElseThrow();
+            if (countRegisterPost < 3 && personInBD.getIsApproved() == 0) {
                 updateNewPerson(personInBD, registerRequest);
                 mailMessageForRegistration(registerRequest);
             } else {
-                throw new UserExistException("Слишком много попыток пройти регистрацию по одному email");
+                throw new UserExistException("Пользователь с данным email уже подтвержден или слишком много попыток пройти регистрацию по одному email");
             }
         } else {
             createNewPerson(registerRequest);
@@ -64,7 +64,8 @@ public class AccountServiceImpl implements AccountService {
     public String verifyRegistration(String email, String code) throws TokenConfirmationException {
         Person person = utilsService.findPersonByEmail(email);
         if (person.getConfirmationCode().equals(code)) {
-            person.setIsApproved(1)
+            person
+                    .setIsApproved(1)
                     .setUserType(UserType.USER)
                     .setMessagesPermission(MessagesPermission.ALL)
                     .setConfirmationCode("");
@@ -73,14 +74,14 @@ public class AccountServiceImpl implements AccountService {
         return "Пользователь подтвержден";
     }
 
-    public String recoveryPasswordMessage(RecoveryRequest recoveryRequest) throws MailjetException {
+    public String recoveryPasswordMessage(RecoveryRequest recoveryRequest) throws MailjetException, IOException {
         String token = utilsService.getToken();
         String text = confirmationUrl.getBaseUrl() + "/api/v1/account/password/recovery/complete?email=" + recoveryRequest.getEmail() + "&code=" + token;
         confirmPersonAndSendEmail(recoveryRequest.getEmail(), text, token);
         return "Ссылка отправлена на почту";
     }
 
-    private void mailMessageForRegistration(RegisterRequest registerRequest) throws MailjetException {
+    private void mailMessageForRegistration(RegisterRequest registerRequest) throws MailjetException, IOException {
         String token = utilsService.getToken();
         String text = confirmationUrl.getBaseUrl() + "/api/v1/account/register/complete?email=" + registerRequest.getEmail() + "&code=" + token;
         confirmPersonAndSendEmail(registerRequest.getEmail(), text, token);
@@ -176,7 +177,7 @@ public class AccountServiceImpl implements AccountService {
     /**
      * Отправка на почту письма с токеном
      */
-    private void confirmPersonAndSendEmail(String email, String text, String token) throws MailjetException {
+    private void confirmPersonAndSendEmail(String email, String text, String token) throws MailjetException, IOException {
         Person person = utilsService.findPersonByEmail(email);
         person.setConfirmationCode(token);
         personRepository.save(person);
