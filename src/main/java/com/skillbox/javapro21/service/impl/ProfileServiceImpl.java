@@ -18,7 +18,6 @@ import com.skillbox.javapro21.repository.PersonRepository;
 import com.skillbox.javapro21.repository.PostRepository;
 import com.skillbox.javapro21.service.ProfileService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -26,8 +25,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.security.Principal;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.time.*;
 import java.util.Optional;
 
 import static com.skillbox.javapro21.domain.enumeration.FriendshipStatusType.*;
@@ -87,9 +85,13 @@ public class ProfileServiceImpl implements ProfileService {
             post = new Post()
                     .setTitle(postRequest.getTitle())
                     .setPostText(postRequest.getPostText())
-                    .setTime(utilsService.getLocalDateTime(publishDate))
                     .setIsBlocked(0)
                     .setAuthor(dst);
+            if (publishDate != -1) {
+                post.setTime(utilsService.getLocalDateTime(publishDate));
+            } else {
+                post.setTime(LocalDateTime.now(ZoneOffset.UTC));
+            }
         } else {
             Optional<Friendship> optionalFriendship = friendshipRepository.findFriendshipBySrcPersonAndDstPerson(src.getId(), id);
             if (utilsService.isBlockedBy(src.getId(), dst.getId(), optionalFriendship)) {
