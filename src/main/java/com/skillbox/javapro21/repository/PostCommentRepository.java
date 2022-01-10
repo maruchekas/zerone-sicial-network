@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -16,6 +17,12 @@ public interface PostCommentRepository extends JpaRepository<PostComment, Intege
             "where p.id = :id and pc.isBlocked = 0 and p.isBlocked = 0 " +
             "order by pc.time")
     Page<PostComment> findPostCommentsByPostId(Long id, Pageable pageable);
+
+    @Query("select pc from PostComment pc " +
+            "left join Post p on pc.post.id = p.id " +
+            "where p.id = :id and pc.isBlocked = 0 and p.isBlocked = 0 " +
+            "order by pc.time")
+    List<PostComment> findPostCommentsByPostIdList(Long id);
 
     @Query("select pc from PostComment pc " +
             "where pc.id = :id and pc.isBlocked = 0 ")

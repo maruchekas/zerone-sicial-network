@@ -28,6 +28,7 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.security.Principal;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -148,7 +149,7 @@ public class AccountServiceImpl implements AccountService {
                         .setMessage(true)
                         .setFriendsBirthday(true));
         ListDataResponse<NotificationSettingData> dataResponse = new ListDataResponse<>();
-        dataResponse.setTimestamp(LocalDateTime.now());
+        dataResponse.setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
         dataListNotification(notificationType);
         dataResponse.setData(dataListNotification(notificationType));
         return dataResponse;

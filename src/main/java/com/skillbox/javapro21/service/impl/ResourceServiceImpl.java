@@ -20,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.security.Principal;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.Map;
 
@@ -34,7 +35,7 @@ public class ResourceServiceImpl implements ResourceService {
     public DataResponse<Content> saveFileInStorage(String type, MultipartFile image, Principal principal) throws IOException {
         Person person = ((Person)(((UsernamePasswordAuthenticationToken) principal).getPrincipal()));
         DataResponse<Content> response = new DataResponse<>()
-                                            .setTimestamp(LocalDateTime.now());
+                                            .setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
 
         if (image == null) {
             log.info("Не принимаем никакой файл в хранилище");
