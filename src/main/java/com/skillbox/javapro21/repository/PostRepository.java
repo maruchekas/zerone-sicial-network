@@ -56,4 +56,15 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
             "group by p.id " +
             "order by p.time desc")
     Page<Post> findPostsByPersonId(Long id, Pageable pageable);
+
+    @Query("select p from Post p " +
+            "join Person ps on ps.id = p.author.id " +
+            "join PostToTag pst on pst.postId = p.id " +
+            "where p.id in (:friendsAndSubscribersIds) " +
+            "and p.isBlocked = 0 " +
+            "and ps.isBlocked = 0 " +
+            "or (p.title like '%'||:text||'%' or p.postText like '%'||:text||'%') " +
+            "group by p.id " +
+            "order by p.time desc")
+    Page<Post> findPostsByTextExcludingBlockers(String text, List<Long> friendsAndSubscribersIds, Pageable pageable);
 }

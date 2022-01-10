@@ -27,6 +27,7 @@ import org.springframework.stereotype.Component;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Optional;
 
 import static com.skillbox.javapro21.domain.enumeration.FriendshipStatusType.*;
@@ -142,7 +143,7 @@ public class ProfileServiceImpl implements ProfileService {
 
     private DataResponse<AuthData> getPersonDataResponse(Person person) {
         return new DataResponse<AuthData>()
-                .setTimestamp(LocalDateTime.now())
+                .setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli())
                 .setError("string")
                 .setData(utilsService.getAuthData(person, null));
     }

@@ -12,7 +12,7 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ListDataResponse<T extends Content> {
     private String error;
-    private LocalDateTime timestamp;
+    private long timestamp;
     private int total;
     private int offset;
     private int perPage;
