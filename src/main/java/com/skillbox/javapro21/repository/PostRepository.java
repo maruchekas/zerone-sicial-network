@@ -58,6 +58,16 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
     Page<Post> findPostsByPersonId(Long id, Pageable pageable);
 
     @Query("select p from Post p " +
+            "left join Person ps on ps.id = p.author.id " +
+            "left join PostComment pc on pc.post.id = p.id " +
+            "where ps.id = :id " +
+            "and ps.isBlocked = 0 " +
+            "and p.isBlocked = 0 " +
+            "group by p.id " +
+            "order by p.time desc")
+    Page<Post> findPostsByAuthorId(Long id, Pageable pageable);
+
+    @Query("select p from Post p " +
             "join Person ps on ps.id = p.author.id " +
             "where ps.id in (:friendsAndSubscribersIds) " +
             "and p.isBlocked = 0 " +

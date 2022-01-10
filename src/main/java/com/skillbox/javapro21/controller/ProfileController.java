@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.file.attribute.UserPrincipalNotFoundException;
 import java.security.Principal;
 
 @Slf4j
@@ -30,7 +31,6 @@ import java.security.Principal;
 @Tag(name = "Контроллер для работы с профилем пользователя")
 @RequestMapping("/api/v1/users")
 public class ProfileController {
-
     private final ProfileService profileService;
 
     @Autowired
@@ -50,7 +50,8 @@ public class ProfileController {
     @PutMapping("/me")
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
-    public ResponseEntity<DataResponse<AuthData>> editPerson(Principal principal, @RequestBody EditProfileRequest editProfileRequest) {
+    public ResponseEntity<DataResponse<AuthData>> editPerson(@RequestBody EditProfileRequest editProfileRequest,
+                                                             Principal principal) throws UserPrincipalNotFoundException {
         return new ResponseEntity<>(profileService.editPerson(principal, editProfileRequest), HttpStatus.OK);
     }
 
