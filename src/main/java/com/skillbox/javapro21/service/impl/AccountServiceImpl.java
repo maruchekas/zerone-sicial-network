@@ -197,8 +197,8 @@ public class AccountServiceImpl implements AccountService {
                 .setConfirmationCode(registerRequest.getCode())
                 .setIsApproved(0)
                 .setPassword(passwordEncoder.encode(registerRequest.getPasswd1()))
-                .setRegDate(LocalDateTime.now())
-                .setLastOnlineTime(LocalDateTime.now())
+                .setRegDate(LocalDateTime.now(ZoneOffset.UTC))
+                .setLastOnlineTime(LocalDateTime.now(ZoneOffset.UTC))
                 .setIsBlocked(0)
                 .setMessagesPermission(MessagesPermission.NOBODY);
         personRepository.save(person);
@@ -217,8 +217,8 @@ public class AccountServiceImpl implements AccountService {
                 .setConfirmationCode(registerRequest.getCode())
                 .setIsApproved(0)
                 .setPassword(passwordEncoder.encode(registerRequest.getPasswd1()))
-                .setRegDate(LocalDateTime.now())
-                .setLastOnlineTime(LocalDateTime.now())
+                .setRegDate(LocalDateTime.now(ZoneOffset.UTC))
+                .setLastOnlineTime(LocalDateTime.now(ZoneOffset.UTC))
                 .setIsBlocked(0)
                 .setMessagesPermission(MessagesPermission.NOBODY);
         personRepository.save(person);
