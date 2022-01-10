@@ -287,13 +287,12 @@ public class PostServiceImpl implements PostService {
                 .setPostText(posts.getPostText())
                 .setBlocked(posts.getIsBlocked() != 0)
                 .setLikes(likes.size())
-                .setComments(getCommentsDataResponse(posts.getId()))
+                .setComments(getCommentsDataResponseForPost(posts.getId()))
                 .setTags(collect);
     }
 
-    private List<CommentsData> getCommentsDataResponse(Long id) {
-        Pageable pageable = PageRequest.of(0 / 20, 20);
-        Page<PostComment> pageablePostComments = postCommentRepository.findPostCommentsByPostId(id, pageable);
+    private List<CommentsData> getCommentsDataResponseForPost(Long id) {
+        List<PostComment> pageablePostComments = postCommentRepository.findPostCommentsByPostIdList(id);
         List<CommentsData> commentsDataArrayList = new ArrayList<>();
         pageablePostComments.forEach(postComment -> {
             CommentsData commentsData = getCommentsData(postComment);
