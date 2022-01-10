@@ -50,13 +50,18 @@ public class PostServiceImpl implements PostService {
         LocalDateTime datetimeTo = (dateTo != -1) ? utilsService.getLocalDateTime(dateTo) : LocalDateTime.now();
         Pageable pageable = PageRequest.of(offset / itemPerPage, itemPerPage);
         Page<Post> pageablePostList;
-        if (tag.equals("")) {
+        if (text.equals("") && tag.equals("") && author.equals("")) {
+            pageablePostList = postRepository.findAllPosts(datetimeFrom, datetimeTo, pageable);
+        } else if (tag.equals("") && author.equals("")) {
+            pageablePostList = postRepository.findAllPostsByText(text, datetimeFrom, datetimeTo, pageable);
+        } else if (tag.equals("")) {
             pageablePostList = postRepository.findPostsByTextByAuthorWithoutTagsContainingByDateExcludingBlockers(text, datetimeFrom, datetimeTo, author, pageable);
         } else {
             List<Long> tags = getTags(tag);
             pageablePostList = postRepository.findPostsByTextByAuthorByTagsContainingByDateExcludingBlockers(text, datetimeFrom, datetimeTo, author, tags, pageable);
         }
         return getPostsResponse(offset, itemPerPage, pageablePostList);
+
     }
 
     public DataResponse<PostData> getPostsById(Long id, Principal principal) throws PostNotFoundException {

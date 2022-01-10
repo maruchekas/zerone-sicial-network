@@ -37,8 +37,8 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
             "where p.isBlocked = 0 " +
             "and ps.isBlocked = 0 " +
             "and (p.time between :dateFrom and :dateTo and p.time < CURRENT_TIMESTAMP) " +
-            "and ((p.title like '%'||:text||'%' or p.postText like '%'||:text||'%') " +
-            "or (ps.firstName like :author||'%' or ps.lastName like :author||'%' )) " +
+            "and (p.title like %:text% or p.postText like %:text%) " +
+            "and (ps.firstName like :author% or ps.lastName like :author% ) " +
             "group by p.id " +
             "order by p.time desc")
     Page<Post> findPostsByTextByAuthorWithoutTagsContainingByDateExcludingBlockers(String text, LocalDateTime dateFrom,
@@ -59,12 +59,31 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
 
     @Query("select p from Post p " +
             "join Person ps on ps.id = p.author.id " +
-            "join PostToTag pst on pst.postId = p.id " +
-            "where p.id in (:friendsAndSubscribersIds) " +
+            "where ps.id in (:friendsAndSubscribersIds) " +
             "and p.isBlocked = 0 " +
             "and ps.isBlocked = 0 " +
-            "or (p.title like '%'||:text||'%' or p.postText like '%'||:text||'%') " +
+            "and (p.title like %:text% or p.postText like %:text%) " +
             "group by p.id " +
             "order by p.time desc")
     Page<Post> findPostsByTextExcludingBlockers(String text, List<Long> friendsAndSubscribersIds, Pageable pageable);
+
+
+    @Query("SELECT p FROM Post p " +
+            "left join Person ps on ps.id = p.author.id " +
+            "where p.isBlocked = 0 " +
+            "and ps.isBlocked = 0 " +
+            "and (p.time between :dateFrom and :dateTo and p.time < CURRENT_TIMESTAMP) " +
+            "and (p.title like %:text% or p.postText like %:text%) " +
+            "group by p.id " +
+            "order by p.time desc")
+    Page<Post> findAllPostsByText(String text, LocalDateTime dateFrom, LocalDateTime dateTo, Pageable pageable);
+
+    @Query("SELECT p FROM Post p " +
+            "left join Person ps on ps.id = p.author.id " +
+            "where p.isBlocked = 0 " +
+            "and ps.isBlocked = 0 " +
+            "and (p.time between :dateFrom and :dateTo and p.time < CURRENT_TIMESTAMP) " +
+            "group by p.id " +
+            "order by p.time desc")
+    Page<Post> findAllPosts(LocalDateTime dateFrom, LocalDateTime dateTo, Pageable pageable);
 }
