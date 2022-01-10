@@ -8,7 +8,9 @@ import com.skillbox.javapro21.api.response.account.AuthData;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 
 @Data
@@ -16,7 +18,7 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class PostData implements Content {
     private Long id;
-    private LocalDateTime time;
+    private long time;
     private AuthData author;
     private String title;
     @JsonProperty("post_text")
@@ -24,7 +26,7 @@ public class PostData implements Content {
     @JsonProperty("is_blocked")
     private boolean isBlocked;
     private int likes;
-    private ListDataResponse<?> comments;
+    private List<CommentsData> comments;
     @JsonProperty("my_like")
     private List<String> tags;
 }
