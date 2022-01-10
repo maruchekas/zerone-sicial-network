@@ -64,7 +64,7 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
             "and ps.isBlocked = 0 " +
             "and (p.title like %:text% or p.postText like %:text%) " +
             "group by p.id " +
-            "order by p.time desc")
+            "order by p.time asc")
     Page<Post> findPostsByTextExcludingBlockers(String text, List<Long> friendsAndSubscribersIds, Pageable pageable);
 
 

@@ -87,9 +87,13 @@ public class ProfileServiceImpl implements ProfileService {
             post = new Post()
                     .setTitle(postRequest.getTitle())
                     .setPostText(postRequest.getPostText())
-                    .setTime(utilsService.getLocalDateTime(publishDate))
                     .setIsBlocked(0)
                     .setAuthor(dst);
+            if (publishDate != null) {
+                post.setTime(utilsService.getLocalDateTime(publishDate));
+            } else {
+                post.setTime(LocalDateTime.now());
+            }
         } else {
             Optional<Friendship> optionalFriendship = friendshipRepository.findFriendshipBySrcPersonAndDstPerson(src.getId(), id);
             if (utilsService.isBlockedBy(src.getId(), dst.getId(), optionalFriendship)) {
