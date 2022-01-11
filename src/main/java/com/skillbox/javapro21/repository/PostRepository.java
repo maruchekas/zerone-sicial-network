@@ -23,9 +23,9 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
             "where pst.tagId in (:tags) " +
             "and p.isBlocked = 0 " +
             "and ps.isBlocked = 0 " +
-            "and p.time between :dateFrom and :dateTo and p.time < CURRENT_TIMESTAMP " +
-            "or ((p.title like '%'||:text||'%' or p.postText like '%'||:text||'%') " +
-            "or (ps.firstName like :author||'%' or ps.lastName like :author||'%' and :author != '' or :author = '' )) " +
+            "and (p.time between :dateFrom and :dateTo and p.time < CURRENT_TIMESTAMP) " +
+            "and (p.title like %:text% or p.postText like %:text%) " +
+            "and (ps.firstName like %:author% or ps.lastName like %:author%) " +
             "group by p.id " +
             "order by p.time desc")
     Page<Post> findPostsByTextByAuthorByTagsContainingByDateExcludingBlockers(String text, LocalDateTime dateFrom,
@@ -38,7 +38,7 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
             "and ps.isBlocked = 0 " +
             "and (p.time between :dateFrom and :dateTo and p.time < CURRENT_TIMESTAMP) " +
             "and (p.title like %:text% or p.postText like %:text%) " +
-            "and (ps.firstName like :author% or ps.lastName like :author% ) " +
+            "and (ps.firstName like %:author% or ps.lastName like %:author% ) " +
             "group by p.id " +
             "order by p.time desc")
     Page<Post> findPostsByTextByAuthorWithoutTagsContainingByDateExcludingBlockers(String text, LocalDateTime dateFrom,
@@ -74,7 +74,7 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
             "and ps.isBlocked = 0 " +
             "and (p.title like %:text% or p.postText like %:text%) " +
             "group by p.id " +
-            "order by p.time asc")
+            "order by p.time desc")
     Page<Post> findPostsByTextExcludingBlockers(String text, List<Long> friendsAndSubscribersIds, Pageable pageable);
 
 
@@ -96,4 +96,14 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
             "group by p.id " +
             "order by p.time desc")
     Page<Post> findAllPosts(LocalDateTime dateFrom, LocalDateTime dateTo, Pageable pageable);
+
+    @Query("SELECT p FROM Post p " +
+            "left join Person ps on ps.id = p.author.id " +
+            "where p.isBlocked = 0 " +
+            "and ps.isBlocked = 0 " +
+            "and (p.time between :dateFrom and :dateTo and p.time < CURRENT_TIMESTAMP) " +
+            "and (ps.firstName like %:author% or ps.lastName like %:author%) " +
+            "group by p.id " +
+            "order by p.time desc")
+    Page<Post> findAllPostsByAuthor(String author, LocalDateTime dateFrom, LocalDateTime dateTo, Pageable pageable);
 }
