@@ -18,7 +18,6 @@ import com.skillbox.javapro21.repository.PersonRepository;
 import com.skillbox.javapro21.repository.PostRepository;
 import com.skillbox.javapro21.service.ProfileService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -27,6 +26,8 @@ import org.springframework.stereotype.Component;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.Arrays;
 import java.util.Optional;
 
 import static com.skillbox.javapro21.domain.enumeration.FriendshipStatusType.*;
@@ -34,7 +35,6 @@ import static com.skillbox.javapro21.domain.enumeration.FriendshipStatusType.*;
 @Component
 @RequiredArgsConstructor
 public class ProfileServiceImpl implements ProfileService {
-
     private final UtilsService utilsService;
     private final PersonRepository personRepository;
     private final PostRepository postRepository;
@@ -49,8 +49,8 @@ public class ProfileServiceImpl implements ProfileService {
 
     public DataResponse<AuthData> editPerson(Principal principal, EditProfileRequest editProfileRequest) {
         Person person = utilsService.findPersonByEmail(principal.getName());
-        savePersonByRequest(person, editProfileRequest);
-        return getPersonDataResponse(person);
+        Person sPerson = savePersonByRequest(person, editProfileRequest);
+        return getPersonDataResponse(sPerson);
     }
 
     public DataResponse<MessageOkContent> deletePerson(Principal principal) {
@@ -71,6 +71,10 @@ public class ProfileServiceImpl implements ProfileService {
         Person dst = personRepository.findPersonById(id).orElseThrow(() -> new PersonNotFoundException("Пользователя с данным id не существует"));
         Pageable pageable = PageRequest.of(offset / itemPerPage, itemPerPage);
         Optional<Friendship> optionalFriendship = friendshipRepository.findFriendshipBySrcPersonAndDstPerson(src.getId(), id);
+        if (src.getId().equals(id)) {
+            Page<Post> posts = postRepository.findPostsByAuthorId(id, pageable);
+            return postService.getPostsResponse(offset, itemPerPage, posts);
+        }
         if (utilsService.isBlockedBy(src.getId(), dst.getId(), optionalFriendship)) {
             Page<Post> posts = postRepository.findPostsByPersonId(id, pageable);
             return postService.getPostsResponse(offset, itemPerPage, posts);
@@ -86,9 +90,13 @@ public class ProfileServiceImpl implements ProfileService {
             post = new Post()
                     .setTitle(postRequest.getTitle())
                     .setPostText(postRequest.getPostText())
-                    .setTime(utilsService.getLocalDateTime(publishDate))
                     .setIsBlocked(0)
                     .setAuthor(dst);
+            if (publishDate != -1) {
+                post.setTime(utilsService.getLocalDateTime(publishDate));
+            } else {
+                post.setTime(LocalDateTime.now(ZoneOffset.UTC));
+            }
         } else {
             Optional<Friendship> optionalFriendship = friendshipRepository.findFriendshipBySrcPersonAndDstPerson(src.getId(), id);
             if (utilsService.isBlockedBy(src.getId(), dst.getId(), optionalFriendship)) {
@@ -142,31 +150,32 @@ public class ProfileServiceImpl implements ProfileService {
 
     private DataResponse<AuthData> getPersonDataResponse(Person person) {
         return new DataResponse<AuthData>()
-                .setTimestamp(LocalDateTime.now())
+                .setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli())
                 .setError("string")
                 .setData(utilsService.getAuthData(person, null));
     }
 
-    private void savePersonByRequest(Person person, EditProfileRequest editProfileRequest) {
-        person
+    private Person savePersonByRequest(Person person, EditProfileRequest editProfileRequest) {
+        Person personById = personRepository.findPersonById(person.getId()).orElseThrow();
+        String[] split = editProfileRequest.getBirthDate().split("\\+");
+        personById
                 .setFirstName(editProfileRequest.getFirstName() != null
                         ? editProfileRequest.getFirstName() : person.getFirstName())
                 .setLastName(editProfileRequest.getLastName() != null
                         ? editProfileRequest.getLastName() : person.getLastName())
-                .setBirthDate(editProfileRequest.getBirthDate() != null
-                        ? editProfileRequest.getBirthDate() : person.getBirthDate())
-                .setEmail(editProfileRequest.getEmail() != null
-                        ? editProfileRequest.getEmail() : person.getEmail())
                 .setPhone(editProfileRequest.getPhone() != null
                         ? editProfileRequest.getPhone() : person.getPhone())
                 .setPhoto(editProfileRequest.getPhoto() != null
                         ? editProfileRequest.getPhoto() : person.getPhoto())
                 .setAbout(editProfileRequest.getAbout() != null
                         ? editProfileRequest.getAbout() : person.getAbout())
-                .setTown(editProfileRequest.getTown() != null
-                        ? editProfileRequest.getTown() : person.getTown())
+                .setTown(editProfileRequest.getCity() != null
+                        ? editProfileRequest.getCity() : person.getTown())
                 .setCountry(editProfileRequest.getCountry() != null
-                        ? editProfileRequest.getCountry() : person.getCountry());
-        personRepository.save(person);
+                        ? editProfileRequest.getCountry() : person.getCountry())
+                .setBirthDate(editProfileRequest.getBirthDate() != null
+                        ? LocalDateTime.from(LocalDateTime.parse(Arrays.asList(split).get(0)).atZone(ZoneOffset.UTC)) : person.getBirthDate());
+        personRepository.save(personById);
+        return personById;
     }
 }

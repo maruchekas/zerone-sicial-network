@@ -1,6 +1,6 @@
 server:
   port: 8080
-  base_url: http://localhost:8080
+  base_url: https://zerone-2022-develop.herokuapp.com
 spring:
   messages:
     basename: lang.messages

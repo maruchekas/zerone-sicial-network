@@ -17,6 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 @Slf4j
 @Component
@@ -52,7 +53,7 @@ public class AuthServiceImpl implements AuthService {
     private DataResponse<AuthData> getSuccessAuthResponse(Person person, String token) {
         DataResponse<AuthData> dataResponse = new DataResponse<>();
         dataResponse.setError("ok");
-        dataResponse.setTimestamp(LocalDateTime.now());
+        dataResponse.setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
         AuthData authData = utilsService.getAuthData(person, token);
         dataResponse.setData(authData);
         return dataResponse;

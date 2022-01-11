@@ -2,11 +2,8 @@ package com.skillbox.javapro21.api.response.post;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.skillbox.javapro21.api.response.Content;
-import com.skillbox.javapro21.api.response.account.AuthData;
 import lombok.Data;
 import lombok.experimental.Accessors;
-
-import java.time.LocalDateTime;
 
 @Data
 @Accessors(chain = true)
@@ -18,8 +15,9 @@ public class CommentsData implements Content {
     private Long id;
     @JsonProperty("post_id")
     private Long postId;
-    private LocalDateTime time;
-    private AuthData author;
+    private long time;
+    @JsonProperty("author_id")
+    private Long authorId;
     @JsonProperty("is_blocked")
     private boolean isBlocked;
 }
