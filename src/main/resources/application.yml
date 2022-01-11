@@ -6,10 +6,13 @@ spring:
     basename: lang.messages
   profiles:
     active: dev
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
   datasource:
     url: jdbc:postgresql://localhost:5432/SocialNetwork
     username: postgres
-    password: root
+    password: rootroot
   jpa:
     show-sql: false
     hibernate:
