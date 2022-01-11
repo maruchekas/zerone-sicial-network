@@ -13,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,7 +41,7 @@ public class LanguageServiceImpl implements LanguageService {
         languageDataListDataResponse.setOffset(offset);
         languageDataListDataResponse.setPerPage(itemPerPage);
         languageDataListDataResponse.setTotal((int) languages.getTotalElements());
-        languageDataListDataResponse.setTimestamp(LocalDateTime.now());
+        languageDataListDataResponse.setTimestamp(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
         languageDataListDataResponse.setData(getLanguagesForResponse(languages.toList()));
 
         return languageDataListDataResponse;
@@ -64,7 +65,7 @@ public class LanguageServiceImpl implements LanguageService {
         .setId(language.getId())
         .setTypeId(language.getTypeId())
         .setEntityId(language.getEntityId())
-        .setSentTime(language.getSentTime())
+        .setSentTime(language.getSentTime().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
         .setInfo(language.getInfo());
     }
 }
