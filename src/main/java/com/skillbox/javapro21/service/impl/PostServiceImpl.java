@@ -51,12 +51,14 @@ public class PostServiceImpl implements PostService {
         LocalDateTime datetimeTo = (dateTo != -1) ? utilsService.getLocalDateTime(dateTo) : LocalDateTime.now();
         Pageable pageable = PageRequest.of(offset / itemPerPage, itemPerPage);
         Page<Post> pageablePostList;
-        if (text.equals("") && tag.equals("") && author.equals("")) {
+        if ((text.matches("\\s*") || text.equals("")) && tag.equals("") && author.equals("")) {
             pageablePostList = postRepository.findAllPosts(datetimeFrom, datetimeTo, pageable);
-        } else if (tag.equals("") && author.equals("")) {
+        } else if (!text.isEmpty() && !text.matches("\\s*") && tag.equals("") && author.equals("")) {
             pageablePostList = postRepository.findAllPostsByText(text, datetimeFrom, datetimeTo, pageable);
-        } else if (tag.equals("")) {
+        } else if (!text.trim().isEmpty() && tag.equals("") && !author.isEmpty()) {
             pageablePostList = postRepository.findPostsByTextByAuthorWithoutTagsContainingByDateExcludingBlockers(text, datetimeFrom, datetimeTo, author, pageable);
+        } else if ((text.matches("\\s*") || text.equals("")) && tag.equals("") && !author.isEmpty()) {
+            pageablePostList = postRepository.findAllPostsByAuthor(author, datetimeFrom, datetimeTo, pageable);
         } else {
             List<Long> tags = getTags(tag);
             pageablePostList = postRepository.findPostsByTextByAuthorByTagsContainingByDateExcludingBlockers(text, datetimeFrom, datetimeTo, author, tags, pageable);
@@ -198,7 +200,6 @@ public class PostServiceImpl implements PostService {
         Person person = utilsService.findPersonByEmail(principal.getName());
         Pageable pageable = PageRequest.of(offset / itemPerPage, itemPerPage);
         List<Long> friendsAndSubscribersIds = personRepository.findAllFriendsAndSubscribersByPersonId(person.getId());
-        friendsAndSubscribersIds.add(person.getId());
         Page<Post> postPage = postRepository.findPostsByTextExcludingBlockers(text, friendsAndSubscribersIds, pageable);
         return getPostsResponse(offset, itemPerPage, postPage);
     }
@@ -294,6 +295,7 @@ public class PostServiceImpl implements PostService {
                 .setBlocked(posts.getIsBlocked() != 0)
                 .setLikes(likes.size())
                 .setComments(getCommentsDataResponseForPost(posts.getId()))
+                .setType(posts.getTime().isBefore(LocalDateTime.now()) ? "POSTED" : "QUEUED")
                 .setTags(collect);
     }
 

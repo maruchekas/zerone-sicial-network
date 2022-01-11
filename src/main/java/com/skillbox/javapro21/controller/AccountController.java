@@ -50,20 +50,20 @@ public class AccountController {
     }
 
     @Operation(summary = "Отправка ссылки на почту для восстановления пароля")
-    @PutMapping("/password/send_recovery_massage")
+    @PutMapping("/password/recovery")
     public ResponseEntity<String> recoveryPasswordMessage(@RequestBody RecoveryRequest recoveryRequest) throws MailjetException, IOException {
         return new ResponseEntity<>(accountService.recoveryPasswordMessage(recoveryRequest), HttpStatus.OK);
     }
 
     @Operation(summary = "Разрешение на восстановление пароля")
-    @GetMapping("/password/recovery/complete")
+    @GetMapping("/password/send_recovery_massage")
     public ResponseEntity<String> verifyRecovery(@RequestParam String email,
                                                  @RequestParam String code) throws TokenConfirmationException {
         return new ResponseEntity<>(accountService.verifyRecovery(email, code), HttpStatus.OK);
     }
 
     @Operation(summary = "Восстановление пароля")
-    @PutMapping("/password/recovery")
+    @GetMapping("/password/recovery/complete")
     public ResponseEntity<String> recoveryPassword(@RequestParam String email,
                                                    @RequestParam String password) {
         return new ResponseEntity<>(accountService.recoveryPassword(email, password), HttpStatus.OK);

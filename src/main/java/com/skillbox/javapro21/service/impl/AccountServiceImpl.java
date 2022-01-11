@@ -77,7 +77,7 @@ public class AccountServiceImpl implements AccountService {
 
     public String recoveryPasswordMessage(RecoveryRequest recoveryRequest) throws MailjetException, IOException {
         String token = utilsService.getToken();
-        String text = confirmationUrl.getBaseUrl() + "/api/v1/account/password/recovery/complete?email=" + recoveryRequest.getEmail() + "&code=" + token;
+        String text = confirmationUrl.getBaseUrl() + "/api/v1/account/password/send_recovery_massage?email=" + recoveryRequest.getEmail() + "&code=" + token;
         confirmPersonAndSendEmail(recoveryRequest.getEmail(), text, token);
         return "Ссылка отправлена на почту";
     }

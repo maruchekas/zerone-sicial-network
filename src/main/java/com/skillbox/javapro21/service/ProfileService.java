@@ -10,13 +10,14 @@ import com.skillbox.javapro21.api.response.post.PostData;
 import com.skillbox.javapro21.exception.*;
 import org.springframework.stereotype.Service;
 
+import java.nio.file.attribute.UserPrincipalNotFoundException;
 import java.security.Principal;
 
 @Service
 public interface ProfileService {
     DataResponse<AuthData> getPerson(Principal principal);
 
-    DataResponse<AuthData> editPerson(Principal principal, EditProfileRequest editProfileRequest);
+    DataResponse<AuthData> editPerson(Principal principal, EditProfileRequest editProfileRequest) throws UserPrincipalNotFoundException;
 
     DataResponse<MessageOkContent> deletePerson(Principal principal);
 
