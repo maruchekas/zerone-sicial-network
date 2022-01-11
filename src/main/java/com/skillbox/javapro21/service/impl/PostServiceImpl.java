@@ -294,6 +294,7 @@ public class PostServiceImpl implements PostService {
                 .setBlocked(posts.getIsBlocked() != 0)
                 .setLikes(likes.size())
                 .setComments(getCommentsDataResponseForPost(posts.getId()))
+                .setType(posts.getTime().isBefore(LocalDateTime.now()) ? "POSTED" : "QUEUED")
                 .setTags(collect);
     }
 
