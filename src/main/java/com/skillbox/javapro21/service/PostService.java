@@ -41,4 +41,6 @@ public interface PostService {
     DataResponse<MessageOkContent> ratPostController(Long id, Principal principal) throws PostNotFoundException, MailjetException, IOException;
 
     DataResponse<MessageOkContent> ratCommentController(Long id, Long commentId, Principal principal) throws CommentNotFoundException, MailjetException, IOException;
+
+    ListDataResponse<PostData> getFeeds(String name, int offset, int itemPerPage, Principal principal);
 }

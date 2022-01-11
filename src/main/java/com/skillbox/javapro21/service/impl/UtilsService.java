@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Map;
@@ -51,7 +52,7 @@ public class UtilsService {
      */
     public DataResponse<MessageOkContent> getMessageOkResponse() {
         DataResponse<MessageOkContent> dataResponse = new DataResponse<>();
-        dataResponse.setTimestamp(LocalDateTime.now());
+        dataResponse.setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
         MessageOkContent accountData = new MessageOkContent();
         accountData.setMessage("ok");
         dataResponse.setData(accountData);

@@ -12,6 +12,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 
 @Slf4j
@@ -28,7 +29,7 @@ public class AddedLastOnlineTimeForPersonWithAOP {
         Object proceed = joinPoint.proceed();
         if (email.matches("^(.+)@(.+)$")) {
             Person person = personRepository.findByEmail(email).orElseThrow();
-            person.setLastOnlineTime(LocalDateTime.now());
+            person.setLastOnlineTime(LocalDateTime.now(ZoneOffset.UTC));
             personRepository.save(person);
             log.info(email + "; " + "LastActivity: " + personRepository.findByEmail(email).get().getLastOnlineTime() + "; Класс контроллера: " + joinPoint.getTarget().getClass());
         }

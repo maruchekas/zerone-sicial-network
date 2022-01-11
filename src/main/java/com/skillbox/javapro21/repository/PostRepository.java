@@ -23,9 +23,9 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
             "where pst.tagId in (:tags) " +
             "and p.isBlocked = 0 " +
             "and ps.isBlocked = 0 " +
-            "and p.time between :dateFrom and :dateTo and p.time < CURRENT_TIMESTAMP " +
-            "or ((p.title like '%'||:text||'%' or p.postText like '%'||:text||'%') " +
-            "or (ps.firstName like :author||'%' or ps.lastName like :author||'%' and :author != '' or :author = '' )) " +
+            "and (p.time between :dateFrom and :dateTo and p.time < CURRENT_TIMESTAMP) " +
+            "and (p.title like %:text% or p.postText like %:text%) " +
+            "and (ps.firstName like %:author% or ps.lastName like %:author%) " +
             "group by p.id " +
             "order by p.time desc")
     Page<Post> findPostsByTextByAuthorByTagsContainingByDateExcludingBlockers(String text, LocalDateTime dateFrom,
@@ -37,8 +37,8 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
             "where p.isBlocked = 0 " +
             "and ps.isBlocked = 0 " +
             "and (p.time between :dateFrom and :dateTo and p.time < CURRENT_TIMESTAMP) " +
-            "and ((p.title like '%'||:text||'%' or p.postText like '%'||:text||'%') " +
-            "or (ps.firstName like :author||'%' or ps.lastName like :author||'%' )) " +
+            "and (p.title like %:text% or p.postText like %:text%) " +
+            "and (ps.firstName like %:author% or ps.lastName like %:author% ) " +
             "group by p.id " +
             "order by p.time desc")
     Page<Post> findPostsByTextByAuthorWithoutTagsContainingByDateExcludingBlockers(String text, LocalDateTime dateFrom,
@@ -56,4 +56,54 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
             "group by p.id " +
             "order by p.time desc")
     Page<Post> findPostsByPersonId(Long id, Pageable pageable);
+
+    @Query("select p from Post p " +
+            "left join Person ps on ps.id = p.author.id " +
+            "left join PostComment pc on pc.post.id = p.id " +
+            "where ps.id = :id " +
+            "and ps.isBlocked = 0 " +
+            "and p.isBlocked = 0 " +
+            "group by p.id " +
+            "order by p.time desc")
+    Page<Post> findPostsByAuthorId(Long id, Pageable pageable);
+
+    @Query("select p from Post p " +
+            "join Person ps on ps.id = p.author.id " +
+            "where ps.id in (:friendsAndSubscribersIds) " +
+            "and p.isBlocked = 0 " +
+            "and ps.isBlocked = 0 " +
+            "and (p.title like %:text% or p.postText like %:text%) " +
+            "group by p.id " +
+            "order by p.time desc")
+    Page<Post> findPostsByTextExcludingBlockers(String text, List<Long> friendsAndSubscribersIds, Pageable pageable);
+
+
+    @Query("SELECT p FROM Post p " +
+            "left join Person ps on ps.id = p.author.id " +
+            "where p.isBlocked = 0 " +
+            "and ps.isBlocked = 0 " +
+            "and (p.time between :dateFrom and :dateTo and p.time < CURRENT_TIMESTAMP) " +
+            "and (p.title like %:text% or p.postText like %:text%) " +
+            "group by p.id " +
+            "order by p.time desc")
+    Page<Post> findAllPostsByText(String text, LocalDateTime dateFrom, LocalDateTime dateTo, Pageable pageable);
+
+    @Query("SELECT p FROM Post p " +
+            "left join Person ps on ps.id = p.author.id " +
+            "where p.isBlocked = 0 " +
+            "and ps.isBlocked = 0 " +
+            "and (p.time between :dateFrom and :dateTo and p.time < CURRENT_TIMESTAMP) " +
+            "group by p.id " +
+            "order by p.time desc")
+    Page<Post> findAllPosts(LocalDateTime dateFrom, LocalDateTime dateTo, Pageable pageable);
+
+    @Query("SELECT p FROM Post p " +
+            "left join Person ps on ps.id = p.author.id " +
+            "where p.isBlocked = 0 " +
+            "and ps.isBlocked = 0 " +
+            "and (p.time between :dateFrom and :dateTo and p.time < CURRENT_TIMESTAMP) " +
+            "and (ps.firstName like %:author% or ps.lastName like %:author%) " +
+            "group by p.id " +
+            "order by p.time desc")
+    Page<Post> findAllPostsByAuthor(String author, LocalDateTime dateFrom, LocalDateTime dateTo, Pageable pageable);
 }

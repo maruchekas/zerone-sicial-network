@@ -28,6 +28,7 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.security.Principal;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -76,7 +77,7 @@ public class AccountServiceImpl implements AccountService {
 
     public String recoveryPasswordMessage(RecoveryRequest recoveryRequest) throws MailjetException, IOException {
         String token = utilsService.getToken();
-        String text = confirmationUrl.getBaseUrl() + "/api/v1/account/password/recovery/complete?email=" + recoveryRequest.getEmail() + "&code=" + token;
+        String text = confirmationUrl.getBaseUrl() + "/api/v1/account/password/send_recovery_massage?email=" + recoveryRequest.getEmail() + "&code=" + token;
         confirmPersonAndSendEmail(recoveryRequest.getEmail(), text, token);
         return "Ссылка отправлена на почту";
     }
@@ -148,7 +149,7 @@ public class AccountServiceImpl implements AccountService {
                         .setMessage(true)
                         .setFriendsBirthday(true));
         ListDataResponse<NotificationSettingData> dataResponse = new ListDataResponse<>();
-        dataResponse.setTimestamp(LocalDateTime.now());
+        dataResponse.setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
         dataListNotification(notificationType);
         dataResponse.setData(dataListNotification(notificationType));
         return dataResponse;
@@ -196,8 +197,8 @@ public class AccountServiceImpl implements AccountService {
                 .setConfirmationCode(registerRequest.getCode())
                 .setIsApproved(0)
                 .setPassword(passwordEncoder.encode(registerRequest.getPasswd1()))
-                .setRegDate(LocalDateTime.now())
-                .setLastOnlineTime(LocalDateTime.now())
+                .setRegDate(LocalDateTime.now(ZoneOffset.UTC))
+                .setLastOnlineTime(LocalDateTime.now(ZoneOffset.UTC))
                 .setIsBlocked(0)
                 .setMessagesPermission(MessagesPermission.NOBODY);
         personRepository.save(person);
@@ -216,8 +217,8 @@ public class AccountServiceImpl implements AccountService {
                 .setConfirmationCode(registerRequest.getCode())
                 .setIsApproved(0)
                 .setPassword(passwordEncoder.encode(registerRequest.getPasswd1()))
-                .setRegDate(LocalDateTime.now())
-                .setLastOnlineTime(LocalDateTime.now())
+                .setRegDate(LocalDateTime.now(ZoneOffset.UTC))
+                .setLastOnlineTime(LocalDateTime.now(ZoneOffset.UTC))
                 .setIsBlocked(0)
                 .setMessagesPermission(MessagesPermission.NOBODY);
         personRepository.save(person);
