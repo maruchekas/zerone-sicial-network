@@ -16,7 +16,6 @@ import java.util.*;
 @Table(name = "posts")
 @Getter
 @Setter
-@ToString
 @Accessors(chain = true)
 @RequiredArgsConstructor
 public class Post {

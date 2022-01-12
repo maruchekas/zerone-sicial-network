@@ -12,7 +12,7 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/SocialNetwork
     username: postgres
-    password: rootroot
+    password: root
   jpa:
     show-sql: false
     hibernate:

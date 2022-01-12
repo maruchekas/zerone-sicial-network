@@ -15,13 +15,15 @@ public interface PostCommentRepository extends JpaRepository<PostComment, Intege
     @Query("select pc from PostComment pc " +
             "left join Post p on pc.post.id = p.id " +
             "where p.id = :id and pc.isBlocked = 0 and p.isBlocked = 0 " +
-            "order by pc.time")
+            "group by pc.id " +
+            "order by pc.time asc")
     Page<PostComment> findPostCommentsByPostId(Long id, Pageable pageable);
 
     @Query("select pc from PostComment pc " +
             "left join Post p on pc.post.id = p.id " +
             "where p.id = :id and pc.isBlocked = 0 and p.isBlocked = 0 " +
-            "order by pc.time")
+            "group by pc.id " +
+            "order by pc.time asc")
     List<PostComment> findPostCommentsByPostIdList(Long id);
 
     @Query("select pc from PostComment pc " +
@@ -37,4 +39,12 @@ public interface PostCommentRepository extends JpaRepository<PostComment, Intege
             "left join Post p on pc.post.id = p.id " +
             "where ( p.id = :parentId and pc.id = :id ) and ( pc.isBlocked = 2 and p.isBlocked = 0 )")
     Optional<PostComment> findPostCommentByIdAndParentIdWhichIsDelete(Long id, Long parentId);
+
+    @Query("select pc from PostComment pc " +
+            "left join Post p on pc.post.id = p.id " +
+            "where pc.parent.id = :id " +
+            "and pc.isBlocked = 0 and p.isBlocked = 0 " +
+            "group by pc.id " +
+            "order by pc.time asc")
+    List<PostComment> findPostCommentsByParentId(Long id);
 }
