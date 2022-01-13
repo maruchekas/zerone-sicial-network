@@ -24,7 +24,10 @@ import org.springframework.stereotype.Component;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
+
+import static com.skillbox.javapro21.domain.enumeration.ReadStatus.SENT;
 
 @Component
 @RequiredArgsConstructor
@@ -38,7 +41,12 @@ public class DialogsServiceImpl implements DialogsService {
     public ListDataResponse<DialogsData> getDialogs(String query, int offset, int itemPerPage, Principal principal) {
         Person person = utilsService.findPersonByEmail(principal.getName());
         Pageable pageable = PageRequest.of(offset / itemPerPage, itemPerPage);
-        Page<PersonToDialog> allMessagesByPersonIdAndQuery = personToDialogRepository.findDialogsByPersonIdAndQuery(person.getId(), query, pageable);
+        Page<PersonToDialog> allMessagesByPersonIdAndQuery;
+        if (query.equals("")) {
+            allMessagesByPersonIdAndQuery = personToDialogRepository.findDialogsByPerson(person.getId(), pageable);
+        } else {
+            allMessagesByPersonIdAndQuery = personToDialogRepository.findDialogsByPersonIdAndQuery(person.getId(), query, pageable);
+        }
         return getListDataResponse(offset, itemPerPage, allMessagesByPersonIdAndQuery);
     }
 
@@ -52,7 +60,7 @@ public class DialogsServiceImpl implements DialogsService {
             if  (dialogByAuthorAndRecipient != null) {
                 return new DataResponse<DialogsData>()
                         .setError("")
-                        .setTimestamp(LocalDateTime.now())
+                        .setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli())
                         .setData(new DialogsData().setId(dialogByAuthorAndRecipient.getId()));
             } else {
                 Set<Person> personSet = new HashSet<>();
@@ -64,18 +72,18 @@ public class DialogsServiceImpl implements DialogsService {
                         .setIsBlocked(0);
                 Dialog savedDialog = dialogRepository.save(dialog);
                 PersonToDialog person1ToDialog = new PersonToDialog()
-                        .setLastCheck(LocalDateTime.now())
+                        .setLastCheck(LocalDateTime.now(ZoneOffset.UTC))
                         .setDialog(dialog)
                         .setPerson(person);
                 PersonToDialog person2ToDialog = new PersonToDialog()
-                        .setLastCheck(LocalDateTime.now())
+                        .setLastCheck(LocalDateTime.now(ZoneOffset.UTC))
                         .setDialog(dialog)
                         .setPerson(personDst.get());
                 personToDialogRepository.save(person1ToDialog);
                 personToDialogRepository.save(person2ToDialog);
                 return new DataResponse<DialogsData>()
                         .setError("")
-                        .setTimestamp(LocalDateTime.now())
+                        .setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli())
                         .setData(new DialogsData().setId(savedDialog.getId()));
             }
         } else {
@@ -99,7 +107,7 @@ public class DialogsServiceImpl implements DialogsService {
             }
             return new DataResponse<DialogsData>()
                     .setError("")
-                    .setTimestamp(LocalDateTime.now())
+                    .setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli())
                     .setData(new DialogsData().setId(savedDialog.getId()));
         }
     }
@@ -109,7 +117,7 @@ public class DialogsServiceImpl implements DialogsService {
                 .setError("")
                 .setOffset(offset)
                 .setPerPage(itemPerPage)
-                .setTimestamp(LocalDateTime.now())
+                .setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli())
                 .setTotal((int) allMessagesByPersonIdAndQuery.getTotalElements())
                 .setData(getDialogsForResponse(allMessagesByPersonIdAndQuery.toList()));
     }
@@ -124,14 +132,15 @@ public class DialogsServiceImpl implements DialogsService {
     }
 
     private DialogsData getDialogData(PersonToDialog p2d) {
-        DialogsData data = new DialogsData()
-                .setId(p2d.getDialog().getId())
-                .setUnreadCount(p2d.getDialog().getMessages().stream()
-                        .filter(message -> message.getReadStatus().equals(ReadStatus.SENT)).count());
+        DialogsData data = new DialogsData();
         if (p2d.getDialog().getMessages().size() > 0) {
+            data
+                    .setId(p2d.getDialog().getId())
+                .setUnreadCount(p2d.getDialog().getMessages().stream()
+                        .filter(message -> message.getReadStatus().equals(SENT)).count() != 0 ?
+                        p2d.getDialog().getMessages().stream().filter(message -> message.getReadStatus().equals(SENT)).count() : 0);
             data.setLastMessage(getMessageData(
-                    p2d.getDialog().getMessages().stream().max(Comparator.comparing(Message::getId)).get(), p2d)
-            );
+                    p2d.getDialog().getMessages().stream().max(Comparator.comparing(Message::getId)).get(), p2d));
         } else {
             data.setLastMessage(new MessageData());
         }
@@ -142,8 +151,9 @@ public class DialogsServiceImpl implements DialogsService {
         return new MessageData()
                 .setMessageText(message.getMessageText())
                 .setAuthorId(message.getAuthor().getId())
+                .setRecipientId(message.getRecipient().getId())
                 .setId(message.getId())
                 .setTime(message.getTime())
-                .setReadStatus(message.getTime().isAfter(personToDialog.getLastCheck()) ? ReadStatus.SENT : ReadStatus.READ);
+                .setReadStatus(message.getTime().isAfter(personToDialog.getLastCheck()) ? SENT : ReadStatus.READ);
     }
 }

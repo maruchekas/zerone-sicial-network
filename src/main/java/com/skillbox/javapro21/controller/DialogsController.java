@@ -28,7 +28,7 @@ private final DialogsService dialogsService;
     @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<ListDataResponse<DialogsData>> getDialogs(@RequestParam(name = "offset", defaultValue = "0") int offset,
                                                                     @RequestParam(name = "item_per_page", defaultValue = "20") int itemPerPage,
-                                                                    @RequestParam String query,
+                                                                    @RequestParam(name = "query", defaultValue = "") String query,
                                                                     Principal principal) {
         return new ResponseEntity<>(dialogsService.getDialogs(query, offset, itemPerPage, principal), HttpStatus.OK);
     }

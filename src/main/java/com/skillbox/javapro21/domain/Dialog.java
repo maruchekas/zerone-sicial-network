@@ -20,7 +20,7 @@ public class Dialog {
     @Column(name = "title")
     private String title;
 
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "dialog")
     private Set<Message> messages;
 
     @Column(name = "is_blocked")
