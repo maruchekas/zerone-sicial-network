@@ -15,7 +15,6 @@ import java.util.*;
 @Table(name = "posts")
 @Getter
 @Setter
-@ToString
 @Accessors(chain = true)
 public class Post {
     @Id
