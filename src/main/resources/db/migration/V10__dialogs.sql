@@ -47,8 +47,8 @@ VALUES (777, 777, 777, '2021-12-16 16:57:08'),
 INSERT INTO messages (id, dialog_id, time, author_id, recipient_id, message_text, read_status)
 VALUES (777, 777, '2021-12-18 00:59:21', 777, 666,
         'are you buba',
-        'READ'),
+        'SENT'),
        (778, 777, '2021-12-18 09:54:15', 666, 777,
         'no, i am biba',
-        'READ')
+        'SENT')
 

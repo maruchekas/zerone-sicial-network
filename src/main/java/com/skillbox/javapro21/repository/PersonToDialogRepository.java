@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface PersonToDialogRepository extends JpaRepository<PersonToDialog, Integer> {
     @Query("select p2d from PersonToDialog p2d " +
@@ -26,4 +28,8 @@ public interface PersonToDialogRepository extends JpaRepository<PersonToDialog, 
             "group by p2d.id " +
             "order by p2d.lastCheck desc")
     Page<PersonToDialog> findDialogsByPerson(Long id, Pageable pageable);
+
+    @Query("select p2d from PersonToDialog p2d " +
+            "where p2d.person.id = :id and p2d.dialog.isBlocked = 0 and p2d.person.isBlocked = 0 ")
+    List<PersonToDialog> findDialogsByPersonId(Long id);
 }

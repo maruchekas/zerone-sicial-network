@@ -3,6 +3,7 @@ package com.skillbox.javapro21.service.impl;
 import com.skillbox.javapro21.api.request.dialogs.DialogRequestForCreate;
 import com.skillbox.javapro21.api.response.DataResponse;
 import com.skillbox.javapro21.api.response.ListDataResponse;
+import com.skillbox.javapro21.api.response.dialogs.CountContent;
 import com.skillbox.javapro21.api.response.dialogs.DialogsData;
 import com.skillbox.javapro21.api.response.dialogs.MessageData;
 import com.skillbox.javapro21.domain.Dialog;
@@ -112,6 +113,24 @@ public class DialogsServiceImpl implements DialogsService {
         }
     }
 
+    public DataResponse<CountContent> getUnreadedDialogs(Principal principal) {
+        Person person = utilsService.findPersonByEmail(principal.getName());
+        List<PersonToDialog> dialogs = personToDialogRepository.findDialogsByPersonId(person.getId());
+        int count = 0;
+        for (PersonToDialog p2d : dialogs) {
+            count += p2d.getDialog().getMessages().stream()
+                    .filter(message -> {
+                        if(!message.getAuthor().getId().equals(person.getId())) {
+                            return message.getReadStatus().equals(SENT);
+                        } return false;
+                    }).count();
+        }
+        return new DataResponse<CountContent>()
+                .setError("")
+                .setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli())
+                .setData(new CountContent().setCount(count));
+    }
+
     private ListDataResponse<DialogsData> getListDataResponse(int offset, int itemPerPage, Page<PersonToDialog> allMessagesByPersonIdAndQuery) {
         return new ListDataResponse<DialogsData>()
                 .setError("")
@@ -137,8 +156,7 @@ public class DialogsServiceImpl implements DialogsService {
             data
                     .setId(p2d.getDialog().getId())
                 .setUnreadCount(p2d.getDialog().getMessages().stream()
-                        .filter(message -> message.getReadStatus().equals(SENT)).count() != 0 ?
-                        p2d.getDialog().getMessages().stream().filter(message -> message.getReadStatus().equals(SENT)).count() : 0);
+                        .filter(message -> message.getReadStatus().equals(SENT)).count());
             data.setLastMessage(getMessageData(
                     p2d.getDialog().getMessages().stream().max(Comparator.comparing(Message::getId)).get(), p2d));
         } else {
