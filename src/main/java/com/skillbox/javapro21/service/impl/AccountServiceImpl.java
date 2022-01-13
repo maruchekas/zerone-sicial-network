@@ -200,6 +200,7 @@ public class AccountServiceImpl implements AccountService {
                 .setRegDate(LocalDateTime.now(ZoneOffset.UTC))
                 .setLastOnlineTime(LocalDateTime.now(ZoneOffset.UTC))
                 .setIsBlocked(0)
+                .setPhoto("new photo")
                 .setMessagesPermission(MessagesPermission.NOBODY);
         personRepository.save(person);
         globalNotificationsSettings(person);
