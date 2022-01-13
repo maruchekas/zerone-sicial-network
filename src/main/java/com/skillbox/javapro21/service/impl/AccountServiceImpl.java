@@ -6,7 +6,9 @@ import com.skillbox.javapro21.api.response.DataResponse;
 import com.skillbox.javapro21.api.response.ListDataResponse;
 import com.skillbox.javapro21.api.response.MessageOkContent;
 import com.skillbox.javapro21.api.response.account.NotificationSettingData;
+import com.skillbox.javapro21.config.AvatarConfig;
 import com.skillbox.javapro21.config.MailjetSender;
+import com.skillbox.javapro21.config.MultipartImage;
 import com.skillbox.javapro21.config.properties.ConfirmationUrl;
 import com.skillbox.javapro21.config.security.JwtGenerator;
 import com.skillbox.javapro21.domain.NotificationType;
@@ -19,12 +21,17 @@ import com.skillbox.javapro21.exception.UserExistException;
 import com.skillbox.javapro21.repository.NotificationTypeRepository;
 import com.skillbox.javapro21.repository.PersonRepository;
 import com.skillbox.javapro21.service.AccountService;
+import com.skillbox.javapro21.service.ResourceService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.Principal;
 import java.time.LocalDateTime;
@@ -44,6 +51,7 @@ public class AccountServiceImpl implements AccountService {
     private final ConfirmationUrl confirmationUrl;
     private final JwtGenerator jwtGenerator;
     private final NotificationTypeRepository notificationTypeRepository;
+    private final ResourceService resourceService;
 
     public DataResponse<MessageOkContent> registration(RegisterRequest registerRequest) throws UserExistException, MailjetException, IOException {
         if (personRepository.findByEmail(registerRequest.getEmail()).isPresent()) {
@@ -188,8 +196,9 @@ public class AccountServiceImpl implements AccountService {
     /**
      * Создание пользователя без верификации
      */
-    private void createNewPerson(RegisterRequest registerRequest) {
+    private void createNewPerson(RegisterRequest registerRequest) throws IOException {
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
+
         Person person = new Person()
                 .setEmail(registerRequest.getEmail())
                 .setFirstName(registerRequest.getFirstName())
@@ -200,7 +209,7 @@ public class AccountServiceImpl implements AccountService {
                 .setRegDate(LocalDateTime.now(ZoneOffset.UTC))
                 .setLastOnlineTime(LocalDateTime.now(ZoneOffset.UTC))
                 .setIsBlocked(0)
-                .setPhoto("new photo")
+                .setPhoto(AvatarConfig.createDefaultRoboticAvatar(registerRequest.getFirstName()))
                 .setMessagesPermission(MessagesPermission.NOBODY);
         personRepository.save(person);
         globalNotificationsSettings(person);
