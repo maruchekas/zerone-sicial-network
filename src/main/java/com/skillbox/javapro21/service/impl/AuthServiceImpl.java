@@ -8,29 +8,24 @@ import com.skillbox.javapro21.config.security.JwtGenerator;
 import com.skillbox.javapro21.domain.Person;
 import com.skillbox.javapro21.exception.NotSuchUserOrWrongPasswordException;
 import com.skillbox.javapro21.exception.UserLegalException;
-import com.skillbox.javapro21.repository.PersonRepository;
 import com.skillbox.javapro21.service.AuthService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
     private final UtilsService utilsService;
     private final JwtGenerator jwtGenerator;
-
-    @Autowired
-    protected AuthServiceImpl(UtilsService utilsService, JwtGenerator jwtGenerator) {
-        this.utilsService = utilsService;
-        this.jwtGenerator = jwtGenerator;
-    }
 
     public DataResponse<AuthData> login(AuthRequest authRequest) throws NotSuchUserOrWrongPasswordException, UserLegalException {
         Person person = utilsService.findPersonByEmail(authRequest.getEmail());
@@ -58,7 +53,7 @@ public class AuthServiceImpl implements AuthService {
     private DataResponse<AuthData> getSuccessAuthResponse(Person person, String token) {
         DataResponse<AuthData> dataResponse = new DataResponse<>();
         dataResponse.setError("ok");
-        dataResponse.setTimestamp(LocalDateTime.now());
+        dataResponse.setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
         AuthData authData = utilsService.getAuthData(person, token);
         dataResponse.setData(authData);
         return dataResponse;

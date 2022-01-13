@@ -1,7 +1,6 @@
 package com.skillbox.javapro21.api.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -12,6 +11,6 @@ import java.time.LocalDateTime;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DataResponse<T extends Content> {
     private String error;
-    private LocalDateTime timestamp;
+    private long timestamp;
     private T data;
 }

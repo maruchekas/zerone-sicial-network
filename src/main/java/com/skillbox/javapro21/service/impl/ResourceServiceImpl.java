@@ -11,8 +11,8 @@ import com.skillbox.javapro21.config.Constants;
 import com.skillbox.javapro21.domain.Person;
 import com.skillbox.javapro21.repository.PersonRepository;
 import com.skillbox.javapro21.service.ResourceService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,28 +20,22 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.security.Principal;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.Map;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class ResourceServiceImpl implements ResourceService {
-
     private final PersonRepository personRepository;
     private final Cloudinary cloudinary;
-
-    @Autowired
-    public ResourceServiceImpl(PersonRepository personRepository, Cloudinary cloudinary) {
-        this.personRepository = personRepository;
-        this.cloudinary = cloudinary;
-    }
-
 
     @Override
     public DataResponse<Content> saveFileInStorage(String type, MultipartFile image, Principal principal) throws IOException {
         Person person = ((Person)(((UsernamePasswordAuthenticationToken) principal).getPrincipal()));
         DataResponse<Content> response = new DataResponse<>()
-                                            .setTimestamp(LocalDateTime.now());
+                                            .setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
 
         if (image == null) {
             log.info("Не принимаем никакой файл в хранилище");
@@ -57,9 +51,6 @@ public class ResourceServiceImpl implements ResourceService {
             }
             default -> throw new IllegalStateException("Unexpected value: " + type);
         }
-
-
-
     }
 
     private AvatarUploadData saveUserAvatar(MultipartFile image, Person person) throws IOException {

@@ -2,48 +2,37 @@ package com.skillbox.javapro21.aop;
 
 import com.skillbox.javapro21.domain.Person;
 import com.skillbox.javapro21.repository.PersonRepository;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.aspectj.lang.annotation.AfterReturning;
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Before;
-import org.aspectj.lang.annotation.Pointcut;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
+import java.time.ZoneOffset;
 
 
 @Slf4j
 @Aspect
 @Component
+@RequiredArgsConstructor
 public class AddedLastOnlineTimeForPersonWithAOP {
     private final PersonRepository personRepository;
 
-    private static String email;
-
-    @Autowired
-    public AddedLastOnlineTimeForPersonWithAOP(PersonRepository personRepository) {
-        this.personRepository = personRepository;
-    }
-
-    @Pointcut("execution(public * com.skillbox.javapro21.service.impl.ProfileServiceImpl.*(..))")
-    public void callAtServiceProfile() {
-    }
-
-    @Before("callAtServiceProfile()")
-    public void getEmailBeforeDelete() {
+    @Around("@annotation(LastActivity)")
+    public Object setLastActivity(ProceedingJoinPoint joinPoint) throws Throwable {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        email = auth.getName();
-    }
-
-    @AfterReturning("callAtServiceProfile()")
-    public void setLastOnlineTime() {
-        Optional<Person> person = personRepository.findByEmail(email);
-        person.get().setLastOnlineTime(LocalDateTime.now());
-        log.info("Пользователь {} совершил действие {} воспользовавшись методом из класса ProfileService.", person.get().getEmail(), LocalDateTime.now());
-        personRepository.save(person.get());
+        String email = auth.getName();
+        Object proceed = joinPoint.proceed();
+        if (email.matches("^(.+)@(.+)$")) {
+            Person person = personRepository.findByEmail(email).orElseThrow();
+            person.setLastOnlineTime(LocalDateTime.now(ZoneOffset.UTC));
+            personRepository.save(person);
+            log.info(email + "; " + "LastActivity: " + personRepository.findByEmail(email).get().getLastOnlineTime() + "; Класс контроллера: " + joinPoint.getTarget().getClass());
+        }
+        return proceed;
     }
 }

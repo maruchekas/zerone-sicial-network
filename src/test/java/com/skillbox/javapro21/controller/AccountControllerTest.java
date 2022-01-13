@@ -44,8 +44,8 @@ public class AccountControllerTest extends AbstractTest {
     @BeforeEach
     public void setup() {
         super.setup();
-        String email = "arcadiy9@test.ru";
-        String verifyEmail = "test@test.ru";
+        String email = "ivan_zukkel@mail.ru";
+        String verifyEmail = "ivan_zykkel@mail.ru";
         String password = "1234";
         String firstName = "Arcadiy";
         String lastName = "Parovozov";

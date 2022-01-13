@@ -9,7 +9,4 @@ import org.springframework.stereotype.Component;
 public class ConfirmationUrl {
     @Value("${server.base_url}")
     private String baseUrl;
-
-    private final String urlForRegisterComplete = baseUrl + "/api/v1/account/register/complete";
-    private final String urlForPasswordComplete = baseUrl + "/api/v1/account/password/recovery/complete";
 }
