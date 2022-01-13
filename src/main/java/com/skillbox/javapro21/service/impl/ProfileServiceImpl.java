@@ -28,7 +28,10 @@ import java.security.Principal;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static com.skillbox.javapro21.domain.enumeration.FriendshipStatusType.*;
 
@@ -79,7 +82,7 @@ public class ProfileServiceImpl implements ProfileService {
             Page<Post> posts = postRepository.findPostsByPersonId(id, pageable);
             return postService.getPostsResponse(offset, itemPerPage, posts);
         }
-        throw new InterlockedFriendshipStatusException("Полльзователь заблокирован и не может смотреть посты");
+        throw new InterlockedFriendshipStatusException("Пользователь заблокирован и не может смотреть посты");
     }
 
     public DataResponse<PostData> postPostOnPersonWallById(Long id, Long publishDate, PostRequest postRequest, Principal principal) throws InterlockedFriendshipStatusException, PersonNotFoundException, PostNotFoundException {
@@ -146,6 +149,24 @@ public class ProfileServiceImpl implements ProfileService {
             utilsService.createFriendship(src, dst, INTERLOCKED);
         }
         return utilsService.getMessageOkResponse();
+    }
+
+    @Override
+    public ListDataResponse<AuthData> searchByPerson(String firstName, String lastName, Integer ageFrom, Integer ageTo, String country, String city, Integer offset, Integer itemPerPage) {
+        Pageable nextPage = PageRequest.of(offset, itemPerPage);
+        Page<Person> personPage = personRepository.findAllByNameAndAgeAndLocation(firstName, lastName, ageFrom, ageTo, country, city, nextPage);
+        List<AuthData> data = personPage.getContent().stream()
+                .map(p -> utilsService.getAuthData(p, null))
+                .collect(Collectors.toList());
+
+        ListDataResponse<AuthData> response = new ListDataResponse<>();
+        response.setError("ok");
+        response.setTimestamp(new Date().getTime());
+        response.setTotal((int) personPage.getTotalElements());
+        response.setOffset(offset);
+        response.setPerPage(itemPerPage);
+        response.setData(data);
+        return response;
     }
 
     private DataResponse<AuthData> getPersonDataResponse(Person person) {

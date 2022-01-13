@@ -7,6 +7,7 @@ import com.skillbox.javapro21.domain.*;
 import com.skillbox.javapro21.domain.enumeration.FriendshipStatusType;
 import com.skillbox.javapro21.domain.enumeration.MessagesPermission;
 import com.skillbox.javapro21.repository.*;
+import com.skillbox.javapro21.service.ProfileService;
 import com.skillbox.javapro21.service.impl.UtilsService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -50,6 +51,8 @@ public class ProfileControllerTest extends AbstractTest {
     private FriendshipStatusRepository friendshipStatusRepository;
     @Autowired
     private UtilsService utilsService;
+    @Autowired
+    private ProfileService profileService;
 
     private Person verifyPerson;
     private Person verifyPersonWithPost;
@@ -87,7 +90,10 @@ public class ProfileControllerTest extends AbstractTest {
                 .setMessagesPermission(MessagesPermission.ALL)
                 .setIsBlocked(0)
                 .setIsApproved(1)
-                .setLastOnlineTime(LocalDateTime.now());
+                .setLastOnlineTime(LocalDateTime.now())
+                .setBirthDate(LocalDateTime.of(2000, 1, 1, 10, 0))
+                .setCountry("Россия")
+                .setTown("Москва");
         personRepository.save(verifyPerson);
 
         verifyPersonWithPost = new Person()
@@ -101,7 +107,10 @@ public class ProfileControllerTest extends AbstractTest {
                 .setMessagesPermission(MessagesPermission.ALL)
                 .setIsBlocked(0)
                 .setIsApproved(1)
-                .setLastOnlineTime(LocalDateTime.now().minusDays(2));
+                .setLastOnlineTime(LocalDateTime.now().minusDays(2))
+                .setBirthDate(LocalDateTime.of(2010, 1, 1, 10, 0))
+                .setCountry("Россия")
+                .setTown("Санкт-Петербург");
         personRepository.save(verifyPersonWithPost);
 
         friendshipStatusSrc = new FriendshipStatus();
@@ -333,5 +342,24 @@ public class ProfileControllerTest extends AbstractTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.data.message").value("ok"));
         Assertions.assertEquals(null, utilsService.getFriendshipStatus(verifyPerson.getId(), verifyPersonWithPost.getId()));
         Assertions.assertEquals(null, utilsService.getFriendshipStatus(verifyPersonWithPost.getId(), verifyPerson.getId()));
+    }
+
+    @Test
+    @WithMockUser(username = "test1@test.ru", authorities = "user:write")
+    void searchByPerson() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/api/v1/users/search", "Arcadiy")
+                        .principal(() -> "test1@test.ru")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk());
+        Assertions.assertEquals(2, profileService.searchByPerson("", "", 0, 150, "", "", 0, 20).getTotal());
+        Assertions.assertEquals(2, profileService.searchByPerson("Arcadiy", "", 0, 150, "", "", 0, 20).getTotal());
+        Assertions.assertEquals(1, profileService.searchByPerson("Arcadiy-", "", 0, 150, "", "", 0, 20).getTotal());
+        Assertions.assertEquals(2, profileService.searchByPerson("", "ovoz", 0, 150, "", "", 0, 20).getTotal());
+        Assertions.assertEquals(1, profileService.searchByPerson("diy", "ovoz", 18, 30, "", "", 0, 20).getTotal());
+        Assertions.assertEquals(2, profileService.searchByPerson("diy", "ovoz", 0, 30, "", "", 0, 20).getTotal());
+        Assertions.assertEquals(2, profileService.searchByPerson("diy", "ovoz", 0, 30, "Россия", "", 0, 20).getTotal());
+        Assertions.assertEquals(1, profileService.searchByPerson("diy", "ovoz", 0, 30, "Россия", "Москва", 0, 20).getTotal());
     }
 }

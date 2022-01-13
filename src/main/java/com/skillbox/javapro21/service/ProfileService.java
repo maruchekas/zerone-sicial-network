@@ -30,4 +30,6 @@ public interface ProfileService {
     DataResponse<MessageOkContent> blockPersonById(Long id, Principal principal) throws BlockPersonHimselfException, InterlockedFriendshipStatusException, PersonNotFoundException, FriendshipNotFoundException;
 
     DataResponse<MessageOkContent> unblockPersonById(Long id, Principal principal) throws PersonNotFoundException, BlockPersonHimselfException, NonBlockedFriendshipException, InterlockedFriendshipStatusException, FriendshipNotFoundException;
+
+    ListDataResponse<AuthData> searchByPerson(String firstName, String lastName, Integer ageFrom, Integer ageTo, String country, String city, Integer offset, Integer itemPerPage);
 }
