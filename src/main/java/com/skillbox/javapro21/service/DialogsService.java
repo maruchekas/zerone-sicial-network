@@ -17,4 +17,6 @@ public interface DialogsService {
     DataResponse<DialogsData> createDialog(DialogRequestForCreate userId, Principal principal) throws PersonNotFoundException;
 
     DataResponse<CountContent> getUnreadedDialogs(Principal principal);
+
+    DataResponse<DialogsData> deleteDialog(int id, Principal principal);
 }

@@ -50,4 +50,12 @@ private final DialogsService dialogsService;
     public ResponseEntity<DataResponse<CountContent>> getUnreadedDialogs(Principal principal) {
         return new ResponseEntity<>(dialogsService.getUnreadedDialogs(principal), HttpStatus.OK);
     }
+
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Получение кол-ва непрочтенных сообщений")
+    @PreAuthorize("hasAuthority('user:write')")
+    public ResponseEntity<DataResponse<DialogsData>> deleteDialog(@PathVariable int id,
+                                                                   Principal principal) {
+        return new ResponseEntity<>(dialogsService.deleteDialog(id, principal), HttpStatus.OK);
+    }
 }

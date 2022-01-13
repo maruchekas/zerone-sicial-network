@@ -131,6 +131,13 @@ public class DialogsServiceImpl implements DialogsService {
                 .setData(new CountContent().setCount(count));
     }
 
+    public DataResponse<DialogsData> deleteDialog(int id, Principal principal) {
+        Person person = utilsService.findPersonByEmail(principal.getName());
+        Dialog dialog = dialogRepository.findById(id).orElseThrow();
+//        if (dialog.getPersons())
+        return null;
+    }
+
     private ListDataResponse<DialogsData> getListDataResponse(int offset, int itemPerPage, Page<PersonToDialog> allMessagesByPersonIdAndQuery) {
         return new ListDataResponse<DialogsData>()
                 .setError("")

@@ -5,6 +5,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface DialogRepository extends JpaRepository<Dialog, Integer> {
     @Query("SELECT d " +
@@ -13,4 +15,8 @@ public interface DialogRepository extends JpaRepository<Dialog, Integer> {
             "WHERE p2d.person.id = :id and d.persons = :idDsc " +
             "AND d.isBlocked = 0 ")
     Dialog findPersonToDialogByPersonDialog(Long id, Long idDsc);
+
+    @Query("select d from Dialog d " +
+            "where d.id = :id and d.isBlocked = 0")
+    Optional<Dialog> findById(int id);
 }
