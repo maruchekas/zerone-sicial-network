@@ -32,4 +32,11 @@ public interface PersonToDialogRepository extends JpaRepository<PersonToDialog, 
     @Query("select p2d from PersonToDialog p2d " +
             "where p2d.person.id = :id and p2d.dialog.isBlocked = 0 and p2d.person.isBlocked = 0 ")
     List<PersonToDialog> findDialogsByPersonId(Long id);
+
+    @Query("select p2d from PersonToDialog p2d " +
+            "left join Person p on p2d.person.id = p.id " +
+            "left join Dialog d on p2d.dialog.id = d.id " +
+            "where p.id = :personId " +
+            "and d.id = :dialogId ")
+    PersonToDialog findDialogByPersonIdAndDialogId(Long personId, int dialogId);
 }

@@ -8,5 +8,5 @@ import java.util.List;
 @Data
 public class DialogRequestForCreate {
     @JsonProperty("users_ids")
-    private List<Integer> usersIds;
+    private List<Long> usersIds;
 }

@@ -19,4 +19,7 @@ public interface DialogRepository extends JpaRepository<Dialog, Integer> {
     @Query("select d from Dialog d " +
             "where d.id = :id and d.isBlocked = 0")
     Optional<Dialog> findById(int id);
+
+    @Query("select d from Dialog d where d.code = :link")
+    Dialog findByCode(String link);
 }

@@ -63,7 +63,7 @@ public class UtilsService {
      * создание рандомного токена
      */
     public String getToken() {
-        return RandomStringUtils.randomAlphanumeric(6);
+        return RandomStringUtils.randomAlphanumeric(8);
     }
 
     /**

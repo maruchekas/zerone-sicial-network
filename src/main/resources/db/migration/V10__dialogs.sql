@@ -50,5 +50,6 @@ VALUES (777, 777, '2021-12-18 00:59:21', 777, 666,
         'SENT'),
        (778, 777, '2021-12-18 09:54:15', 666, 777,
         'no, i am biba',
-        'SENT')
+        'SENT');
 
+ALTER TABLE dialogs ADD COLUMN code VARCHAR(255);

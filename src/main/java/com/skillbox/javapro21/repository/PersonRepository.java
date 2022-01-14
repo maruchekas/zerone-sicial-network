@@ -26,4 +26,7 @@ public interface PersonRepository extends JpaRepository<Person, Integer> {
             "or fs.friendshipStatusType = 'SUBSCRIBED' " +
             ") group by p.id" )
     List<Long> findAllFriendsAndSubscribersByPersonId(Long id);
+
+    @Query("select p from Person p where p.id in (:ids) and p.isBlocked = 0")
+    List<Person> findAllById(List<Long> ids);
 }

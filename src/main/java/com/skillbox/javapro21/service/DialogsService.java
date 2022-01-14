@@ -1,10 +1,13 @@
 package com.skillbox.javapro21.service;
 
 import com.skillbox.javapro21.api.request.dialogs.DialogRequestForCreate;
+import com.skillbox.javapro21.api.request.dialogs.LincRequest;
 import com.skillbox.javapro21.api.response.DataResponse;
 import com.skillbox.javapro21.api.response.ListDataResponse;
 import com.skillbox.javapro21.api.response.dialogs.CountContent;
+import com.skillbox.javapro21.api.response.dialogs.DialogPersonIdContent;
 import com.skillbox.javapro21.api.response.dialogs.DialogsData;
+import com.skillbox.javapro21.api.response.dialogs.LinkContent;
 import com.skillbox.javapro21.exception.PersonNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -18,5 +21,13 @@ public interface DialogsService {
 
     DataResponse<CountContent> getUnreadedDialogs(Principal principal);
 
-    DataResponse<DialogsData> deleteDialog(int id, Principal principal);
+    DataResponse<DialogsData> deleteDialog(int id);
+
+    DataResponse<DialogPersonIdContent> putPersonsInDialog(int id, DialogRequestForCreate listPersons, Principal principal);
+
+    DataResponse<DialogPersonIdContent> deletePersonsInDialog(int id, DialogRequestForCreate listPersons, Principal principal);
+
+    DataResponse<LinkContent> inviteLink(int id, Principal principal);
+
+    DataResponse<DialogPersonIdContent> joinInLink(int id, LincRequest lincRequest, Principal principal);
 }

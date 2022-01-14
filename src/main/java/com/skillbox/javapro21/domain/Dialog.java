@@ -26,6 +26,9 @@ public class Dialog {
     @Column(name = "is_blocked")
     private int isBlocked;
 
+    @Column(name = "code")
+    private String code;
+
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(name = "person2dialog",
             joinColumns = {@JoinColumn(name = "dialog_id")},
