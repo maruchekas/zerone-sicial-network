@@ -105,7 +105,6 @@ public class DialogsController {
     @GetMapping("/{id}/messages")
     @Operation(summary = "Получение списка сообщений в диалога")
     @PreAuthorize("hasAuthority('user:write')")
-    @LastActivity
     public ResponseEntity<ListDataResponse<MessageData>> getMessagesById(@PathVariable int id,
                                                                      @RequestParam(name = "query", defaultValue = "") String query,
                                                                      @RequestParam(name = "offset", defaultValue = "0") int offset,

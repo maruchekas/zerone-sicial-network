@@ -293,10 +293,10 @@ public class DialogsServiceImpl implements DialogsService {
     private MessageData getMessageData(Message message, PersonToDialog personToDialog) {
         return new MessageData()
                 .setMessageText(message.getMessageText())
-                .setAuthorId(message.getAuthor().getId())
+                .setAuthor(utilsService.getAuthData(message.getAuthor(), null))
                 .setRecipientId(message.getRecipient().getId())
                 .setId(message.getId())
-                .setTime(message.getTime())
+                .setTime(message.getTime().toInstant(ZoneOffset.UTC).toEpochMilli())
                 .setReadStatus(message.getTime().isAfter(personToDialog.getLastCheck()) ? SENT : READ);
     }
 }
