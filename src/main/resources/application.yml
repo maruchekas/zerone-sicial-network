@@ -20,8 +20,8 @@ spring:
       dialect: org.hibernate.dialect.PostgreSQLDialect
 mailjet:
   mail:
-    key: ${MAIlJET_MAIL_FROM}
-    from: ${MAIlJET_MAIL_KEY}
+    from: ${MAIlJET_MAIL_FROM}
+    key: ${MAIlJET_MAIL_KEY}
     secret: ${MAIlJET_MAIL_SECRET}
     version: v3.1
     email_admin: briz.zukkel@gmail.com
