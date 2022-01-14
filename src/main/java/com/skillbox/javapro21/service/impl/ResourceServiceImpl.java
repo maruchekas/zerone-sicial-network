@@ -7,28 +7,24 @@ import com.skillbox.javapro21.api.response.Content;
 import com.skillbox.javapro21.api.response.DataResponse;
 import com.skillbox.javapro21.api.response.MessageOkContent;
 import com.skillbox.javapro21.api.response.account.AvatarUploadData;
-import com.skillbox.javapro21.config.AvatarConfig;
 import com.skillbox.javapro21.config.Constants;
-import com.skillbox.javapro21.config.MultipartImage;
 import com.skillbox.javapro21.domain.Person;
 import com.skillbox.javapro21.repository.PersonRepository;
 import com.skillbox.javapro21.service.ResourceService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.Map;
+import java.util.Random;
 
 @Slf4j
 @Component
@@ -37,16 +33,11 @@ public class ResourceServiceImpl implements ResourceService {
     private final PersonRepository personRepository;
     private final Cloudinary cloudinary;
 
-    public String saveDefaultAvatarToPerson(Person person) throws IOException {
+    public String createDefaultRoboticAvatar(String username){
+        int setNum = new Random().nextInt(4);
+        String randomString = RandomStringUtils.randomAlphabetic(5);
 
-        BufferedImage originalImage = AvatarConfig.createDefaultAvatar();
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ImageIO.write( originalImage, "jpg", baos );
-        baos.flush();
-
-        MultipartFile multipartFile = new MultipartImage(baos.toByteArray());
-
-        return saveUserAvatar(multipartFile, person).getRelativeFilePath();
+        return Constants.BASE_ROBOTIC_AVA_URL + username + randomString + Constants.AVATAR_CONFIG + setNum;
     }
 
     @Override

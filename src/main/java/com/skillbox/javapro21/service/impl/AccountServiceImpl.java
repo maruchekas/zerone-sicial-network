@@ -6,9 +6,7 @@ import com.skillbox.javapro21.api.response.DataResponse;
 import com.skillbox.javapro21.api.response.ListDataResponse;
 import com.skillbox.javapro21.api.response.MessageOkContent;
 import com.skillbox.javapro21.api.response.account.NotificationSettingData;
-import com.skillbox.javapro21.config.AvatarConfig;
 import com.skillbox.javapro21.config.MailjetSender;
-import com.skillbox.javapro21.config.MultipartImage;
 import com.skillbox.javapro21.config.properties.ConfirmationUrl;
 import com.skillbox.javapro21.config.security.JwtGenerator;
 import com.skillbox.javapro21.domain.NotificationType;
@@ -27,11 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
-import org.springframework.web.multipart.MultipartFile;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.Principal;
 import java.time.LocalDateTime;
@@ -209,7 +203,7 @@ public class AccountServiceImpl implements AccountService {
                 .setRegDate(LocalDateTime.now(ZoneOffset.UTC))
                 .setLastOnlineTime(LocalDateTime.now(ZoneOffset.UTC))
                 .setIsBlocked(0)
-                .setPhoto(AvatarConfig.createDefaultRoboticAvatar(registerRequest.getFirstName()))
+                .setPhoto(resourceService.createDefaultRoboticAvatar(registerRequest.getFirstName()))
                 .setMessagesPermission(MessagesPermission.NOBODY);
         personRepository.save(person);
         globalNotificationsSettings(person);
