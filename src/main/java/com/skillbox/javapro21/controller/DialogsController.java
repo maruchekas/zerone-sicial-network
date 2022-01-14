@@ -102,16 +102,16 @@ public class DialogsController {
         return new ResponseEntity<>(dialogsService.joinInLink(id, lincRequest, principal), HttpStatus.OK);
     }
 
-//    @GetMapping("/{id}/messages")
-//    @Operation(summary = "Получение списка сообщений в диалога")
-//    @PreAuthorize("hasAuthority('user:write')")
-//    @LastActivity
-//    public ResponseEntity<ListDataResponse<MessageData>> getMessages(@PathVariable int id,
-//                                                                     @RequestParam(name = "query", defaultValue = "") String query,
-//                                                                     @RequestParam(name = "offset", defaultValue = "0") int offset,
-//                                                                     @RequestParam(name = "item_per_page", defaultValue = "20") int itemPerPage,
-//                                                                     @RequestParam(name = "fromMessageId", defaultValue = "") int fromMessageId,
-//                                                                     Principal principal) {
-//        return new ResponseEntity<>(dialogsService.getMessages(id, query, offset, itemPerPage, fromMessageId, principal), HttpStatus.OK);
-//    }
+    @GetMapping("/{id}/messages")
+    @Operation(summary = "Получение списка сообщений в диалога")
+    @PreAuthorize("hasAuthority('user:write')")
+    @LastActivity
+    public ResponseEntity<ListDataResponse<MessageData>> getMessagesById(@PathVariable int id,
+                                                                     @RequestParam(name = "query", defaultValue = "") String query,
+                                                                     @RequestParam(name = "offset", defaultValue = "0") int offset,
+                                                                     @RequestParam(name = "item_per_page", defaultValue = "20") int itemPerPage,
+                                                                     @RequestParam(name = "fromMessageId", defaultValue = "-1") int fromMessageId,
+                                                                     Principal principal) {
+        return new ResponseEntity<>(dialogsService.getMessagesById(id, query, offset, itemPerPage, fromMessageId, principal), HttpStatus.OK);
+    }
 }

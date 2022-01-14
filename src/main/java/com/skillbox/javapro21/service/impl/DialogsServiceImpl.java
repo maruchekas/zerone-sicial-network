@@ -55,7 +55,7 @@ public class DialogsServiceImpl implements DialogsService {
         if (personList.size() == 1) {
             Optional<Person> personDst = personList.stream().findFirst();
             Dialog dialogByAuthorAndRecipient = dialogRepository.findPersonToDialogByPersonDialog(person.getId(), personDst.get().getId());
-            if  (dialogByAuthorAndRecipient != null) {
+            if (dialogByAuthorAndRecipient != null) {
                 return new DataResponse<DialogsData>()
                         .setError("")
                         .setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli())
@@ -117,9 +117,10 @@ public class DialogsServiceImpl implements DialogsService {
         for (PersonToDialog p2d : dialogs) {
             count += p2d.getDialog().getMessages().stream()
                     .filter(message -> {
-                        if(!message.getAuthor().getId().equals(person.getId())) {
+                        if (!message.getAuthor().getId().equals(person.getId())) {
                             return message.getReadStatus().equals(SENT);
-                        } return false;
+                        }
+                        return false;
                     }).count();
         }
         return new DataResponse<CountContent>()
@@ -196,6 +197,29 @@ public class DialogsServiceImpl implements DialogsService {
         return getDataResponseWithListPersonsId(list);
     }
 
+    public ListDataResponse<MessageData> getMessagesById(int id, String query, int offset, int itemPerPage, int fromMessageId, Principal principal) {
+        Person person = utilsService.findPersonByEmail(principal.getName());
+        Page<PersonToDialog> personToDialogs = null;
+        Pageable pageable = PageRequest.of(offset / itemPerPage, itemPerPage);
+        if (fromMessageId == -1) {
+            if (query.equals("")) {
+                personToDialogs = personToDialogRepository.findByDialogIdAndPersonId(id, person.getId(), pageable);
+            } else {
+                personToDialogs = personToDialogRepository.findByDialogIdAndPersonIdAndQuery(id, person.getId(), query, pageable);
+            }
+        } else {
+            if (query.equals("")) {
+                personToDialogs = personToDialogRepository.findByDialogIdAndPersonIdAndMessageId(id, person.getId(), fromMessageId,  pageable);
+            } else {
+                personToDialogs = personToDialogRepository.findByDialogIdAndPersonIdAndQueryAndMessageId(id, person.getId(), query, fromMessageId, pageable);
+            }
+        }
+        return getListDataResponseWithMessage(offset, itemPerPage, personToDialogs);
+    }
+
+    private ListDataResponse<MessageData> getListDataResponseWithMessage(int offset, int itemPerPage, Page<PersonToDialog> personToDialogs) {
+    }
+
     private DataResponse<DialogPersonIdContent> getDataResponseWithListPersonsId(List<Long> usersIds) {
         return new DataResponse<DialogPersonIdContent>()
                 .setError("")
@@ -235,8 +259,8 @@ public class DialogsServiceImpl implements DialogsService {
         if (p2d.getDialog().getMessages().size() > 0) {
             data
                     .setId(p2d.getDialog().getId())
-                .setUnreadCount(p2d.getDialog().getMessages().stream()
-                        .filter(message -> message.getReadStatus().equals(SENT)).count());
+                    .setUnreadCount(p2d.getDialog().getMessages().stream()
+                            .filter(message -> message.getReadStatus().equals(SENT)).count());
             data.setLastMessage(getMessageData(
                     p2d.getDialog().getMessages().stream().max(Comparator.comparing(Message::getId)).get(), p2d));
         } else {

@@ -4,10 +4,7 @@ import com.skillbox.javapro21.api.request.dialogs.DialogRequestForCreate;
 import com.skillbox.javapro21.api.request.dialogs.LincRequest;
 import com.skillbox.javapro21.api.response.DataResponse;
 import com.skillbox.javapro21.api.response.ListDataResponse;
-import com.skillbox.javapro21.api.response.dialogs.CountContent;
-import com.skillbox.javapro21.api.response.dialogs.DialogPersonIdContent;
-import com.skillbox.javapro21.api.response.dialogs.DialogsData;
-import com.skillbox.javapro21.api.response.dialogs.LinkContent;
+import com.skillbox.javapro21.api.response.dialogs.*;
 import com.skillbox.javapro21.exception.PersonNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -30,4 +27,6 @@ public interface DialogsService {
     DataResponse<LinkContent> inviteLink(int id, Principal principal);
 
     DataResponse<DialogPersonIdContent> joinInLink(int id, LincRequest lincRequest, Principal principal);
+
+    ListDataResponse<MessageData> getMessagesById(int id, String query, int offset, int itemPerPage, int fromMessageId, Principal principal);
 }
