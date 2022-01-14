@@ -2,6 +2,7 @@ package com.skillbox.javapro21.service.impl;
 
 import com.skillbox.javapro21.api.request.dialogs.DialogRequestForCreate;
 import com.skillbox.javapro21.api.request.dialogs.LincRequest;
+import com.skillbox.javapro21.api.request.dialogs.MessageTextRequest;
 import com.skillbox.javapro21.api.response.DataResponse;
 import com.skillbox.javapro21.api.response.ListDataResponse;
 import com.skillbox.javapro21.api.response.dialogs.*;
@@ -218,6 +219,32 @@ public class DialogsServiceImpl implements DialogsService {
             }
         }
         return getListDataResponseWithMessage(offset, itemPerPage, personToDialogs);
+    }
+
+    public DataResponse<MessageData> putMessagesById(int id, MessageTextRequest messageText, Principal principal) {
+        Person person = utilsService.findPersonByEmail(principal.getName());
+        Dialog dialog = dialogRepository.findById(id).orElseThrow();
+        List<Person> allPersonsByDialogId = personRepository.findAllByDialogId(id);
+        List<Person> personList = allPersonsByDialogId.stream().filter(p -> !p.getId().equals(person.getId())).toList();
+        Message message = new Message()
+                .setDialog(dialog)
+                .setMessageText(messageText.getMessageText())
+                .setAuthor(person)
+                .setTime(LocalDateTime.now(ZoneOffset.UTC))
+                .setReadStatus(SENT);
+        if (personList.size() > 1) {
+            for (Person p : personList)
+            message.setRecipient(p);
+            messageRepository.save(message);
+        } else {
+            message.setRecipient(personList.stream().findFirst().orElseThrow());
+            messageRepository.save(message);
+        }
+        PersonToDialog p2DByDialogAndMessage = personToDialogRepository.findP2DByDialogAndMessage(id, person.getId());
+        return new DataResponse<MessageData>()
+                .setError("")
+                .setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli())
+                .setData(getMessageData(message, p2DByDialogAndMessage));
     }
 
     private ListDataResponse<MessageData> getListDataResponseWithMessage(int offset, int itemPerPage, Page<Message> personToDialogs) {

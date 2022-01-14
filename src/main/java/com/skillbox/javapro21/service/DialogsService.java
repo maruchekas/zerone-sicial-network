@@ -2,6 +2,7 @@ package com.skillbox.javapro21.service;
 
 import com.skillbox.javapro21.api.request.dialogs.DialogRequestForCreate;
 import com.skillbox.javapro21.api.request.dialogs.LincRequest;
+import com.skillbox.javapro21.api.request.dialogs.MessageTextRequest;
 import com.skillbox.javapro21.api.response.DataResponse;
 import com.skillbox.javapro21.api.response.ListDataResponse;
 import com.skillbox.javapro21.api.response.dialogs.*;
@@ -29,4 +30,6 @@ public interface DialogsService {
     DataResponse<DialogPersonIdContent> joinInLink(int id, LincRequest lincRequest, Principal principal);
 
     ListDataResponse<MessageData> getMessagesById(int id, String query, int offset, int itemPerPage, int fromMessageId, Principal principal);
+
+    DataResponse<MessageData> putMessagesById(int id, MessageTextRequest messageText, Principal principal);
 }

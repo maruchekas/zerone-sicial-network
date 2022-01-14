@@ -29,4 +29,9 @@ public interface PersonRepository extends JpaRepository<Person, Integer> {
 
     @Query("select p from Person p where p.id in (:ids) and p.isBlocked = 0")
     List<Person> findAllById(List<Long> ids);
+
+    @Query("select p from Person p " +
+            "left join PersonToDialog p2d on p2d.person.id = p.id " +
+            "where p2d.dialog.id = :id and p.isBlocked = 0 and p2d.dialog.isBlocked = 0 ")
+    List<Person> findAllByDialogId(int id);
 }

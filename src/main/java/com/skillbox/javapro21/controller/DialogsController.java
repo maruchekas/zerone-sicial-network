@@ -3,6 +3,7 @@ package com.skillbox.javapro21.controller;
 import com.skillbox.javapro21.aop.LastActivity;
 import com.skillbox.javapro21.api.request.dialogs.DialogRequestForCreate;
 import com.skillbox.javapro21.api.request.dialogs.LincRequest;
+import com.skillbox.javapro21.api.request.dialogs.MessageTextRequest;
 import com.skillbox.javapro21.api.response.DataResponse;
 import com.skillbox.javapro21.api.response.ListDataResponse;
 import com.skillbox.javapro21.api.response.dialogs.*;
@@ -112,5 +113,15 @@ public class DialogsController {
                                                                      @RequestParam(name = "fromMessageId", defaultValue = "-1") int fromMessageId,
                                                                      Principal principal) {
         return new ResponseEntity<>(dialogsService.getMessagesById(id, query, offset, itemPerPage, fromMessageId, principal), HttpStatus.OK);
+    }
+
+    @PutMapping("/{id}/messages")
+    @Operation(summary = "Получение списка сообщений в диалога")
+    @PreAuthorize("hasAuthority('user:write')")
+    @LastActivity
+    public ResponseEntity<DataResponse<MessageData>> putMessagesById(@PathVariable int id,
+                                                                         @RequestBody MessageTextRequest messageText,
+                                                                         Principal principal) {
+        return new ResponseEntity<>(dialogsService.putMessagesById(id, messageText, principal), HttpStatus.OK);
     }
 }
