@@ -9,9 +9,9 @@ import com.skillbox.javapro21.domain.Dialog;
 import com.skillbox.javapro21.domain.Message;
 import com.skillbox.javapro21.domain.Person;
 import com.skillbox.javapro21.domain.PersonToDialog;
-import com.skillbox.javapro21.domain.enumeration.ReadStatus;
 import com.skillbox.javapro21.exception.PersonNotFoundException;
 import com.skillbox.javapro21.repository.DialogRepository;
+import com.skillbox.javapro21.repository.MessageRepository;
 import com.skillbox.javapro21.repository.PersonRepository;
 import com.skillbox.javapro21.repository.PersonToDialogRepository;
 import com.skillbox.javapro21.service.DialogsService;
@@ -19,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.security.Principal;
@@ -26,6 +27,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
 
+import static com.skillbox.javapro21.domain.enumeration.ReadStatus.READ;
 import static com.skillbox.javapro21.domain.enumeration.ReadStatus.SENT;
 
 @Component
@@ -35,6 +37,7 @@ public class DialogsServiceImpl implements DialogsService {
     private final PersonRepository personRepository;
     private final DialogRepository dialogRepository;
     private final UtilsService utilsService;
+    private final MessageRepository messageRepository;
 
     public ListDataResponse<DialogsData> getDialogs(String query, int offset, int itemPerPage, Principal principal) {
         Person person = utilsService.findPersonByEmail(principal.getName());
@@ -199,25 +202,43 @@ public class DialogsServiceImpl implements DialogsService {
 
     public ListDataResponse<MessageData> getMessagesById(int id, String query, int offset, int itemPerPage, int fromMessageId, Principal principal) {
         Person person = utilsService.findPersonByEmail(principal.getName());
-        Page<PersonToDialog> personToDialogs = null;
+        Page<Message> personToDialogs;
         Pageable pageable = PageRequest.of(offset / itemPerPage, itemPerPage);
         if (fromMessageId == -1) {
             if (query.equals("")) {
-                personToDialogs = personToDialogRepository.findByDialogIdAndPersonId(id, person.getId(), pageable);
+                personToDialogs = messageRepository.findByDialogIdAndPersonId(id, person.getId(), pageable);
             } else {
-                personToDialogs = personToDialogRepository.findByDialogIdAndPersonIdAndQuery(id, person.getId(), query, pageable);
+                personToDialogs = messageRepository.findByDialogIdAndPersonIdAndQuery(id, person.getId(), query, pageable);
             }
         } else {
             if (query.equals("")) {
-                personToDialogs = personToDialogRepository.findByDialogIdAndPersonIdAndMessageId(id, person.getId(), fromMessageId,  pageable);
+                personToDialogs = messageRepository.findByDialogIdAndPersonIdAndMessageId(id, person.getId(), fromMessageId,  pageable);
             } else {
-                personToDialogs = personToDialogRepository.findByDialogIdAndPersonIdAndQueryAndMessageId(id, person.getId(), query, fromMessageId, pageable);
+                personToDialogs = messageRepository.findByDialogIdAndPersonIdAndQueryAndMessageId(id, person.getId(), query, fromMessageId, pageable);
             }
         }
         return getListDataResponseWithMessage(offset, itemPerPage, personToDialogs);
     }
 
-    private ListDataResponse<MessageData> getListDataResponseWithMessage(int offset, int itemPerPage, Page<PersonToDialog> personToDialogs) {
+    private ListDataResponse<MessageData> getListDataResponseWithMessage(int offset, int itemPerPage, Page<Message> personToDialogs) {
+        return new ListDataResponse<MessageData>()
+                .setError("")
+                .setOffset(offset)
+                .setPerPage(itemPerPage)
+                .setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli())
+                .setTotal((int) personToDialogs.getTotalElements())
+                .setData(getMessageForResponse(personToDialogs.toList()));
+    }
+
+    private List<MessageData> getMessageForResponse(List<Message> messages) {
+        List<MessageData> messageDataList = new ArrayList<>();
+        Person person = utilsService.findPersonByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
+        messages.forEach(m -> {
+            PersonToDialog p2DByDialogAndMessage = personToDialogRepository.findP2DByDialogAndMessage(m.getDialog().getId(), person.getId());
+            MessageData data = getMessageData(m, p2DByDialogAndMessage);
+            messageDataList.add(data);
+        });
+        return messageDataList;
     }
 
     private DataResponse<DialogPersonIdContent> getDataResponseWithListPersonsId(List<Long> usersIds) {
@@ -276,6 +297,6 @@ public class DialogsServiceImpl implements DialogsService {
                 .setRecipientId(message.getRecipient().getId())
                 .setId(message.getId())
                 .setTime(message.getTime())
-                .setReadStatus(message.getTime().isAfter(personToDialog.getLastCheck()) ? SENT : ReadStatus.READ);
+                .setReadStatus(message.getTime().isAfter(personToDialog.getLastCheck()) ? SENT : READ);
     }
 }

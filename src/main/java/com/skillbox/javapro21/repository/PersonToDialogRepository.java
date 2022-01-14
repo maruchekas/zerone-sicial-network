@@ -41,25 +41,7 @@ public interface PersonToDialogRepository extends JpaRepository<PersonToDialog, 
     PersonToDialog findDialogByPersonIdAndDialogId(Long personId, int dialogId);
 
     @Query("select p2d from PersonToDialog p2d " +
-            "where p2d.dialog.id = :id " +
-            "and p2d.person.id = :pId " +
-            "and p2d.dialog.isBlocked = 0 " +
-            "and p2d.person.isBlocked = 0")
-    Page<PersonToDialog> findByDialogIdAndPersonId(int id, Long pId, Pageable pageable);
-
-    @Query("select p2d from PersonToDialog p2d " +
-            "left join Message m on p2d.dialog.id = m.dialog.id " +
-            "where p2d.dialog.id = :id " +
-            "and p2d.person.id = :pId " +
-            "and m.messageText like %:query% " +
-            "and p2d.dialog.isBlocked = 0 " +
-            "and p2d.person.isBlocked = 0")
-    Page<PersonToDialog> findByDialogIdAndPersonIdAndQuery(int id, Long id1, String query, Pageable pageable);
-
-    @Query("select p2d from PersonToDialog p2d " +
-            "where p2d.dialog.id = :id " +
-            "and p2d.person.id = :pId " +
-            "and p2d.dialog.isBlocked = 0 " +
-            "and p2d.person.isBlocked = 0 ")
-    Page<PersonToDialog> findByDialogIdAndPersonIdAndMessageId(int id, Long id1, int fromMessageId, Pageable pageable);
+            "left join Dialog d on p2d.dialog.id = d.id " +
+            "where d.id = :dialogId and p2d.person.id = :id")
+    PersonToDialog findP2DByDialogAndMessage(int dialogId, Long id);
 }
