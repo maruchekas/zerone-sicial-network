@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: ${PORT:8080}
   base_url: ${BASE_URL}
 spring:
   messages:
@@ -20,15 +20,15 @@ spring:
       dialect: org.hibernate.dialect.PostgreSQLDialect
 mailjet:
   mail:
-    from: ${MAIlJET_MAIL_FROM}
-    key: ${MAIlJET_MAIL_KEY}
+    key: ${MAIlJET_MAIL_FROM}
+    from: ${MAIlJET_MAIL_KEY}
     secret: ${MAIlJET_MAIL_SECRET}
     version: v3.1
-    email_admin: ${MAIlJET_MAIL_SECRET}
+    email_admin: briz.zukkel@gmail.com
   flyway:
     enabled: true
 jwt:
-  secret: secret
+  secret: ${JWT_SECRET}
 captcha:
   width: 193
   height: 57
