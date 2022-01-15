@@ -326,7 +326,8 @@ public class DialogsServiceImpl implements DialogsService {
         } else {
             lastActivityContent
                     .setOnline(false)
-                    .setLastActivity(recipient.getLastOnlineTime().toInstant(ZoneOffset.UTC).toEpochMilli());;
+                    .setLastActivity(recipient.getLastOnlineTime().toInstant(ZoneOffset.UTC).toEpochMilli());
+            ;
         }
         return new DataResponse<LastActivityContent>()
                 .setError("")

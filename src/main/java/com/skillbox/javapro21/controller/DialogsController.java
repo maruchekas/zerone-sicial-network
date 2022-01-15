@@ -174,8 +174,8 @@ public class DialogsController {
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
     public ResponseEntity<DataResponse<LastActivityContent>> activityPersonInDialog(@PathVariable int id,
-                                                                                 @PathVariable(name = "user_id") Long userId,
-                                                                                 Principal principal) {
+                                                                                    @PathVariable(name = "user_id") Long userId,
+                                                                                    Principal principal) {
         return new ResponseEntity<>(dialogsService.activityPersonInDialog(id, userId, principal), HttpStatus.OK);
     }
 
@@ -184,8 +184,8 @@ public class DialogsController {
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
     public ResponseEntity<DataResponse<MessageOkContent>> postActivityPersonInDialog(@PathVariable int id,
-                                                                                    @PathVariable(name = "user_id") Long userId,
-                                                                                    Principal principal) throws PersonNotFoundException {
+                                                                                     @PathVariable(name = "user_id") Long userId,
+                                                                                     Principal principal) throws PersonNotFoundException {
         return new ResponseEntity<>(dialogsService.postActivityPersonInDialog(id, userId, principal), HttpStatus.OK);
     }
 }
