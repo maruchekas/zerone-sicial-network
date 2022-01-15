@@ -3,6 +3,7 @@ package com.skillbox.javapro21.controller;
 import com.skillbox.javapro21.aop.LastActivity;
 import com.skillbox.javapro21.api.request.post.PostRequest;
 import com.skillbox.javapro21.api.request.profile.EditProfileRequest;
+import com.skillbox.javapro21.api.response.Content;
 import com.skillbox.javapro21.api.response.DataResponse;
 import com.skillbox.javapro21.api.response.ListDataResponse;
 import com.skillbox.javapro21.api.response.MessageOkContent;
@@ -110,14 +111,15 @@ public class ProfileController {
     @LastActivity
     @PreAuthorize("hasAuthority('user:write')")
     @GetMapping("/search")
-    public ResponseEntity<ListDataResponse<AuthData>> searchByPerson(@RequestParam(name = "first_name", defaultValue = "") String firstName,
-                                                                     @RequestParam(name = "last_name", defaultValue = "") String lastName,
-                                                                     @RequestParam(name = "age_from", defaultValue = "0") Integer ageFrom,
-                                                                     @RequestParam(name = "age_to", defaultValue = "150") Integer ageTo,
-                                                                     @RequestParam(name = "country", defaultValue = "") String country,
-                                                                     @RequestParam(name = "city", defaultValue = "") String city,
-                                                                     @RequestParam(name = "offset", defaultValue = "0") Integer offset,
-                                                                     @RequestParam(name = "itemPerPage", defaultValue = "20") Integer itemPerPage) {
-        return new ResponseEntity<>(profileService.searchByPerson(firstName, lastName, ageFrom, ageTo, country, city, offset, itemPerPage), HttpStatus.OK);
+    public ResponseEntity<ListDataResponse<Content>> searchByPerson(@RequestParam(name = "first_name", defaultValue = "") String firstName,
+                                                                    @RequestParam(name = "last_name", defaultValue = "") String lastName,
+                                                                    @RequestParam(name = "age_from", defaultValue = "0") Integer ageFrom,
+                                                                    @RequestParam(name = "age_to", defaultValue = "150") Integer ageTo,
+                                                                    @RequestParam(name = "country", defaultValue = "") String country,
+                                                                    @RequestParam(name = "city", defaultValue = "") String city,
+                                                                    @RequestParam(name = "offset", defaultValue = "0") Integer offset,
+                                                                    @RequestParam(name = "limit", defaultValue = "20") Integer limit,
+                                                                    Principal principal) {
+        return new ResponseEntity<>(profileService.searchByPerson(firstName, lastName, ageFrom, ageTo, country, city, offset, limit, principal), HttpStatus.OK);
     }
 }

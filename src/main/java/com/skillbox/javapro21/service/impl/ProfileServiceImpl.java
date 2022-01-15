@@ -2,6 +2,7 @@ package com.skillbox.javapro21.service.impl;
 
 import com.skillbox.javapro21.api.request.post.PostRequest;
 import com.skillbox.javapro21.api.request.profile.EditProfileRequest;
+import com.skillbox.javapro21.api.response.Content;
 import com.skillbox.javapro21.api.response.DataResponse;
 import com.skillbox.javapro21.api.response.ListDataResponse;
 import com.skillbox.javapro21.api.response.MessageOkContent;
@@ -152,21 +153,14 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     @Override
-    public ListDataResponse<AuthData> searchByPerson(String firstName, String lastName, Integer ageFrom, Integer ageTo, String country, String city, Integer offset, Integer itemPerPage) {
-        Pageable nextPage = PageRequest.of(offset, itemPerPage);
-        Page<Person> personPage = personRepository.findAllByNameAndAgeAndLocation(firstName, lastName, ageFrom, ageTo, country, city, nextPage);
-        List<AuthData> data = personPage.getContent().stream()
+    public ListDataResponse<Content> searchByPerson(String firstName, String lastName, Integer ageFrom, Integer ageTo, String country, String city, Integer offset, Integer limit, Principal principal) {
+        Person currentUser = utilsService.findPersonByEmail(principal.getName());
+        Pageable nextPage = PageRequest.of(offset, limit);
+        Page<Person> personPage = personRepository.findAllByNameAndAgeAndLocation(currentUser.getId(), firstName, lastName, ageFrom, ageTo, country, city, nextPage);
+        List<Content> data = personPage.getContent().stream()
                 .map(p -> utilsService.getAuthData(p, null))
                 .collect(Collectors.toList());
-
-        ListDataResponse<AuthData> response = new ListDataResponse<>();
-        response.setError("ok");
-        response.setTimestamp(new Date().getTime());
-        response.setTotal((int) personPage.getTotalElements());
-        response.setOffset(offset);
-        response.setPerPage(itemPerPage);
-        response.setData(data);
-        return response;
+        return utilsService.getListDataResponse((int) personPage.getTotalElements(), offset, limit, data);
     }
 
     private DataResponse<AuthData> getPersonDataResponse(Person person) {
