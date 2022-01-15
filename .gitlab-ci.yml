@@ -21,6 +21,7 @@ build:
   stage: build
   script:
     - 'mvn $MAVEN_CLI_OPTS package'
+  image: maven:latest
   only:
     - develop
     - main
