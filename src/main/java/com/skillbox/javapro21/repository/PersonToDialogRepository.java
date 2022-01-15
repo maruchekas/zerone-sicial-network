@@ -12,8 +12,8 @@ import java.util.List;
 @Repository
 public interface PersonToDialogRepository extends JpaRepository<PersonToDialog, Integer> {
     @Query("select p2d from PersonToDialog p2d " +
-            "left join Dialog d on p2d.dialog.id = d.id " +
-            "left join Person p on p2d.person.id = p.id " +
+            "left join Dialog d on p2d.dialogId = d.id " +
+            "left join Person p on p2d.personId = p.id " +
             "left join Message m on m.dialog.id = d.id " +
             "where p.id = :id and d.title like %:query% " +
             "group by p2d.id " +
@@ -21,8 +21,8 @@ public interface PersonToDialogRepository extends JpaRepository<PersonToDialog, 
     Page<PersonToDialog> findDialogsByPersonIdAndQuery(Long id, String query, Pageable pageable);
 
     @Query("select p2d from PersonToDialog p2d " +
-            "left join Dialog d on p2d.dialog.id = d.id " +
-            "left join Person p on p2d.person.id = p.id " +
+            "left join Dialog d on p2d.dialogId = d.id " +
+            "left join Person p on p2d.personId = p.id " +
             "left join Message m on m.dialog.id = d.id " +
             "where p.id = :id " +
             "group by p2d.id " +
@@ -30,18 +30,20 @@ public interface PersonToDialogRepository extends JpaRepository<PersonToDialog, 
     Page<PersonToDialog> findDialogsByPerson(Long id, Pageable pageable);
 
     @Query("select p2d from PersonToDialog p2d " +
-            "where p2d.person.id = :id and p2d.dialog.isBlocked = 0 and p2d.person.isBlocked = 0 ")
+            "left join Person p on p2d.personId = p.id " +
+            "left join Dialog d on p2d.dialogId = d.id " +
+            "where p2d.personId = :id " +
+            "and d.isBlocked = 0 and p.isBlocked = 0 ")
     List<PersonToDialog> findDialogsByPersonId(Long id);
 
     @Query("select p2d from PersonToDialog p2d " +
-            "left join Person p on p2d.person.id = p.id " +
-            "left join Dialog d on p2d.dialog.id = d.id " +
+            "left join Person p on p2d.personId = p.id " +
+            "left join Dialog d on p2d.dialogId = d.id " +
             "where p.id = :personId " +
             "and d.id = :dialogId ")
     PersonToDialog findDialogByPersonIdAndDialogId(Long personId, int dialogId);
 
     @Query("select p2d from PersonToDialog p2d " +
-            "left join Dialog d on p2d.dialog.id = d.id " +
-            "where d.id = :dialogId and p2d.person.id = :id")
+            "where p2d.dialogId = :dialogId and p2d.personId = :id")
     PersonToDialog findP2DByDialogAndMessage(int dialogId, Long id);
 }

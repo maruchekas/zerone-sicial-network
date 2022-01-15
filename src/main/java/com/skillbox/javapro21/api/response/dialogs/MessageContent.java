@@ -11,13 +11,13 @@ import lombok.experimental.Accessors;
 @Data
 @Accessors(chain = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class MessageData implements Content {
+public class MessageContent implements Content {
     private Long id;
     private long time;
     @JsonProperty(value = "author")
     private AuthData author;
     @JsonProperty(value = "recipient_id")
-    private Long recipientId;
+    private AuthData recipientId;
     @JsonProperty(value = "message_text")
     private String messageText;
     @JsonProperty(value = "read_status")

@@ -11,8 +11,8 @@ import java.util.Optional;
 public interface DialogRepository extends JpaRepository<Dialog, Integer> {
     @Query("SELECT d " +
             "FROM Dialog d " +
-            "left join PersonToDialog p2d on p2d.dialog.id = d.id " +
-            "WHERE p2d.person.id = :id and d.persons = :idDsc " +
+            "left join PersonToDialog p2d on p2d.dialogId = d.id " +
+            "WHERE p2d.personId = :id and d.persons = :idDsc " +
             "AND d.isBlocked = 0 ")
     Dialog findPersonToDialogByPersonDialog(Long id, Long idDsc);
 

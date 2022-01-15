@@ -157,7 +157,10 @@ public class ProfileServiceImpl implements ProfileService {
 
     private Person savePersonByRequest(Person person, EditProfileRequest editProfileRequest) {
         Person personById = personRepository.findPersonById(person.getId()).orElseThrow();
-        String[] split = editProfileRequest.getBirthDate().split("\\+");
+        String[] split = null;
+        if (editProfileRequest.getBirthDate() != null) {
+            split = editProfileRequest.getBirthDate().split("\\+");
+        }
         personById
                 .setFirstName(editProfileRequest.getFirstName() != null
                         ? editProfileRequest.getFirstName() : person.getFirstName())

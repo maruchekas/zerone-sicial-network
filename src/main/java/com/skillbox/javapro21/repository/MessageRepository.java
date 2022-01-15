@@ -19,16 +19,16 @@ public interface MessageRepository extends JpaRepository<Message, Integer> {
 
     @Query("select m from Message m " +
             "left join Dialog d on d.id = m.dialog.id " +
-            "left join PersonToDialog p2d on p2d.dialog.id = d.id " +
-            "where m.dialog.id = :id and p2d.person.id = :personId " +
+            "left join PersonToDialog p2d on p2d.dialogId = d.id " +
+            "where m.dialog.id = :id and p2d.personId = :personId " +
             "and m.isBlocked = 0 " +
             "order by m.time asc")
     Page<Message> findByDialogIdAndPersonId(int id, Long personId, Pageable pageable);
 
     @Query("select m from Message m " +
             "left join Dialog d on d.id = m.dialog.id " +
-            "left join PersonToDialog p2d on p2d.dialog.id = d.id " +
-            "where m.dialog.id = :id and p2d.person.id = :personId " +
+            "left join PersonToDialog p2d on p2d.dialogId = d.id " +
+            "where m.dialog.id = :id and p2d.personId = :personId " +
             "and m.isBlocked = 0 " +
             "and m.messageText like %:query% " +
             "order by m.time asc")
@@ -36,8 +36,8 @@ public interface MessageRepository extends JpaRepository<Message, Integer> {
 
     @Query("select m from Message m " +
             "left join Dialog d on d.id = m.dialog.id " +
-            "left join PersonToDialog p2d on p2d.dialog.id = d.id " +
-            "where m.dialog.id = :id and p2d.person.id = :personId " +
+            "left join PersonToDialog p2d on p2d.dialogId = d.id " +
+            "where m.dialog.id = :id and p2d.personId = :personId " +
             "and m.isBlocked = 0 " +
             "group by m.id having m.id > :fromMessageId " +
             "order by m.time asc")
@@ -45,8 +45,8 @@ public interface MessageRepository extends JpaRepository<Message, Integer> {
 
     @Query("select m from Message m " +
             "left join Dialog d on d.id = m.dialog.id " +
-            "left join PersonToDialog p2d on p2d.dialog.id = d.id " +
-            "where m.dialog.id = :id and p2d.person.id = :personId " +
+            "left join PersonToDialog p2d on p2d.dialogId = d.id " +
+            "where m.dialog.id = :id and p2d.personId = :personId " +
             "and m.messageText like %:query% " +
             "and m.isBlocked = 0 " +
             "group by m.id having m.id >= :fromMessageId " +

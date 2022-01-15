@@ -17,11 +17,11 @@ public class PersonToDialog {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @OneToOne
-    private Person person;
+    @Column(name = "person_id")
+    private Long personId;
 
-    @OneToOne
-    private Dialog dialog;
+    @Column(name = "dialog_id")
+    private Integer dialogId;
 
     @Column(name = "last_check")
     private LocalDateTime lastCheck;

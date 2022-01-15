@@ -35,10 +35,10 @@ public class DialogsController {
     @Operation(summary = "Получение диалогов", security = @SecurityRequirement(name = "jwt"))
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
-    public ResponseEntity<ListDataResponse<DialogsData>> getDialogs(@RequestParam(name = "offset", defaultValue = "0") int offset,
-                                                                    @RequestParam(name = "item_per_page", defaultValue = "20") int itemPerPage,
-                                                                    @RequestParam(name = "query", defaultValue = "") String query,
-                                                                    Principal principal) {
+    public ResponseEntity<ListDataResponse<DialogContent>> getDialogs(@RequestParam(name = "offset", defaultValue = "0") int offset,
+                                                                      @RequestParam(name = "item_per_page", defaultValue = "20") int itemPerPage,
+                                                                      @RequestParam(name = "query", defaultValue = "") String query,
+                                                                      Principal principal) {
         return new ResponseEntity<>(dialogsService.getDialogs(query, offset, itemPerPage, principal), HttpStatus.OK);
     }
 
@@ -46,8 +46,8 @@ public class DialogsController {
     @Operation(summary = "Добавление диалога", security = @SecurityRequirement(name = "jwt"))
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
-    public ResponseEntity<DataResponse<DialogsData>> createDialog(@RequestBody DialogRequestForCreate dialogRequestForCreate,
-                                                                  Principal principal) throws PersonNotFoundException {
+    public ResponseEntity<DataResponse<DialogContent>> createDialog(@RequestBody DialogRequestForCreate dialogRequestForCreate,
+                                                                    Principal principal) throws PersonNotFoundException {
         return new ResponseEntity<>(dialogsService.createDialog(dialogRequestForCreate, principal), HttpStatus.OK);
     }
 
@@ -63,7 +63,7 @@ public class DialogsController {
     @Operation(summary = "Удаление диалога", security = @SecurityRequirement(name = "jwt"))
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
-    public ResponseEntity<DataResponse<DialogsData>> deleteDialog(@PathVariable int id) {
+    public ResponseEntity<DataResponse<DialogContent>> deleteDialog(@PathVariable int id) {
         return new ResponseEntity<>(dialogsService.deleteDialog(id), HttpStatus.OK);
     }
 
@@ -109,12 +109,12 @@ public class DialogsController {
     @GetMapping("/{id}/messages")
     @Operation(summary = "Получение списка сообщений в диалога", security = @SecurityRequirement(name = "jwt"))
     @PreAuthorize("hasAuthority('user:write')")
-    public ResponseEntity<ListDataResponse<MessageData>> getMessagesById(@PathVariable int id,
-                                                                         @RequestParam(name = "query", defaultValue = "") String query,
-                                                                         @RequestParam(name = "offset", defaultValue = "0") int offset,
-                                                                         @RequestParam(name = "item_per_page", defaultValue = "20") int itemPerPage,
-                                                                         @RequestParam(name = "fromMessageId", defaultValue = "-1") int fromMessageId,
-                                                                         Principal principal) {
+    public ResponseEntity<ListDataResponse<MessageContent>> getMessagesById(@PathVariable int id,
+                                                                            @RequestParam(name = "query", defaultValue = "") String query,
+                                                                            @RequestParam(name = "offset", defaultValue = "0") int offset,
+                                                                            @RequestParam(name = "item_per_page", defaultValue = "20") int itemPerPage,
+                                                                            @RequestParam(name = "fromMessageId", defaultValue = "-1") int fromMessageId,
+                                                                            Principal principal) {
         return new ResponseEntity<>(dialogsService.getMessagesById(id, query, offset, itemPerPage, fromMessageId, principal), HttpStatus.OK);
     }
 
@@ -122,9 +122,9 @@ public class DialogsController {
     @Operation(summary = "Отправка сообщений", security = @SecurityRequirement(name = "jwt"))
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
-    public ResponseEntity<DataResponse<MessageData>> postMessagesById(@PathVariable int id,
-                                                                      @RequestBody MessageTextRequest messageText,
-                                                                      Principal principal) {
+    public ResponseEntity<DataResponse<MessageContent>> postMessagesById(@PathVariable int id,
+                                                                         @RequestBody MessageTextRequest messageText,
+                                                                         Principal principal) {
         return new ResponseEntity<>(dialogsService.postMessagesById(id, messageText, principal), HttpStatus.OK);
     }
 
@@ -142,10 +142,10 @@ public class DialogsController {
     @Operation(summary = "Редактирование сообщения", security = @SecurityRequirement(name = "jwt"))
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
-    public ResponseEntity<DataResponse<MessageData>> putMessageById(@PathVariable(name = "dialog_id") int dialogId,
-                                                                    @PathVariable(name = "message_id") Long messageId,
-                                                                    @RequestBody MessageTextRequest messageText,
-                                                                    Principal principal) {
+    public ResponseEntity<DataResponse<MessageContent>> putMessageById(@PathVariable(name = "dialog_id") int dialogId,
+                                                                       @PathVariable(name = "message_id") Long messageId,
+                                                                       @RequestBody MessageTextRequest messageText,
+                                                                       Principal principal) {
         return new ResponseEntity<>(dialogsService.putMessageById(dialogId, messageId, messageText, principal), HttpStatus.OK);
     }
 
@@ -153,9 +153,9 @@ public class DialogsController {
     @Operation(summary = "Восстановление сообщения", security = @SecurityRequirement(name = "jwt"))
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
-    public ResponseEntity<DataResponse<MessageData>> putRecoverMessageById(@PathVariable(name = "dialog_id") int dialogId,
-                                                                           @PathVariable(name = "message_id") Long messageId,
-                                                                           Principal principal) throws MessageNotFoundException {
+    public ResponseEntity<DataResponse<MessageContent>> putRecoverMessageById(@PathVariable(name = "dialog_id") int dialogId,
+                                                                              @PathVariable(name = "message_id") Long messageId,
+                                                                              Principal principal) throws MessageNotFoundException {
         return new ResponseEntity<>(dialogsService.putRecoverMessageById(dialogId, messageId, principal), HttpStatus.OK);
     }
 

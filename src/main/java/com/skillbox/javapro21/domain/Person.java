@@ -89,10 +89,11 @@ public class Person implements UserDetails {
     @Column(name = "user_type")
     private UserType userType;
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToMany
     @JoinTable(name = "person2dialog",
             joinColumns = {@JoinColumn(name = "person_id")},
             inverseJoinColumns = {@JoinColumn(name = "dialog_id")})
+    @ToString.Exclude
     private Set<Dialog> dialogs;
 
 //    @OneToMany(mappedBy = "person", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

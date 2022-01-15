@@ -15,13 +15,13 @@ import java.security.Principal;
 
 @Service
 public interface DialogsService {
-    ListDataResponse<DialogsData> getDialogs(String query, int offset, int itemPerPage, Principal principal);
+    ListDataResponse<DialogContent> getDialogs(String query, int offset, int itemPerPage, Principal principal);
 
-    DataResponse<DialogsData> createDialog(DialogRequestForCreate userId, Principal principal) throws PersonNotFoundException;
+    DataResponse<DialogContent> createDialog(DialogRequestForCreate userId, Principal principal) throws PersonNotFoundException;
 
     DataResponse<CountContent> getUnreadedDialogs(Principal principal);
 
-    DataResponse<DialogsData> deleteDialog(int id);
+    DataResponse<DialogContent> deleteDialog(int id);
 
     DataResponse<DialogPersonIdContent> putPersonsInDialog(int id, DialogRequestForCreate listPersons, Principal principal);
 
@@ -31,15 +31,15 @@ public interface DialogsService {
 
     DataResponse<DialogPersonIdContent> joinInLink(int id, LincRequest lincRequest, Principal principal);
 
-    ListDataResponse<MessageData> getMessagesById(int id, String query, int offset, int itemPerPage, int fromMessageId, Principal principal);
+    ListDataResponse<MessageContent> getMessagesById(int id, String query, int offset, int itemPerPage, int fromMessageId, Principal principal);
 
-    DataResponse<MessageData> postMessagesById(int id, MessageTextRequest messageText, Principal principal);
+    DataResponse<MessageContent> postMessagesById(int id, MessageTextRequest messageText, Principal principal);
 
     DataResponse<MessageIdContent> deleteMessageById(int dialogId, Long messageId, Principal principal);
 
-    DataResponse<MessageData> putMessageById(int dialogId, Long messageId, MessageTextRequest messageText, Principal principal);
+    DataResponse<MessageContent> putMessageById(int dialogId, Long messageId, MessageTextRequest messageText, Principal principal);
 
-    DataResponse<MessageData> putRecoverMessageById(int dialogId, Long messageId, Principal principal) throws MessageNotFoundException;
+    DataResponse<MessageContent> putRecoverMessageById(int dialogId, Long messageId, Principal principal) throws MessageNotFoundException;
 
     DataResponse<MessageOkContent> readeMessage(int dialogId, Long messageId, Principal principal);
 

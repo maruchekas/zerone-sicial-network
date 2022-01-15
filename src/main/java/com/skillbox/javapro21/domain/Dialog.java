@@ -2,6 +2,7 @@ package com.skillbox.javapro21.domain;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import lombok.experimental.Accessors;
 
 import javax.persistence.*;
@@ -29,9 +30,10 @@ public class Dialog {
     @Column(name = "code")
     private String code;
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToMany
     @JoinTable(name = "person2dialog",
             joinColumns = {@JoinColumn(name = "dialog_id")},
             inverseJoinColumns = {@JoinColumn(name = "person_id")})
+    @ToString.Exclude
     private Set<Person> persons;
 }

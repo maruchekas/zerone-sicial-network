@@ -44,8 +44,8 @@ public class AccountControllerTest extends AbstractTest {
     @BeforeEach
     public void setup() {
         super.setup();
-        String email = "ivan_zukkel@mail.ru";
-        String verifyEmail = "ivan_zykkel@mail.ru";
+        String email = "test1@test.ru";
+        String verifyEmail = "test@test.ru";
         String password = "1234";
         String firstName = "Arcadiy";
         String lastName = "Parovozov";
@@ -63,7 +63,6 @@ public class AccountControllerTest extends AbstractTest {
                 .setPassword(passwordEncoder.encode(password))
                 .setFirstName(firstName)
                 .setLastName(lastName)
-                .setConfirmationCode("123")
                 .setRegDate(reg_date)
                 .setConfirmationCode(conf_code)
                 .setMessagesPermission(MessagesPermission.ALL)
