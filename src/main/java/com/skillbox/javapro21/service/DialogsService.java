@@ -5,7 +5,9 @@ import com.skillbox.javapro21.api.request.dialogs.LincRequest;
 import com.skillbox.javapro21.api.request.dialogs.MessageTextRequest;
 import com.skillbox.javapro21.api.response.DataResponse;
 import com.skillbox.javapro21.api.response.ListDataResponse;
+import com.skillbox.javapro21.api.response.MessageOkContent;
 import com.skillbox.javapro21.api.response.dialogs.*;
+import com.skillbox.javapro21.exception.MessageNotFoundException;
 import com.skillbox.javapro21.exception.PersonNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -31,5 +33,17 @@ public interface DialogsService {
 
     ListDataResponse<MessageData> getMessagesById(int id, String query, int offset, int itemPerPage, int fromMessageId, Principal principal);
 
-    DataResponse<MessageData> putMessagesById(int id, MessageTextRequest messageText, Principal principal);
+    DataResponse<MessageData> postMessagesById(int id, MessageTextRequest messageText, Principal principal);
+
+    DataResponse<MessageIdContent> deleteMessageById(int dialogId, Long messageId, Principal principal);
+
+    DataResponse<MessageData> putMessageById(int dialogId, Long messageId, MessageTextRequest messageText, Principal principal);
+
+    DataResponse<MessageData> putRecoverMessageById(int dialogId, Long messageId, Principal principal) throws MessageNotFoundException;
+
+    DataResponse<MessageOkContent> readeMessage(int dialogId, Long messageId, Principal principal);
+
+    DataResponse<LastActivityContent> activityPersonInDialog(int id, Long userId, Principal principal);
+
+    DataResponse<MessageOkContent> postActivityPersonInDialog(int id, Long userId, Principal principal) throws PersonNotFoundException;
 }

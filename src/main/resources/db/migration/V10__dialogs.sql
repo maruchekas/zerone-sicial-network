@@ -44,12 +44,14 @@ INSERT INTO person2dialog (id, person_id, dialog_id, last_check)
 VALUES (777, 777, 777, '2021-12-16 16:57:08'),
        (778, 666, 777, '2021-12-16 16:57:08');
 
-INSERT INTO messages (id, dialog_id, time, author_id, recipient_id, message_text, read_status)
+ALTER TABLE messages ADD COLUMN is_blocked INTEGER;
+
+INSERT INTO messages (id, dialog_id, time, author_id, recipient_id, message_text, read_status, is_blocked)
 VALUES (777, 777, '2021-12-18 00:59:21', 777, 666,
         'are you buba',
-        'SENT'),
+        'SENT', 0),
        (778, 777, '2021-12-18 09:54:15', 666, 777,
         'no, i am biba',
-        'SENT');
+        'SENT', 0);
 
 ALTER TABLE dialogs ADD COLUMN code VARCHAR(255);
