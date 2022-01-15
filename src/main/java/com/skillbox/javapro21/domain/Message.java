@@ -42,6 +42,9 @@ public class Message {
     @Column(name = "read_status")
     private ReadStatus readStatus;
 
+    @Column(name = "is_blocked")
+    private Integer isBlocked;
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JsonIgnoreProperties(
             value = {

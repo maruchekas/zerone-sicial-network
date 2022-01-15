@@ -6,7 +6,9 @@ import com.skillbox.javapro21.api.request.dialogs.LincRequest;
 import com.skillbox.javapro21.api.request.dialogs.MessageTextRequest;
 import com.skillbox.javapro21.api.response.DataResponse;
 import com.skillbox.javapro21.api.response.ListDataResponse;
+import com.skillbox.javapro21.api.response.MessageOkContent;
 import com.skillbox.javapro21.api.response.dialogs.*;
+import com.skillbox.javapro21.exception.MessageNotFoundException;
 import com.skillbox.javapro21.exception.PersonNotFoundException;
 import com.skillbox.javapro21.service.DialogsService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -107,21 +109,82 @@ public class DialogsController {
     @Operation(summary = "Получение списка сообщений в диалога")
     @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<ListDataResponse<MessageData>> getMessagesById(@PathVariable int id,
-                                                                     @RequestParam(name = "query", defaultValue = "") String query,
-                                                                     @RequestParam(name = "offset", defaultValue = "0") int offset,
-                                                                     @RequestParam(name = "item_per_page", defaultValue = "20") int itemPerPage,
-                                                                     @RequestParam(name = "fromMessageId", defaultValue = "-1") int fromMessageId,
-                                                                     Principal principal) {
+                                                                         @RequestParam(name = "query", defaultValue = "") String query,
+                                                                         @RequestParam(name = "offset", defaultValue = "0") int offset,
+                                                                         @RequestParam(name = "item_per_page", defaultValue = "20") int itemPerPage,
+                                                                         @RequestParam(name = "fromMessageId", defaultValue = "-1") int fromMessageId,
+                                                                         Principal principal) {
         return new ResponseEntity<>(dialogsService.getMessagesById(id, query, offset, itemPerPage, fromMessageId, principal), HttpStatus.OK);
     }
 
-    @PutMapping("/{id}/messages")
-    @Operation(summary = "Получение списка сообщений в диалога")
+    @PostMapping("/{id}/messages")
+    @Operation(summary = "Отправка сообщений")
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
-    public ResponseEntity<DataResponse<MessageData>> putMessagesById(@PathVariable int id,
-                                                                         @RequestBody MessageTextRequest messageText,
-                                                                         Principal principal) {
-        return new ResponseEntity<>(dialogsService.putMessagesById(id, messageText, principal), HttpStatus.OK);
+    public ResponseEntity<DataResponse<MessageData>> postMessagesById(@PathVariable int id,
+                                                                      @RequestBody MessageTextRequest messageText,
+                                                                      Principal principal) {
+        return new ResponseEntity<>(dialogsService.postMessagesById(id, messageText, principal), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{dialog_id}/messages/{message_id}")
+    @Operation(summary = "Удаление сообщения")
+    @PreAuthorize("hasAuthority('user:write')")
+    @LastActivity
+    public ResponseEntity<DataResponse<MessageIdContent>> deleteMessageById(@PathVariable(name = "dialog_id") int dialogId,
+                                                                            @PathVariable(name = "message_id") Long messageId,
+                                                                            Principal principal) {
+        return new ResponseEntity<>(dialogsService.deleteMessageById(dialogId, messageId, principal), HttpStatus.OK);
+    }
+
+    @PutMapping("/{dialog_id}/messages/{message_id}")
+    @Operation(summary = "Редактирование сообщения")
+    @PreAuthorize("hasAuthority('user:write')")
+    @LastActivity
+    public ResponseEntity<DataResponse<MessageData>> putMessageById(@PathVariable(name = "dialog_id") int dialogId,
+                                                                    @PathVariable(name = "message_id") Long messageId,
+                                                                    @RequestBody MessageTextRequest messageText,
+                                                                    Principal principal) {
+        return new ResponseEntity<>(dialogsService.putMessageById(dialogId, messageId, messageText, principal), HttpStatus.OK);
+    }
+
+    @PutMapping("/{dialog_id}/messages/{message_id}/recover")
+    @Operation(summary = "Восстановление сообщения")
+    @PreAuthorize("hasAuthority('user:write')")
+    @LastActivity
+    public ResponseEntity<DataResponse<MessageData>> putRecoverMessageById(@PathVariable(name = "dialog_id") int dialogId,
+                                                                           @PathVariable(name = "message_id") Long messageId,
+                                                                           Principal principal) throws MessageNotFoundException {
+        return new ResponseEntity<>(dialogsService.putRecoverMessageById(dialogId, messageId, principal), HttpStatus.OK);
+    }
+
+    @PutMapping("/{dialog_id}/messages/{message_id}/read")
+    @Operation(summary = "Отметить сообщение прочтенным")
+    @PreAuthorize("hasAuthority('user:write')")
+    @LastActivity
+    public ResponseEntity<DataResponse<MessageOkContent>> readeMessage(@PathVariable(name = "dialog_id") int dialogId,
+                                                                       @PathVariable(name = "message_id") Long messageId,
+                                                                       Principal principal) throws MessageNotFoundException {
+        return new ResponseEntity<>(dialogsService.readeMessage(dialogId, messageId, principal), HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}/activity/{user_id}")
+    @Operation(summary = "Получить последнюю активность и текущий статус для пользователя с которым ведется диалог")
+    @PreAuthorize("hasAuthority('user:write')")
+    @LastActivity
+    public ResponseEntity<DataResponse<LastActivityContent>> activityPersonInDialog(@PathVariable int id,
+                                                                                 @PathVariable(name = "user_id") Long userId,
+                                                                                 Principal principal) {
+        return new ResponseEntity<>(dialogsService.activityPersonInDialog(id, userId, principal), HttpStatus.OK);
+    }
+
+    @PostMapping("/{id}/activity/{user_id}")
+    @Operation(summary = "Изменить статус набора текста пользователем в диалоге.")
+    @PreAuthorize("hasAuthority('user:write')")
+    @LastActivity
+    public ResponseEntity<DataResponse<MessageOkContent>> postActivityPersonInDialog(@PathVariable int id,
+                                                                                    @PathVariable(name = "user_id") Long userId,
+                                                                                    Principal principal) throws PersonNotFoundException {
+        return new ResponseEntity<>(dialogsService.postActivityPersonInDialog(id, userId, principal), HttpStatus.OK);
     }
 }
