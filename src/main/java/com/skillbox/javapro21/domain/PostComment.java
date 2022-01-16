@@ -1,6 +1,7 @@
 package com.skillbox.javapro21.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.skillbox.javapro21.domain.marker.HavePerson;
 import lombok.*;
 import lombok.experimental.Accessors;
 import org.hibernate.Hibernate;
@@ -19,7 +20,7 @@ import java.util.Set;
 @Entity
 @Accessors(chain = true)
 @Table(name = "post_comments")
-public class PostComment {
+public class PostComment implements HavePerson {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

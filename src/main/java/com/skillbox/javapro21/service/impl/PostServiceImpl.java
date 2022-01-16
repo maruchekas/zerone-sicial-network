@@ -283,7 +283,7 @@ public class PostServiceImpl implements PostService {
     }
 
     protected PostData getPostData(Post posts) throws PostNotFoundException {
-        Set<PostLike> likes = postLikeRepository.findPostLikeByPostId(posts.getId());
+        List<PostLike> likes = postLikeRepository.findPostLikeByPostId(posts.getId());
         List<String> collect = null;
         if (posts.getTags() != null) collect = posts.getTags().stream().map(Tag::getTag).toList();
         return new PostData()

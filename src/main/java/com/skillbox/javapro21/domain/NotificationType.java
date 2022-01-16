@@ -1,5 +1,6 @@
 package com.skillbox.javapro21.domain;
 
+import com.skillbox.javapro21.domain.marker.HavePerson;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -11,7 +12,7 @@ import javax.persistence.*;
 @Entity
 @Table(name = "notification_type")
 @Accessors(chain = true)
-public class NotificationType {
+public class NotificationType implements HavePerson {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")

@@ -13,7 +13,7 @@ public class CORSConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
 
         registry.addMapping("/**")
-                .allowedOrigins("https://zerone-2022-develop.herokuapp.com/")
+                .allowedOrigins("http://localhost:8080/")
                 .allowedMethods("HEAD", "GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowCredentials(true)
                 .allowedHeaders("Authorization", "Cache-Control", "Content-Type", "Access-Control-Allow-Origin");
