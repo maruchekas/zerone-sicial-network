@@ -33,6 +33,7 @@ public interface PersonRepository extends JpaRepository<Person, Integer> {
     @Query("select p from Person p " +
             "left join PersonToDialog p2d on p2d.personId = p.id " +
             "left join Dialog d on p2d.dialogId = d.id " +
-            "where p2d.dialogId = :id and p.isBlocked = 0 and d.isBlocked = 0 ")
+            "where p2d.dialogId = :id and p.isBlocked = 0 and d.isBlocked = 0 " +
+            "group by p.id ")
     List<Person> findAllByDialogId(int id);
 }

@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface MessageRepository extends JpaRepository<Message, Integer> {
     @Query("select m from Message m " +
@@ -41,7 +43,7 @@ public interface MessageRepository extends JpaRepository<Message, Integer> {
             "and m.isBlocked = 0 " +
             "group by m.id having m.id > :fromMessageId " +
             "order by m.time asc")
-    Page<Message> findByDialogIdAndPersonIdAndMessageId(int id, Long personId, int fromMessageId, Pageable pageable);
+    Page<Message> findByDialogIdAndPersonIdAndMessageId(int id, Long personId, Long fromMessageId, Pageable pageable);
 
     @Query("select m from Message m " +
             "left join Dialog d on d.id = m.dialog.id " +
@@ -51,7 +53,7 @@ public interface MessageRepository extends JpaRepository<Message, Integer> {
             "and m.isBlocked = 0 " +
             "group by m.id having m.id >= :fromMessageId " +
             "order by m.time asc")
-    Page<Message> findByDialogIdAndPersonIdAndQueryAndMessageId(int id, Long personId, String query, int fromMessageId, Pageable pageable);
+    Page<Message> findByDialogIdAndPersonIdAndQueryAndMessageId(int id, Long personId, String query, Long fromMessageId, Pageable pageable);
 
     @Query("select m from Message m " +
             "where m.dialog.id = :dialogId and m.id = :messageId " +
@@ -62,4 +64,9 @@ public interface MessageRepository extends JpaRepository<Message, Integer> {
             "where m.dialog.id = :dialogId and m.id = :messageId " +
             "and m.isBlocked = 2 ")
     Message findDeletedMessageByDialogIdMessageId(int dialogId, Long messageId);
+
+    @Query("select m from Message m " +
+            "where m.id = :id and m.isBlocked = 0")
+    Optional<Message> findById(Long id);
+
 }

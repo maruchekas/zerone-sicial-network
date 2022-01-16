@@ -10,6 +10,7 @@ import com.skillbox.javapro21.api.response.MessageOkContent;
 import com.skillbox.javapro21.api.response.dialogs.*;
 import com.skillbox.javapro21.exception.MessageNotFoundException;
 import com.skillbox.javapro21.exception.PersonNotFoundException;
+import com.skillbox.javapro21.exception.UserExistOnDialogException;
 import com.skillbox.javapro21.service.DialogsService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -102,7 +103,7 @@ public class DialogsController {
     @LastActivity
     public ResponseEntity<DataResponse<DialogPersonIdContent>> joinInLink(@PathVariable int id,
                                                                           @RequestBody LincRequest lincRequest,
-                                                                          Principal principal) {
+                                                                          Principal principal) throws UserExistOnDialogException {
         return new ResponseEntity<>(dialogsService.joinInLink(id, lincRequest, principal), HttpStatus.OK);
     }
 
@@ -113,8 +114,8 @@ public class DialogsController {
                                                                             @RequestParam(name = "query", defaultValue = "") String query,
                                                                             @RequestParam(name = "offset", defaultValue = "0") int offset,
                                                                             @RequestParam(name = "item_per_page", defaultValue = "20") int itemPerPage,
-                                                                            @RequestParam(name = "fromMessageId", defaultValue = "-1") int fromMessageId,
-                                                                            Principal principal) {
+                                                                            @RequestParam(name = "fromMessageId", defaultValue = "-1") Long fromMessageId,
+                                                                            Principal principal) throws MessageNotFoundException {
         return new ResponseEntity<>(dialogsService.getMessagesById(id, query, offset, itemPerPage, fromMessageId, principal), HttpStatus.OK);
     }
 
