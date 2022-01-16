@@ -14,6 +14,7 @@ cache:
 
 stages:
   - build
+  - test
   - develop
   - production
 
@@ -21,6 +22,15 @@ build:
   stage: build
   script:
     - 'mvn $MAVEN_CLI_OPTS package -DskipTests'
+  image: maven:latest
+  only:
+    - develop
+    - main
+
+unit testing:
+  stage: test
+  script:
+    - 'mvn test'
   image: maven:latest
   only:
     - develop
