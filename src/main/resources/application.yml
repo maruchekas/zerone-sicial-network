@@ -1,6 +1,6 @@
 server:
-  port: 8080
-  base_url: https://zerone-2022-develop.herokuapp.com
+  port: ${PORT:8080}
+  base_url: ${BASE_URL}
 spring:
   messages:
     basename: lang.messages
@@ -10,9 +10,9 @@ spring:
     pathmatch:
       matching-strategy: ant_path_matcher
   datasource:
-    url: jdbc:postgresql://localhost:5432/SocialNetwork
-    username: postgres
-    password: root
+    url: jdbc:postgresql://ec2-3-227-15-75.compute-1.amazonaws.com:5432/d7bpl25oifrii5
+    username: rccgqavsuohfal
+    password: ffa5552063947d650153c68fd58de02873993eabc1150389329642937747ebec
   jpa:
     show-sql: false
     hibernate:
@@ -20,24 +20,24 @@ spring:
       dialect: org.hibernate.dialect.PostgreSQLDialect
 mailjet:
   mail:
-    from: admin@zeronenetwork.design
-    key: 31630259aad78bb4a4adff1902eee4c3
-    secret: cc6adb843048afd0f1a7d9c33feb4b22
+    from: ${MAIlJET_MAIL_FROM}
+    key: ${MAIlJET_MAIL_KEY}
+    secret: ${MAIlJET_MAIL_SECRET}
     version: v3.1
     email_admin: briz.zukkel@gmail.com
   flyway:
     enabled: true
 jwt:
-  secret: secret
+  secret: ${JWT_SECRET}
 captcha:
   width: 193
   height: 57
   image: data:captchaImage/png;base64,
   lifespanBySec: 0
 cloudinary:
-  cloudName: dcn3kveee
-  apiKey: 695884337247625
-  apiSecret: U4D89gdUoSYLhK1eBCPCTOo1TvE
+  cloudName: ${CLOUDINARY_CLOUD_NAME}
+  apiKey: ${CLOUDINARY_API_KEY}
+  apiSecret: ${CLOUDINARY_API_SECRET}
 html:
   file:
     register: ./src/main/resources/messages/register.html
