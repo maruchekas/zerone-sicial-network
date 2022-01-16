@@ -2,6 +2,7 @@ package com.skillbox.javapro21.controller;
 
 import com.skillbox.javapro21.AbstractTest;
 import com.skillbox.javapro21.api.request.dialogs.DialogRequestForCreate;
+import com.skillbox.javapro21.api.request.dialogs.LincRequest;
 import com.skillbox.javapro21.domain.Dialog;
 import com.skillbox.javapro21.domain.Message;
 import com.skillbox.javapro21.domain.Person;
@@ -12,6 +13,7 @@ import com.skillbox.javapro21.repository.MessageRepository;
 import com.skillbox.javapro21.repository.PersonRepository;
 import com.skillbox.javapro21.repository.PersonToDialogRepository;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,6 +53,7 @@ public class DialogsControllerTest extends AbstractTest {
     private Person sP1;
     private Person sP2;
     private Person sP3;
+    private Dialog sDialog;
 
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
 
@@ -125,7 +128,7 @@ public class DialogsControllerTest extends AbstractTest {
         Set<Message> messageSet = new HashSet<>();
         messageSet.add(sMessage);
         sDialog.setMessages(messageSet);
-        dialogRepository.save(sDialog);
+        this.sDialog = dialogRepository.save(sDialog);
 
         PersonToDialog p2d = personToDialogRepository.findDialogByPersonIdAndDialogId(sP1.getId(), sDialog.getId());
         p2d.setLastCheck(LocalDateTime.now(ZoneOffset.UTC));
@@ -225,4 +228,96 @@ public class DialogsControllerTest extends AbstractTest {
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.data.id").value(dialogs.get().getId())).andReturn();
     }
+
+    @Test
+    @WithMockUser(username = "test999@test.ru", authorities = "user:write")
+    void getUnreadedMessagesForP1() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/api/v1/dialogs/unreaded")
+                        .principal(() -> "test999@test.ru"))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.count").value(0)).andReturn();
+    }
+
+    @Test
+    @WithMockUser(username = "test1000@test.ru", authorities = "user:write")
+    void getUnreadedMessagesForP2() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/api/v1/dialogs/unreaded")
+                        .principal(() -> "test1000@test.ru"))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.count").value(1)).andReturn();
+    }
+
+    @Test
+    @WithMockUser(username = "test999@test.ru", authorities = "user:write")
+    void deleteDialog() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders
+                        .delete("/api/v1/dialogs/{id}", sDialog.getId())
+                        .principal(() -> "test999@test.ru"))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.id").value(sDialog.getId())).andReturn();
+
+        Assertions.assertEquals(Optional.empty(), dialogRepository.findById(sDialog.getId()));
+    }
+
+    @Test
+    @WithMockUser(username = "test999@test.ru", authorities = "user:write")
+    void putPersonsInDialog() throws Exception {
+        DialogRequestForCreate dialogRequestForCreate = new DialogRequestForCreate();
+        List<Long> longList = new ArrayList<>();
+        longList.add(sP3.getId());
+        dialogRequestForCreate.setUsersIds(longList);
+        mockMvc.perform(MockMvcRequestBuilders
+                        .put("/api/v1/dialogs/{id}/users", sDialog.getId())
+                        .principal(() -> "test999@test.ru")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(dialogRequestForCreate)))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @Test
+    @WithMockUser(username = "test999@test.ru", authorities = "user:write")
+    void deletePersonsInDialog() throws Exception {
+        DialogRequestForCreate dialogRequestForCreate = new DialogRequestForCreate();
+        List<Long> longList = new ArrayList<>();
+        longList.add(sP2.getId());
+        dialogRequestForCreate.setUsersIds(longList);
+        mockMvc.perform(MockMvcRequestBuilders
+                        .delete("/api/v1/dialogs/{id}/users", sDialog.getId())
+                        .principal(() -> "test999@test.ru")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(dialogRequestForCreate)))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @Test
+    @WithMockUser(username = "test999@test.ru", authorities = "user:write")
+    void inviteLinkAndJoinInLink() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/api/v1/dialogs/{id}/users/invite", sDialog.getId())
+                        .principal(() -> "test999@test.ru"))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.link")
+                        .value(dialogRepository.findById(sDialog.getId()).get().getCode())).andReturn();
+
+        Optional<Dialog> dialog = dialogRepository.findById(sDialog.getId());
+        LincRequest lincRequest = new LincRequest();
+        lincRequest.setLink(dialog.get().getCode());
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .put("/api/v1/dialogs/{id}/users/join", sDialog.getId())
+                        .principal(() -> "test999@test.ru")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(lincRequest)))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
+    }
+
 }

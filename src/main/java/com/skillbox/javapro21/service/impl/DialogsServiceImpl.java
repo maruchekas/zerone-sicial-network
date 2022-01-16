@@ -13,6 +13,7 @@ import com.skillbox.javapro21.domain.Person;
 import com.skillbox.javapro21.domain.PersonToDialog;
 import com.skillbox.javapro21.exception.MessageNotFoundException;
 import com.skillbox.javapro21.exception.PersonNotFoundException;
+import com.skillbox.javapro21.exception.UserExistOnDialogException;
 import com.skillbox.javapro21.repository.DialogRepository;
 import com.skillbox.javapro21.repository.MessageRepository;
 import com.skillbox.javapro21.repository.PersonRepository;
@@ -176,9 +177,11 @@ public class DialogsServiceImpl implements DialogsService {
         utilsService.findPersonByEmail(principal.getName());
         List<Person> personList = personRepository.findAllById(listPersons.getUsersIds());
         Dialog dialog = dialogRepository.findById(id).orElseThrow();
-        ;
         for (Person p : personList) {
             dialog.getPersons().remove(p);
+        }
+        if (dialog.getPersons().size() == 1) {
+            dialog.setIsBlocked(2);
         }
         dialogRepository.save(dialog);
         return getDataResponseWithListPersonsId(listPersons.getUsersIds());
@@ -196,26 +199,30 @@ public class DialogsServiceImpl implements DialogsService {
                         .setLink(token));
     }
 
-    public DataResponse<DialogPersonIdContent> joinInLink(int id, LincRequest lincRequest, Principal principal) {
+    public DataResponse<DialogPersonIdContent> joinInLink(int id, LincRequest lincRequest, Principal principal) throws UserExistOnDialogException {
         Dialog dialog = dialogRepository.findByCode(lincRequest.getLink());
         Person person = utilsService.findPersonByEmail(principal.getName());
-        Set<Person> personSet = new HashSet<>();
-        personSet.add(person);
-        dialog
-                .setCode("")
-                .setPersons(personSet);
-        dialogRepository.save(dialog);
-        PersonToDialog personToDialog = new PersonToDialog();
-        personToDialog
-                .setDialogId(dialog.getId())
-                .setPersonId(person.getId())
-                .setLastCheck(LocalDateTime.now(ZoneOffset.UTC));
-        personToDialogRepository.save(personToDialog);
-        List<Long> list = new ArrayList<>();
-        for (Person p : personSet) {
-            list.add(p.getId());
+        if (!dialog.getPersons().stream().anyMatch(p -> p.getId().equals(person.getId()))) {
+            Set<Person> personSet = new HashSet<>();
+            personSet.add(person);
+            dialog
+                    .setCode("")
+                    .setPersons(personSet);
+            Dialog sDialog = dialogRepository.save(dialog);
+            PersonToDialog personToDialog = new PersonToDialog();
+            personToDialog
+                    .setDialogId(sDialog.getId())
+                    .setPersonId(person.getId())
+                    .setLastCheck(LocalDateTime.now(ZoneOffset.UTC));
+            personToDialogRepository.save(personToDialog);
+            List<Long> list = new ArrayList<>();
+            for (Person p : personSet) {
+                list.add(p.getId());
+            }
+            return getDataResponseWithListPersonsId(list);
+        } else {
+            throw new UserExistOnDialogException("Пользователь уже в есть в диалоге");
         }
-        return getDataResponseWithListPersonsId(list);
     }
 
     public ListDataResponse<MessageContent> getMessagesById(int id, String query, int offset, int itemPerPage, int fromMessageId, Principal principal) {
