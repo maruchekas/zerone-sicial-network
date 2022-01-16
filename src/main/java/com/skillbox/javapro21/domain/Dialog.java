@@ -30,7 +30,7 @@ public class Dialog {
     @Column(name = "code")
     private String code;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "person2dialog",
             joinColumns = {@JoinColumn(name = "dialog_id")},
             inverseJoinColumns = {@JoinColumn(name = "person_id")})
