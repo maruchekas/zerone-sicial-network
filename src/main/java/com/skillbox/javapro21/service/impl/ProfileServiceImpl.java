@@ -42,17 +42,20 @@ public class ProfileServiceImpl implements ProfileService {
     private final FriendshipRepository friendshipRepository;
     private final FriendshipStatusRepository friendshipStatusRepository;
 
+    @Override
     public DataResponse<AuthData> getPerson(Principal principal) {
         Person person = utilsService.findPersonByEmail(principal.getName());
         return getPersonDataResponse(person);
     }
 
+    @Override
     public DataResponse<AuthData> editPerson(Principal principal, EditProfileRequest editProfileRequest) {
         Person person = utilsService.findPersonByEmail(principal.getName());
         Person sPerson = savePersonByRequest(person, editProfileRequest);
         return getPersonDataResponse(sPerson);
     }
 
+    @Override
     public DataResponse<MessageOkContent> deletePerson(Principal principal) {
         Person person = utilsService.findPersonByEmail(principal.getName())
                 .setIsBlocked(2);
@@ -61,11 +64,13 @@ public class ProfileServiceImpl implements ProfileService {
         return utilsService.getMessageOkResponse();
     }
 
+    @Override
     public DataResponse<AuthData> getPersonById(Long id) throws PersonNotFoundException {
         Person person = personRepository.findPersonById(id).orElseThrow(() -> new PersonNotFoundException("Пользователя с данным айди не существует"));
         return getPersonDataResponse(person);
     }
 
+    @Override
     public ListDataResponse<PostData> getPersonWallById(Long id, int offset, int itemPerPage, Principal principal) throws PersonNotFoundException, InterlockedFriendshipStatusException {
         Person src = utilsService.findPersonByEmail(principal.getName());
         Person dst = personRepository.findPersonById(id).orElseThrow(() -> new PersonNotFoundException("Пользователя с данным id не существует"));
@@ -82,6 +87,7 @@ public class ProfileServiceImpl implements ProfileService {
         throw new InterlockedFriendshipStatusException("Полльзователь заблокирован и не может смотреть посты");
     }
 
+    @Override
     public DataResponse<PostData> postPostOnPersonWallById(Long id, Long publishDate, PostRequest postRequest, Principal principal) throws InterlockedFriendshipStatusException, PersonNotFoundException, PostNotFoundException {
         Person src = utilsService.findPersonByEmail(principal.getName());
         Person dst = personRepository.findPersonById(id).orElseThrow(() -> new PersonNotFoundException("Пользователя с данным id не существует"));
@@ -113,6 +119,7 @@ public class ProfileServiceImpl implements ProfileService {
 
     }
 
+    @Override
     public DataResponse<MessageOkContent> blockPersonById(Long id, Principal principal) throws BlockPersonHimselfException, InterlockedFriendshipStatusException, PersonNotFoundException, FriendshipNotFoundException {
         Person src = utilsService.findPersonByEmail(principal.getName());
         Person dst = personRepository.findPersonById(id).orElseThrow(() -> new PersonNotFoundException("Пользователя с данным id не существует"));
@@ -130,6 +137,7 @@ public class ProfileServiceImpl implements ProfileService {
         return utilsService.getMessageOkResponse();
     }
 
+    @Override
     public DataResponse<MessageOkContent> unblockPersonById(Long id, Principal principal) throws PersonNotFoundException, BlockPersonHimselfException, NonBlockedFriendshipException, InterlockedFriendshipStatusException, FriendshipNotFoundException {
         Person src = utilsService.findPersonByEmail(principal.getName());
         Person dst = personRepository.findPersonById(id).orElseThrow(() -> new PersonNotFoundException("Пользователя с данным id не существует"));

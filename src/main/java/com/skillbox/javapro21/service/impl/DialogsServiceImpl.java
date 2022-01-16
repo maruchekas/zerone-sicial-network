@@ -43,6 +43,7 @@ public class DialogsServiceImpl implements DialogsService {
     private final UtilsService utilsService;
     private final MessageRepository messageRepository;
 
+    @Override
     public ListDataResponse<DialogContent> getDialogs(String query, int offset, int itemPerPage, Principal principal) {
         Person person = utilsService.findPersonByEmail(principal.getName());
         Pageable pageable = PageRequest.of(offset / itemPerPage, itemPerPage);
@@ -55,6 +56,7 @@ public class DialogsServiceImpl implements DialogsService {
         return getListDataResponse(offset, itemPerPage, allMessagesByPersonIdAndQuery);
     }
 
+    @Override
     public DataResponse<DialogContent> createDialog(DialogRequestForCreate dialogRequest, Principal principal) throws PersonNotFoundException {
         Person person = utilsService.findPersonByEmail(principal.getName());
         List<Person> personList = personRepository.findAllById(dialogRequest.getUsersIds());
@@ -130,6 +132,7 @@ public class DialogsServiceImpl implements DialogsService {
         return null;
     }
 
+    @Override
     public DataResponse<CountContent> getUnreadedDialogs(Principal principal) {
         Person person = utilsService.findPersonByEmail(principal.getName());
         List<PersonToDialog> dialogs = personToDialogRepository.findDialogsByPersonId(person.getId());
@@ -150,6 +153,7 @@ public class DialogsServiceImpl implements DialogsService {
                 .setData(new CountContent().setCount(count));
     }
 
+    @Override
     public DataResponse<DialogContent> deleteDialog(int id) {
         Dialog dialog = dialogRepository.findById(id).orElseThrow();
         dialog.setIsBlocked(2);
@@ -157,6 +161,7 @@ public class DialogsServiceImpl implements DialogsService {
         return getDataResponseWithId(save.getId());
     }
 
+    @Override
     public DataResponse<DialogPersonIdContent> putPersonsInDialog(int id, DialogRequestForCreate listPersons, Principal principal) {
         utilsService.findPersonByEmail(principal.getName());
         List<Person> personList = personRepository.findAllById(listPersons.getUsersIds());
@@ -173,6 +178,7 @@ public class DialogsServiceImpl implements DialogsService {
         return getDataResponseWithListPersonsId(listPersons.getUsersIds());
     }
 
+    @Override
     public DataResponse<DialogPersonIdContent> deletePersonsInDialog(int id, DialogRequestForCreate listPersons, Principal principal) {
         utilsService.findPersonByEmail(principal.getName());
         List<Person> personList = personRepository.findAllById(listPersons.getUsersIds());
@@ -199,6 +205,7 @@ public class DialogsServiceImpl implements DialogsService {
                         .setLink(token));
     }
 
+    @Override
     public DataResponse<DialogPersonIdContent> joinInLink(int id, LincRequest lincRequest, Principal principal) throws UserExistOnDialogException {
         Dialog dialog = dialogRepository.findByCode(lincRequest.getLink());
         Person person = utilsService.findPersonByEmail(principal.getName());
@@ -225,6 +232,7 @@ public class DialogsServiceImpl implements DialogsService {
         }
     }
 
+    @Override
     public ListDataResponse<MessageContent> getMessagesById(int id, String query, int offset, int itemPerPage, Long fromMessageId, Principal principal) throws MessageNotFoundException {
         Person person = utilsService.findPersonByEmail(principal.getName());
         PersonToDialog p2d = personToDialogRepository.findDialogByPersonIdAndDialogId(person.getId(), id);
@@ -249,6 +257,7 @@ public class DialogsServiceImpl implements DialogsService {
         return getListDataResponseWithMessage(offset, itemPerPage, personToDialogs);
     }
 
+    @Override
     public DataResponse<MessageContent> postMessagesById(int id, MessageTextRequest messageText, Principal principal) {
         Person person = utilsService.findPersonByEmail(principal.getName());
         PersonToDialog p2d = personToDialogRepository.findDialogByPersonIdAndDialogId(person.getId(), id);
@@ -278,6 +287,7 @@ public class DialogsServiceImpl implements DialogsService {
         return getDataResponseWithMessageData(save, p2DByDialogAndMessage);
     }
 
+    @Override
     public DataResponse<MessageIdContent> deleteMessageById(int dialogId, Long messageId, Principal principal) {
         Person person = utilsService.findPersonByEmail(principal.getName());
         PersonToDialog p2d = personToDialogRepository.findDialogByPersonIdAndDialogId(person.getId(), dialogId);
@@ -292,6 +302,7 @@ public class DialogsServiceImpl implements DialogsService {
                 .setData(new MessageIdContent().setMessageId(save.getId()));
     }
 
+    @Override
     public DataResponse<MessageContent> putMessageById(int dialogId, Long messageId, MessageTextRequest messageText, Principal principal) {
         Message message = messageRepository.findByDialogIdMessageId(dialogId, messageId);
         Person person = utilsService.findPersonByEmail(principal.getName());
@@ -307,6 +318,7 @@ public class DialogsServiceImpl implements DialogsService {
         return getDataResponseWithMessageData(save, p2DByDialogAndMessage);
     }
 
+    @Override
     public DataResponse<MessageContent> putRecoverMessageById(int dialogId, Long messageId, Principal principal) throws MessageNotFoundException {
         Message message = messageRepository.findDeletedMessageByDialogIdMessageId(dialogId, messageId);
         Person person = utilsService.findPersonByEmail(principal.getName());
@@ -324,6 +336,7 @@ public class DialogsServiceImpl implements DialogsService {
         return getDataResponseWithMessageData(save, p2DByDialogAndMessage);
     }
 
+    @Override
     public DataResponse<MessageOkContent> readeMessage(int dialogId, Long messageId, Principal principal) {
         Message message = messageRepository.findByDialogIdMessageId(dialogId, messageId);
         message
@@ -332,6 +345,7 @@ public class DialogsServiceImpl implements DialogsService {
         return utilsService.getMessageOkResponse();
     }
 
+    @Override
     public DataResponse<LastActivityContent> activityPersonInDialog(int id, Long userId, Principal principal) {
         Person recipient = personRepository.findPersonById(userId).orElseThrow();
         LastActivityContent lastActivityContent = new LastActivityContent();
@@ -350,6 +364,7 @@ public class DialogsServiceImpl implements DialogsService {
                 .setData(lastActivityContent);
     }
 
+    @Override
     public DataResponse<MessageOkContent> postActivityPersonInDialog(int id, Long userId, Principal principal) throws PersonNotFoundException {
         PersonToDialog p2d = personToDialogRepository.findDialogByPersonIdAndDialogId(userId, id);
         if (p2d.getLastCheck().isAfter(LocalDateTime.now(ZoneOffset.UTC).minusSeconds(2))) {
