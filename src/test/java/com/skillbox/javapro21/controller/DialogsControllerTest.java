@@ -433,7 +433,7 @@ public class DialogsControllerTest extends AbstractTest {
                         .principal(() -> "test999@test.ru"))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                        .andExpect(MockMvcResultMatchers.jsonPath("$.data.online")
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.online")
                         .value(true));
     }
 
