@@ -24,7 +24,7 @@ mailjet:
     key: ${MAIlJET_MAIL_KEY}
     secret: ${MAIlJET_MAIL_SECRET}
     version: v3.1
-    email_admin: briz.zukkel@gmail.com
+    email_admin: ${MAIlJET_MAIL_EMAIL_ADMIN}
   flyway:
     enabled: true
 jwt:
