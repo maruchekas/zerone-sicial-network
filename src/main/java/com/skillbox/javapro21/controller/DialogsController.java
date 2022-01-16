@@ -114,8 +114,8 @@ public class DialogsController {
                                                                             @RequestParam(name = "query", defaultValue = "") String query,
                                                                             @RequestParam(name = "offset", defaultValue = "0") int offset,
                                                                             @RequestParam(name = "item_per_page", defaultValue = "20") int itemPerPage,
-                                                                            @RequestParam(name = "fromMessageId", defaultValue = "-1") int fromMessageId,
-                                                                            Principal principal) {
+                                                                            @RequestParam(name = "fromMessageId", defaultValue = "-1") Long fromMessageId,
+                                                                            Principal principal) throws MessageNotFoundException {
         return new ResponseEntity<>(dialogsService.getMessagesById(id, query, offset, itemPerPage, fromMessageId, principal), HttpStatus.OK);
     }
 

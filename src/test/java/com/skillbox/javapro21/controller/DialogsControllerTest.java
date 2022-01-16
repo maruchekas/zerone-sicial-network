@@ -3,6 +3,7 @@ package com.skillbox.javapro21.controller;
 import com.skillbox.javapro21.AbstractTest;
 import com.skillbox.javapro21.api.request.dialogs.DialogRequestForCreate;
 import com.skillbox.javapro21.api.request.dialogs.LincRequest;
+import com.skillbox.javapro21.api.request.dialogs.MessageTextRequest;
 import com.skillbox.javapro21.domain.Dialog;
 import com.skillbox.javapro21.domain.Message;
 import com.skillbox.javapro21.domain.Person;
@@ -54,6 +55,7 @@ public class DialogsControllerTest extends AbstractTest {
     private Person sP2;
     private Person sP3;
     private Dialog sDialog;
+    private Message sMessage;
 
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
 
@@ -124,7 +126,7 @@ public class DialogsControllerTest extends AbstractTest {
                 .setDialog(sDialog)
                 .setReadStatus(SENT)
                 .setMessageText("wtf?");
-        Message sMessage = messageRepository.save(message);
+        sMessage = messageRepository.save(message);
         Set<Message> messageSet = new HashSet<>();
         messageSet.add(sMessage);
         sDialog.setMessages(messageSet);
@@ -320,4 +322,58 @@ public class DialogsControllerTest extends AbstractTest {
                 .andExpect(MockMvcResultMatchers.status().isBadRequest());
     }
 
+    @Test
+    @WithMockUser(username = "test999@test.ru", authorities = "user:write")
+    void getMessagesByIdDialog() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/api/v1/dialogs/{id}/messages", sDialog.getId())
+                        .principal(() -> "test999@test.ru"))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.total").value(1)).andReturn();
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/api/v1/dialogs/{id}/messages?query=22222", sDialog.getId())
+                        .principal(() -> "test999@test.ru"))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.total").value(0)).andReturn();
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/api/v1/dialogs/{id}/messages?fromMessageId=221", sDialog.getId())
+                        .principal(() -> "test999@test.ru"))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isNotFound()).andReturn();
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/api/v1/dialogs/{id}/messages", sDialog.getId())
+                        .param("fromMessageId", sMessage.getId().toString())
+                        .principal(() -> "test999@test.ru"))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @Test
+    @WithMockUser(username = "test999@test.ru", authorities = "user:write")
+    void postMessageById() throws Exception {
+        MessageTextRequest messageTextRequest = new MessageTextRequest();
+        messageTextRequest.setMessageText("NONONO!");
+        mockMvc.perform(MockMvcRequestBuilders
+                        .post("/api/v1/dialogs/{id}/messages", sDialog.getId())
+                        .principal(() -> "test999@test.ru")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(messageTextRequest)))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @Test
+    @WithMockUser(username = "test999@test.ru", authorities = "user:write")
+    void deleteMessageById() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders
+                        .delete("/api/v1/dialogs/{dialog_id}/messages/{message_id}", sDialog.getId(), sMessage.getId())
+                        .principal(() -> "test999@test.ru"))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk());
+    }
 }

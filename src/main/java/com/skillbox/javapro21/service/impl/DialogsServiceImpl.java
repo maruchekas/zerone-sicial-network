@@ -225,7 +225,7 @@ public class DialogsServiceImpl implements DialogsService {
         }
     }
 
-    public ListDataResponse<MessageContent> getMessagesById(int id, String query, int offset, int itemPerPage, int fromMessageId, Principal principal) {
+    public ListDataResponse<MessageContent> getMessagesById(int id, String query, int offset, int itemPerPage, Long fromMessageId, Principal principal) throws MessageNotFoundException {
         Person person = utilsService.findPersonByEmail(principal.getName());
         PersonToDialog p2d = personToDialogRepository.findDialogByPersonIdAndDialogId(person.getId(), id);
         p2d.setLastCheck(LocalDateTime.now(ZoneOffset.UTC));
@@ -239,6 +239,7 @@ public class DialogsServiceImpl implements DialogsService {
                 personToDialogs = messageRepository.findByDialogIdAndPersonIdAndQuery(id, person.getId(), query, pageable);
             }
         } else {
+            messageRepository.findById(fromMessageId).orElseThrow(() -> new MessageNotFoundException("Сообщения с данным id не существует"));
             if (query.equals("")) {
                 personToDialogs = messageRepository.findByDialogIdAndPersonIdAndMessageId(id, person.getId(), fromMessageId, pageable);
             } else {

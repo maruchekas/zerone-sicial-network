@@ -10,7 +10,6 @@ import com.skillbox.javapro21.api.response.dialogs.*;
 import com.skillbox.javapro21.exception.MessageNotFoundException;
 import com.skillbox.javapro21.exception.PersonNotFoundException;
 import com.skillbox.javapro21.exception.UserExistOnDialogException;
-import com.skillbox.javapro21.exception.UserLegalException;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
@@ -33,7 +32,7 @@ public interface DialogsService {
 
     DataResponse<DialogPersonIdContent> joinInLink(int id, LincRequest lincRequest, Principal principal) throws UserExistOnDialogException;
 
-    ListDataResponse<MessageContent> getMessagesById(int id, String query, int offset, int itemPerPage, int fromMessageId, Principal principal);
+    ListDataResponse<MessageContent> getMessagesById(int id, String query, int offset, int itemPerPage, Long fromMessageId, Principal principal) throws MessageNotFoundException;
 
     DataResponse<MessageContent> postMessagesById(int id, MessageTextRequest messageText, Principal principal);
 
