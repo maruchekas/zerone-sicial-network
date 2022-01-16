@@ -54,14 +54,14 @@ public class PostServiceImpl implements PostService {
         if ((text.matches("\\s*") || text.equals("")) && tag.equals("") && author.equals("")) {
             pageablePostList = postRepository.findAllPosts(datetimeFrom, datetimeTo, pageable);
         } else if (!text.isEmpty() && !text.matches("\\s*") && tag.equals("") && author.equals("")) {
-            pageablePostList = postRepository.findAllPostsByText(text, datetimeFrom, datetimeTo, pageable);
+            pageablePostList = postRepository.findAllPostsByText(text.toLowerCase(Locale.ROOT), datetimeFrom, datetimeTo, pageable);
         } else if (!text.trim().isEmpty() && tag.equals("") && !author.isEmpty()) {
-            pageablePostList = postRepository.findPostsByTextByAuthorWithoutTagsContainingByDateExcludingBlockers(text, datetimeFrom, datetimeTo, author, pageable);
+            pageablePostList = postRepository.findPostsByTextByAuthorWithoutTagsContainingByDateExcludingBlockers(text.toLowerCase(Locale.ROOT), datetimeFrom, datetimeTo, author.toLowerCase(Locale.ROOT), pageable);
         } else if ((text.matches("\\s*") || text.equals("")) && tag.equals("") && !author.isEmpty()) {
-            pageablePostList = postRepository.findAllPostsByAuthor(author, datetimeFrom, datetimeTo, pageable);
+            pageablePostList = postRepository.findAllPostsByAuthor(author.toLowerCase(Locale.ROOT), datetimeFrom, datetimeTo, pageable);
         } else {
             List<Long> tags = getTags(tag);
-            pageablePostList = postRepository.findPostsByTextByAuthorByTagsContainingByDateExcludingBlockers(text, datetimeFrom, datetimeTo, author, tags, pageable);
+            pageablePostList = postRepository.findPostsByTextByAuthorByTagsContainingByDateExcludingBlockers(text.toLowerCase(Locale.ROOT), datetimeFrom, datetimeTo, author.toLowerCase(Locale.ROOT), tags, pageable);
         }
         return getPostsResponse(offset, itemPerPage, pageablePostList);
 
@@ -214,7 +214,7 @@ public class PostServiceImpl implements PostService {
         Person person = utilsService.findPersonByEmail(principal.getName());
         Pageable pageable = PageRequest.of(offset / itemPerPage, itemPerPage);
         List<Long> friendsAndSubscribersIds = personRepository.findAllFriendsAndSubscribersByPersonId(person.getId());
-        Page<Post> postPage = postRepository.findPostsByTextExcludingBlockers(text, friendsAndSubscribersIds, pageable);
+        Page<Post> postPage = postRepository.findPostsByTextExcludingBlockers(text.toLowerCase(Locale.ROOT), friendsAndSubscribersIds, pageable);
         return getPostsResponse(offset, itemPerPage, postPage);
     }
 

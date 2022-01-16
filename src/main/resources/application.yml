@@ -10,9 +10,9 @@ spring:
     pathmatch:
       matching-strategy: ant_path_matcher
   datasource:
-    url: jdbc:postgresql://ec2-3-227-15-75.compute-1.amazonaws.com:5432/d7bpl25oifrii5
-    username: rccgqavsuohfal
-    password: ffa5552063947d650153c68fd58de02873993eabc1150389329642937747ebec
+    url: ${JDBC_DATABASE_URL}
+    username: ${JDBC_DATABASE_USERNAME}
+    password: ${JDBC_DATABASE_PASSWORD}
   jpa:
     show-sql: false
     hibernate:

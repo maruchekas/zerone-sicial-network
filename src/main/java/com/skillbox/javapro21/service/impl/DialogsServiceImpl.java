@@ -244,14 +244,14 @@ public class DialogsServiceImpl implements DialogsService {
             if (query.equals("")) {
                 personToDialogs = messageRepository.findByDialogIdAndPersonId(id, person.getId(), pageable);
             } else {
-                personToDialogs = messageRepository.findByDialogIdAndPersonIdAndQuery(id, person.getId(), query, pageable);
+                personToDialogs = messageRepository.findByDialogIdAndPersonIdAndQuery(id, person.getId(), query.toLowerCase(Locale.ROOT), pageable);
             }
         } else {
             messageRepository.findById(fromMessageId).orElseThrow(() -> new MessageNotFoundException("Сообщения с данным id не существует"));
             if (query.equals("")) {
                 personToDialogs = messageRepository.findByDialogIdAndPersonIdAndMessageId(id, person.getId(), fromMessageId, pageable);
             } else {
-                personToDialogs = messageRepository.findByDialogIdAndPersonIdAndQueryAndMessageId(id, person.getId(), query, fromMessageId, pageable);
+                personToDialogs = messageRepository.findByDialogIdAndPersonIdAndQueryAndMessageId(id, person.getId(), query.toLowerCase(Locale.ROOT), fromMessageId, pageable);
             }
         }
         return getListDataResponseWithMessage(offset, itemPerPage, personToDialogs);

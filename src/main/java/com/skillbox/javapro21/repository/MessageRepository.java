@@ -13,7 +13,7 @@ import java.util.Optional;
 public interface MessageRepository extends JpaRepository<Message, Integer> {
     @Query("select m from Message m " +
             "where m.author.id = :id " +
-            "and m.messageText like %:query% " +
+            "and LOWER(m.messageText) like %:query% " +
             "and m.isBlocked = 0 " +
             "group by m.id " +
             "order by m.time desc")
@@ -32,7 +32,7 @@ public interface MessageRepository extends JpaRepository<Message, Integer> {
             "left join PersonToDialog p2d on p2d.dialogId = d.id " +
             "where m.dialog.id = :id and p2d.personId = :personId " +
             "and m.isBlocked = 0 " +
-            "and m.messageText like %:query% " +
+            "and LOWER(m.messageText) like %:query% " +
             "order by m.time asc")
     Page<Message> findByDialogIdAndPersonIdAndQuery(int id, Long personId, String query, Pageable pageable);
 
@@ -49,7 +49,7 @@ public interface MessageRepository extends JpaRepository<Message, Integer> {
             "left join Dialog d on d.id = m.dialog.id " +
             "left join PersonToDialog p2d on p2d.dialogId = d.id " +
             "where m.dialog.id = :id and p2d.personId = :personId " +
-            "and m.messageText like %:query% " +
+            "and LOWER(m.messageText) like %:query% " +
             "and m.isBlocked = 0 " +
             "group by m.id having m.id >= :fromMessageId " +
             "order by m.time asc")
