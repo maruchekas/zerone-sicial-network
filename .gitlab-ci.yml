@@ -14,6 +14,7 @@ cache:
 
 stages:
   - build
+  - test
   - develop
   - production
 
@@ -25,6 +26,14 @@ build:
   only:
     - develop
     - main
+
+# unit testing:
+#   stage: test
+#   script:
+#     - 'mvn $MAVEN_CLI_OPTS test'
+#   image: maven:latest
+#   only:
+#     - develop
 
 deploy to develop:
   stage: develop
