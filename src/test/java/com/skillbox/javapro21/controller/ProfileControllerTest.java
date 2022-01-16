@@ -73,6 +73,7 @@ public class ProfileControllerTest extends AbstractTest {
         String password = "1234";
         String firstName = "Arcadiy";
         String lastName = "Parovozov";
+        LocalDateTime birthDate = LocalDateTime.now().minusYears(20);
         LocalDateTime reg_date = LocalDateTime.now();
         String conf_code = "123";
 
@@ -81,6 +82,7 @@ public class ProfileControllerTest extends AbstractTest {
                 .setPassword(passwordEncoder.encode(password))
                 .setFirstName(firstName)
                 .setLastName(lastName)
+                .setBirthDate(birthDate)
                 .setConfirmationCode("123")
                 .setRegDate(reg_date)
                 .setConfirmationCode(conf_code)
@@ -209,6 +211,7 @@ public class ProfileControllerTest extends AbstractTest {
     void editPerson() throws Exception {
         EditProfileRequest editProfileRequest = new EditProfileRequest();
         editProfileRequest.setFirstName("Oleg");
+        editProfileRequest.setBirthDate(personRepository.findByEmail("test1@test.ru").get().getBirthDate().toString());
 
         mockMvc.perform(MockMvcRequestBuilders
                         .put("/api/v1/users/me")
