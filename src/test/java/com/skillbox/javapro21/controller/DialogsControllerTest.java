@@ -34,6 +34,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
 
+import static com.skillbox.javapro21.domain.enumeration.ReadStatus.READ;
 import static com.skillbox.javapro21.domain.enumeration.ReadStatus.SENT;
 
 @SpringBootTest
@@ -132,9 +133,13 @@ public class DialogsControllerTest extends AbstractTest {
         sDialog.setMessages(messageSet);
         this.sDialog = dialogRepository.save(sDialog);
 
-        PersonToDialog p2d = personToDialogRepository.findDialogByPersonIdAndDialogId(sP1.getId(), sDialog.getId());
-        p2d.setLastCheck(LocalDateTime.now(ZoneOffset.UTC));
-        personToDialogRepository.save(p2d);
+        PersonToDialog p2d1 = personToDialogRepository.findDialogByPersonIdAndDialogId(sP1.getId(), sDialog.getId());
+        p2d1.setLastCheck(LocalDateTime.now(ZoneOffset.UTC));
+        personToDialogRepository.save(p2d1);
+
+        PersonToDialog p2d2 = personToDialogRepository.findDialogByPersonIdAndDialogId(sP2.getId(), sDialog.getId());
+        p2d2.setLastCheck(LocalDateTime.now(ZoneOffset.UTC));
+        personToDialogRepository.save(p2d2);
     }
 
     @AfterEach
@@ -375,5 +380,72 @@ public class DialogsControllerTest extends AbstractTest {
                         .principal(() -> "test999@test.ru"))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @Test
+    @WithMockUser(username = "test999@test.ru", authorities = "user:write")
+    void putMessageById() throws Exception {
+        MessageTextRequest messageTextRequest = new MessageTextRequest();
+        messageTextRequest.setMessageText("NONONO!");
+        mockMvc.perform(MockMvcRequestBuilders
+                        .put("/api/v1/dialogs/{dialog_id}/messages/{message_id}", sDialog.getId(), sMessage.getId())
+                        .principal(() -> "test999@test.ru")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(messageTextRequest)))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @Test
+    @WithMockUser(username = "test999@test.ru", authorities = "user:write")
+    void putRecoverMessageById() throws Exception {
+        Optional<Message> message = messageRepository.findById(sMessage.getId());
+        message.get().setIsBlocked(2);
+        Message save = messageRepository.save(message.get());
+        mockMvc.perform(MockMvcRequestBuilders
+                        .put("/api/v1/dialogs/{dialog_id}/messages/{message_id}/recover", sDialog.getId(), save.getId())
+                        .principal(() -> "test999@test.ru"))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @Test
+    @WithMockUser(username = "test999@test.ru", authorities = "user:write")
+    void readeMessage() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders
+                        .put("/api/v1/dialogs/{dialog_id}/messages/{message_id}/read", sDialog.getId(), sMessage.getId())
+                        .principal(() -> "test999@test.ru"))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
+        Optional<Message> message = messageRepository.findById(sMessage.getId());
+        Assertions.assertEquals(READ, message.get().getReadStatus());
+
+    }
+
+    @Test
+    @WithMockUser(username = "test999@test.ru", authorities = "user:write")
+    void activityPersonInDialog() throws Exception {
+        Optional<Person> person = personRepository.findByEmail(sP2.getEmail());
+        person.get().setLastOnlineTime(LocalDateTime.now(ZoneOffset.UTC));
+        Person save = personRepository.save(person.get());
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/api/v1/dialogs/{id}/activity/{user_id}", sDialog.getId(), save.getId())
+                        .principal(() -> "test999@test.ru"))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                        .andExpect(MockMvcResultMatchers.jsonPath("$.data.online")
+                        .value(true));
+    }
+
+    @Test
+    @WithMockUser(username = "test999@test.ru", authorities = "user:write")
+    void postActivityPersonInDialog() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders
+                        .post("/api/v1/dialogs/{id}/activity/{user_id}", sDialog.getId(), sP2.getId())
+                        .principal(() -> "test999@test.ru"))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.message")
+                        .value("ok"));
     }
 }

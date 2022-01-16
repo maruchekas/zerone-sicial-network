@@ -307,13 +307,6 @@ public class DialogsServiceImpl implements DialogsService {
         return getDataResponseWithMessageData(save, p2DByDialogAndMessage);
     }
 
-    private DataResponse<MessageContent> getDataResponseWithMessageData(Message message, PersonToDialog p2d) {
-        return new DataResponse<MessageContent>()
-                .setError("")
-                .setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli())
-                .setData(getMessageData(message, p2d));
-    }
-
     public DataResponse<MessageContent> putRecoverMessageById(int dialogId, Long messageId, Principal principal) throws MessageNotFoundException {
         Message message = messageRepository.findDeletedMessageByDialogIdMessageId(dialogId, messageId);
         Person person = utilsService.findPersonByEmail(principal.getName());
@@ -332,7 +325,7 @@ public class DialogsServiceImpl implements DialogsService {
     }
 
     public DataResponse<MessageOkContent> readeMessage(int dialogId, Long messageId, Principal principal) {
-        Message message = messageRepository.findDeletedMessageByDialogIdMessageId(dialogId, messageId);
+        Message message = messageRepository.findByDialogIdMessageId(dialogId, messageId);
         message
                 .setReadStatus(READ);
         messageRepository.save(message);
@@ -350,7 +343,6 @@ public class DialogsServiceImpl implements DialogsService {
             lastActivityContent
                     .setOnline(false)
                     .setLastActivity(recipient.getLastOnlineTime().toInstant(ZoneOffset.UTC).toEpochMilli());
-            ;
         }
         return new DataResponse<LastActivityContent>()
                 .setError("")
@@ -400,6 +392,13 @@ public class DialogsServiceImpl implements DialogsService {
                 .setError("")
                 .setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli())
                 .setData(new DialogContent().setId(id));
+    }
+
+    private DataResponse<MessageContent> getDataResponseWithMessageData(Message message, PersonToDialog p2d) {
+        return new DataResponse<MessageContent>()
+                .setError("")
+                .setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli())
+                .setData(getMessageData(message, p2d));
     }
 
 
