@@ -30,7 +30,7 @@ build:
 unit testing:
   stage: test
   script:
-    - 'mvn test'
+    - 'mvn $MAVEN_CLI_OPTS test'
   image: maven:latest
   only:
     - develop
