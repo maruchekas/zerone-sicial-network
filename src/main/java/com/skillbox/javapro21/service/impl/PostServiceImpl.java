@@ -64,7 +64,6 @@ public class PostServiceImpl implements PostService {
             pageablePostList = postRepository.findPostsByTextByAuthorByTagsContainingByDateExcludingBlockers(text.toLowerCase(Locale.ROOT), datetimeFrom, datetimeTo, author.toLowerCase(Locale.ROOT), tags, pageable);
         }
         return getPostsResponse(offset, itemPerPage, pageablePostList);
-
     }
 
     @Override
@@ -214,8 +213,37 @@ public class PostServiceImpl implements PostService {
         Person person = utilsService.findPersonByEmail(principal.getName());
         Pageable pageable = PageRequest.of(offset / itemPerPage, itemPerPage);
         List<Long> friendsAndSubscribersIds = personRepository.findAllFriendsAndSubscribersByPersonId(person.getId());
-        Page<Post> postPage = postRepository.findPostsByTextExcludingBlockers(text.toLowerCase(Locale.ROOT), friendsAndSubscribersIds, pageable);
+        Page<Post> postPage;
+        if (!text.isEmpty()) {
+            postPage = postRepository.findPostsByTextContainingNoBlocked(text.toLowerCase(Locale.ROOT), friendsAndSubscribersIds, pageable);
+        } else {
+            postPage = postRepository.findPostsContainingNoBlocked(friendsAndSubscribersIds, pageable);
+        }
+        if (postPage.getTotalElements() == 0 ) {
+            postPage = postRepository.findBestPosts(PageRequest.of(0, 10));
+            return getPostsResponse(0, 10, postPage);
+        }
+        if (postPage.getTotalElements() > 0 && postPage.getTotalElements() <= 10) {
+            Page<Post> postPage2 = postRepository.findBestPosts(PageRequest.of(0, 10));
+            return getPostsResponse(offset, itemPerPage, postPage, postPage2);
+        }
         return getPostsResponse(offset, itemPerPage, postPage);
+    }
+
+    protected ListDataResponse<PostData> getPostsResponse(int offset, int itemPerPage, Page<Post> pageablePostList, Page<Post> pageablePostList2) {
+        List<Post> postsForResponse = new ArrayList<>(pageablePostList.toList());
+        List<Post> bestPosts = new ArrayList<>(pageablePostList2.toList());
+        for (Post p : bestPosts) {
+            if (!postsForResponse.contains(p)) {
+                postsForResponse.add(p);
+            }
+        }
+        return new ListDataResponse<PostData>()
+                .setOffset(offset)
+                .setPerPage(itemPerPage)
+                .setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli())
+                .setTotal(postsForResponse.size())
+                .setData(getPostForResponse(postsForResponse));
     }
 
     private void sendMessageForAdministration(String message) throws MailjetException, IOException {

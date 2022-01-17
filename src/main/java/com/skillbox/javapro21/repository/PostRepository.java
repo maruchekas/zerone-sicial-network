@@ -52,7 +52,7 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
             "left join Person ps on ps.id = p.author.id " +
             "left join PostComment pc on pc.post.id = p.id " +
             "where ps.id = :id " +
-            "and (ps.isBlocked = 0 and p.isBlocked = 0) and p.time < CURRENT_TIMESTAMP " +
+            "and (ps.isBlocked = 0 and p.isBlocked = 0) and p.time <= CURRENT_TIMESTAMP " +
             "group by p.id " +
             "order by p.time desc")
     Page<Post> findPostsByPersonId(Long id, Pageable pageable);
@@ -75,7 +75,7 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
             "and (LOWER(p.title) like %:text% or LOWER(p.postText) like %:text%) " +
             "group by p.id " +
             "order by p.time desc")
-    Page<Post> findPostsByTextExcludingBlockers(String text, List<Long> friendsAndSubscribersIds, Pageable pageable);
+    Page<Post> findPostsByTextContainingNoBlocked(String text, List<Long> friendsAndSubscribersIds, Pageable pageable);
 
 
     @Query("SELECT p FROM Post p " +
@@ -106,4 +106,18 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
             "group by p.id " +
             "order by p.time desc")
     Page<Post> findAllPostsByAuthor(String author, LocalDateTime dateFrom, LocalDateTime dateTo, Pageable pageable);
+
+
+    @Query("select p from Post p " +
+            "join Person ps on ps.id = p.author.id " +
+            "where ps.id in (:friendsAndSubscribersIds) " +
+            "and p.isBlocked = 0 " +
+            "and ps.isBlocked = 0 " +
+            "group by p.id " +
+            "order by p.time desc")
+    Page<Post> findPostsContainingNoBlocked(List<Long> friendsAndSubscribersIds, Pageable pageable);
+
+    @Query("select p from Post p " +
+            "order by p.likes.size desc")
+    Page<Post> findBestPosts(Pageable pageable);
 }
