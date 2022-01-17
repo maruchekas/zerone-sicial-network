@@ -31,7 +31,8 @@ public class AddedLastOnlineTimeForPersonWithAOP {
             Person person = personRepository.findByEmail(email).orElseThrow();
             person.setLastOnlineTime(LocalDateTime.now(ZoneOffset.UTC));
             personRepository.save(person);
-            log.info(email + "; " + "LastActivity: " + personRepository.findByEmail(email).get().getLastOnlineTime() + "; Класс контроллера: " + joinPoint.getTarget().getClass());
+            log.info(email + "; " + "LastActivity: " + personRepository.findByEmail(email).get().getLastOnlineTime() + "; " +
+                    "Класс контроллера: " + joinPoint.getTarget().getClass());
         }
         return proceed;
     }

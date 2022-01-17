@@ -2,7 +2,6 @@ package com.skillbox.javapro21.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
@@ -16,9 +15,7 @@ import java.util.*;
 @Table(name = "posts")
 @Getter
 @Setter
-@ToString
 @Accessors(chain = true)
-@RequiredArgsConstructor
 public class Post {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

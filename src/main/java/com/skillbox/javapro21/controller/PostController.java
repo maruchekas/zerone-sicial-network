@@ -91,7 +91,7 @@ public class PostController {
         return new ResponseEntity<>(postService.recoverPostById(id, principal), HttpStatus.OK);
     }
 
-    @Operation(summary = "Получение комментариев к посту")
+    @Operation(summary = "Получение комментариев к посту", security = @SecurityRequirement(name = "jwt"))
     @GetMapping("/post/{id}/comments")
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
@@ -101,7 +101,7 @@ public class PostController {
         return new ResponseEntity<>(postService.getComments(id, offset, itemPerPage), HttpStatus.OK);
     }
 
-    @Operation(summary = "Добавление комментариев к посту")
+    @Operation(summary = "Добавление комментариев к посту", security = @SecurityRequirement(name = "jwt"))
     @PostMapping("/post/{id}/comments")
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
@@ -111,7 +111,7 @@ public class PostController {
         return new ResponseEntity<>(postService.postComments(id, commentRequest, principal), HttpStatus.OK);
     }
 
-    @Operation(summary = "Редактирование комментария к посту")
+    @Operation(summary = "Редактирование комментария к посту", security = @SecurityRequirement(name = "jwt"))
     @PutMapping("/post/{id}/comments/{comment_id}")
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
@@ -122,7 +122,7 @@ public class PostController {
         return new ResponseEntity<>(postService.putComments(id, commentId, commentRequest, principal), HttpStatus.OK);
     }
 
-    @Operation(summary = "Удаление комментария")
+    @Operation(summary = "Удаление комментария", security = @SecurityRequirement(name = "jwt"))
     @DeleteMapping("/post/{id}/comments/{comment_id}")
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
@@ -132,7 +132,7 @@ public class PostController {
         return new ResponseEntity<>(postService.deleteComments(id, commentId, principal), HttpStatus.OK);
     }
 
-    @Operation(summary = "Восстановление комментария")
+    @Operation(summary = "Восстановление комментария", security = @SecurityRequirement(name = "jwt"))
     @PutMapping("/post/{id}/comments/{comment_id}/recover")
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
@@ -142,7 +142,7 @@ public class PostController {
         return new ResponseEntity<>(postService.recoverComments(id, commentId, principal), HttpStatus.OK);
     }
 
-    @Operation(summary = "Жалоба на пост")
+    @Operation(summary = "Жалоба на пост", security = @SecurityRequirement(name = "jwt"))
     @PostMapping("/post/{id}/report")
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
@@ -151,7 +151,7 @@ public class PostController {
         return new ResponseEntity<>(postService.ratPostController(id, principal), HttpStatus.OK);
     }
 
-    @Operation(summary = "Восстановление комментария")
+    @Operation(summary = "Жалоба на комментарий к посту", security = @SecurityRequirement(name = "jwt"))
     @PostMapping("/post/{id}/comments/{comment_id}/report")
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity

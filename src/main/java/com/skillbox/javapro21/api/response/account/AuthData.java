@@ -6,7 +6,6 @@ import com.skillbox.javapro21.domain.enumeration.MessagesPermission;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
-import java.sql.Timestamp;
 import java.util.Map;
 
 @Data
@@ -18,9 +17,9 @@ public class AuthData implements Content {
     @JsonProperty("last_name")
     private String lastName;
     @JsonProperty("reg_time")
-    private Timestamp regDate;
+    private long regDate;
     @JsonProperty("birth_date")
-    private Timestamp birthDate;
+    private long birthDate;
     private String email;
     private String phone;
     private String photo;
@@ -30,7 +29,7 @@ public class AuthData implements Content {
     @JsonProperty("message_permission")
     private MessagesPermission messagePermission;
     @JsonProperty("last_online_time")
-    private Timestamp lastOnlineTime;
+    private long lastOnlineTime;
     @JsonProperty("is_blocked")
     private String isBlocked;
     private String token;

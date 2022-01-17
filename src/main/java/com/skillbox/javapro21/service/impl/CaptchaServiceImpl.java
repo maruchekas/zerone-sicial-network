@@ -2,6 +2,7 @@ package com.skillbox.javapro21.service.impl;
 
 import com.github.cage.Cage;
 import com.skillbox.javapro21.api.response.captcha.CaptchaResponse;
+import com.skillbox.javapro21.config.Constants;
 import com.skillbox.javapro21.domain.CaptchaCode;
 import com.skillbox.javapro21.repository.CaptchaRepository;
 import com.skillbox.javapro21.service.CaptchaService;
@@ -21,20 +22,12 @@ import java.util.Base64;
 @Component
 @RequiredArgsConstructor
 public class CaptchaServiceImpl implements CaptchaService {
-    @Value("${captcha.width}")
-    private int captchaWidth;
-    @Value("${captcha.height}")
-    private int captchaHeight;
-    @Value("${captcha.image}")
-    private String captchaImagePNG;
-    @Value("${captcha.lifespanBySec}")
-    private long captchaLifespan;
 
     private final CaptchaRepository captchaRepository;
 
     public CaptchaResponse getNewCaptcha() {
         Timestamp timeThreshold = Timestamp.valueOf(LocalDateTime.now()
-                .minusSeconds(captchaLifespan));
+                .minusSeconds(Constants.CAPTCHA_LIFESPAN_IN_SEC));
         captchaRepository.deleteOldCaptcha(timeThreshold);
         Cage cage = new Cage();
         String code = cage.getTokenGenerator().next();
@@ -48,7 +41,7 @@ public class CaptchaServiceImpl implements CaptchaService {
         captchaCode.setTime(new Timestamp(System.currentTimeMillis()));
         captchaRepository.saveAndFlush(captchaCode);
         CaptchaResponse captchaResponse = new CaptchaResponse();
-        captchaResponse.setImage(captchaImagePNG + encodeImage);
+        captchaResponse.setImage(Constants.CAPTCHA_IMG_ENCODE_PREFIX + encodeImage);
         captchaResponse.setSecretCode(secret);
         return captchaResponse;
     }
@@ -56,7 +49,7 @@ public class CaptchaServiceImpl implements CaptchaService {
     private byte[] compressImageAndGetByteArray(BufferedImage image) {
         byte[] result = new byte[0];
         image = Scalr.resize(image, Scalr.Method.ULTRA_QUALITY, Scalr.Mode.AUTOMATIC,
-                captchaWidth, captchaHeight, Scalr.OP_ANTIALIAS);
+                Constants.CAPTCHA_WIDTH, Constants.CAPTCHA_HEIGHT, Scalr.OP_ANTIALIAS);
         try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             ImageIO.write(image, "png", out);
             result = out.toByteArray();
