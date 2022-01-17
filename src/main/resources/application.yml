@@ -29,11 +29,6 @@ mailjet:
     enabled: true
 jwt:
   secret: ${JWT_SECRET}
-captcha:
-  width: 193
-  height: 57
-  image: data:captchaImage/png;base64,
-  lifespanBySec: 0
 cloudinary:
   cloudName: ${CLOUDINARY_CLOUD_NAME}
   apiKey: ${CLOUDINARY_API_KEY}

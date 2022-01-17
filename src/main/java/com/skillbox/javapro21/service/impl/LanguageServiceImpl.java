@@ -51,9 +51,7 @@ public class LanguageServiceImpl implements LanguageService {
         List<LanguageData> languagesData = new ArrayList<>();
 
         languages.forEach(language -> {
-            LanguageData languageData = null;
-            languageData = getLanguageData(language);
-            languagesData.add(languageData);
+            languagesData.add(getLanguageData(language));
         });
 
         return languagesData;

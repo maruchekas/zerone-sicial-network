@@ -19,6 +19,7 @@ import com.skillbox.javapro21.exception.UserExistException;
 import com.skillbox.javapro21.repository.NotificationTypeRepository;
 import com.skillbox.javapro21.repository.PersonRepository;
 import com.skillbox.javapro21.service.AccountService;
+import com.skillbox.javapro21.service.ResourceService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -44,6 +45,7 @@ public class AccountServiceImpl implements AccountService {
     private final ConfirmationUrl confirmationUrl;
     private final JwtGenerator jwtGenerator;
     private final NotificationTypeRepository notificationTypeRepository;
+    private final ResourceService resourceService;
 
     @Override
     public DataResponse<MessageOkContent> registration(RegisterRequest registerRequest) throws UserExistException, MailjetException, IOException {
@@ -197,8 +199,9 @@ public class AccountServiceImpl implements AccountService {
     /**
      * Создание пользователя без верификации
      */
-    private void createNewPerson(RegisterRequest registerRequest) {
+    private void createNewPerson(RegisterRequest registerRequest) throws IOException {
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
+
         Person person = new Person()
                 .setEmail(registerRequest.getEmail())
                 .setFirstName(registerRequest.getFirstName())
@@ -209,6 +212,7 @@ public class AccountServiceImpl implements AccountService {
                 .setRegDate(LocalDateTime.now(ZoneOffset.UTC))
                 .setLastOnlineTime(LocalDateTime.now(ZoneOffset.UTC))
                 .setIsBlocked(0)
+                .setPhoto(resourceService.createDefaultRoboticAvatar(registerRequest.getFirstName()))
                 .setMessagesPermission(MessagesPermission.NOBODY);
         personRepository.save(person);
         globalNotificationsSettings(person);
