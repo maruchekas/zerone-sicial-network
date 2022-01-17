@@ -7,7 +7,9 @@ import com.skillbox.javapro21.domain.*;
 import com.skillbox.javapro21.domain.enumeration.FriendshipStatusType;
 import com.skillbox.javapro21.domain.enumeration.MessagesPermission;
 import com.skillbox.javapro21.repository.*;
+import com.skillbox.javapro21.service.ProfileService;
 import com.skillbox.javapro21.service.impl.UtilsService;
+import com.sun.security.auth.UserPrincipal;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,12 +27,12 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.skillbox.javapro21.domain.enumeration.FriendshipStatusType.BLOCKED;
-import static com.skillbox.javapro21.domain.enumeration.FriendshipStatusType.WASBLOCKED;
+import static com.skillbox.javapro21.domain.enumeration.FriendshipStatusType.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -50,6 +52,8 @@ public class ProfileControllerTest extends AbstractTest {
     private FriendshipStatusRepository friendshipStatusRepository;
     @Autowired
     private UtilsService utilsService;
+    @Autowired
+    private ProfileService profileService;
 
     private Person verifyPerson;
     private Person verifyPersonWithPost;
@@ -73,6 +77,7 @@ public class ProfileControllerTest extends AbstractTest {
         String password = "1234";
         String firstName = "Arcadiy";
         String lastName = "Parovozov";
+        LocalDateTime birthDate = LocalDateTime.now().minusYears(20);
         LocalDateTime reg_date = LocalDateTime.now();
         String conf_code = "123";
 
@@ -81,14 +86,52 @@ public class ProfileControllerTest extends AbstractTest {
                 .setPassword(passwordEncoder.encode(password))
                 .setFirstName(firstName)
                 .setLastName(lastName)
+                .setBirthDate(birthDate)
                 .setConfirmationCode("123")
                 .setRegDate(reg_date)
                 .setConfirmationCode(conf_code)
                 .setMessagesPermission(MessagesPermission.ALL)
                 .setIsBlocked(0)
                 .setIsApproved(1)
-                .setLastOnlineTime(LocalDateTime.now());
+                .setLastOnlineTime(LocalDateTime.now())
+                .setBirthDate(LocalDateTime.of(2000, 1, 1, 10, 0))
+                .setCountry("Россия")
+                .setTown("Москва");
         personRepository.save(verifyPerson);
+
+        Person verifyPersonA = new Person()
+                .setEmail(verifyEmail + "A")
+                .setPassword(passwordEncoder.encode(password))
+                .setFirstName(firstName + "-Альфа")
+                .setLastName(lastName)
+                .setConfirmationCode("123")
+                .setRegDate(reg_date)
+                .setConfirmationCode(conf_code)
+                .setMessagesPermission(MessagesPermission.ALL)
+                .setIsBlocked(0)
+                .setIsApproved(1)
+                .setLastOnlineTime(LocalDateTime.now())
+                .setBirthDate(LocalDateTime.of(2000, 1, 1, 10, 0))
+                .setCountry("Россия")
+                .setTown("Москва");
+        personRepository.save(verifyPersonA);
+
+        Person verifyPersonB = new Person()
+                .setEmail(verifyEmail + "B")
+                .setPassword(passwordEncoder.encode(password))
+                .setFirstName(firstName + "-Бетта")
+                .setLastName(lastName)
+                .setConfirmationCode("123")
+                .setRegDate(reg_date)
+                .setConfirmationCode(conf_code)
+                .setMessagesPermission(MessagesPermission.ALL)
+                .setIsBlocked(1)
+                .setIsApproved(1)
+                .setLastOnlineTime(LocalDateTime.now())
+                .setBirthDate(LocalDateTime.of(2000, 1, 1, 10, 0))
+                .setCountry("Россия")
+                .setTown("Москва");
+        personRepository.save(verifyPersonB);
 
         verifyPersonWithPost = new Person()
                 .setEmail(verifyEmail + "b")
@@ -101,7 +144,10 @@ public class ProfileControllerTest extends AbstractTest {
                 .setMessagesPermission(MessagesPermission.ALL)
                 .setIsBlocked(0)
                 .setIsApproved(1)
-                .setLastOnlineTime(LocalDateTime.now().minusDays(2));
+                .setLastOnlineTime(LocalDateTime.now().minusDays(2))
+                .setBirthDate(LocalDateTime.of(2010, 1, 1, 10, 0))
+                .setCountry("Россия")
+                .setTown("Санкт-Петербург");
         personRepository.save(verifyPersonWithPost);
 
         friendshipStatusSrc = new FriendshipStatus();
@@ -114,6 +160,16 @@ public class ProfileControllerTest extends AbstractTest {
         friendshipStatusDst.setTime(LocalDateTime.now().minusDays(1));
         friendshipStatusRepository.save(friendshipStatusDst);
 
+        FriendshipStatus statusA = new FriendshipStatus();
+        statusA.setFriendshipStatusType(FRIEND);
+        statusA.setTime(LocalDateTime.now().minusDays(1));
+        friendshipStatusRepository.save(statusA);
+
+        FriendshipStatus statusB = new FriendshipStatus();
+        statusB.setFriendshipStatusType(BLOCKED);
+        statusB.setTime(LocalDateTime.now().minusDays(1));
+        friendshipStatusRepository.save(statusB);
+
         friendshipSrc = new Friendship();
         friendshipSrc.setSrcPerson(verifyPerson);
         friendshipSrc.setDstPerson(verifyPersonWithPost);
@@ -125,6 +181,18 @@ public class ProfileControllerTest extends AbstractTest {
         friendshipDst.setDstPerson(verifyPerson);
         friendshipDst.setFriendshipStatus(friendshipStatusDst);
         friendshipRepository.save(friendshipDst);
+
+        Friendship friendshipA = new Friendship();
+        friendshipA.setSrcPerson(verifyPerson);
+        friendshipA.setDstPerson(verifyPersonA);
+        friendshipA.setFriendshipStatus(statusA);
+        friendshipRepository.save(friendshipA);
+
+        Friendship friendshipB = new Friendship();
+        friendshipB.setSrcPerson(verifyPerson);
+        friendshipB.setDstPerson(verifyPersonB);
+        friendshipB.setFriendshipStatus(statusB);
+        friendshipRepository.save(friendshipB);
 
         tag1 = new Tag()
                 .setTag("моржиНавсегда");
@@ -199,9 +267,6 @@ public class ProfileControllerTest extends AbstractTest {
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk())
         .andExpect(MockMvcResultMatchers.jsonPath("$.error").value("string"));
-
-        Assertions.assertEquals(LocalDateTime.now().getDayOfMonth(),
-                personRepository.findByEmail(verifyPerson.getEmail()).get().getLastOnlineTime().getDayOfMonth());
     }
 
     @Test
@@ -209,6 +274,7 @@ public class ProfileControllerTest extends AbstractTest {
     void editPerson() throws Exception {
         EditProfileRequest editProfileRequest = new EditProfileRequest();
         editProfileRequest.setFirstName("Oleg");
+        editProfileRequest.setBirthDate(personRepository.findByEmail("test1@test.ru").get().getBirthDate().toString());
 
         mockMvc.perform(MockMvcRequestBuilders
                         .put("/api/v1/users/me")
@@ -333,5 +399,24 @@ public class ProfileControllerTest extends AbstractTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.data.message").value("ok"));
         Assertions.assertEquals(null, utilsService.getFriendshipStatus(verifyPerson.getId(), verifyPersonWithPost.getId()));
         Assertions.assertEquals(null, utilsService.getFriendshipStatus(verifyPersonWithPost.getId(), verifyPerson.getId()));
+    }
+
+    @Test
+    @WithMockUser(username = "test1@test.ru", authorities = "user:write")
+    void searchByPerson() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/api/v1/users/search", "Arcadiy")
+                        .principal(() -> "test1@test.ru")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk());
+        Principal principal = new UserPrincipal("test1@test.ru");
+        Assertions.assertEquals(2, profileService.searchByPerson("", "", 0, 150, "", "", 0, 20, principal).getTotal());
+        Assertions.assertEquals(2, profileService.searchByPerson("Arcadiy", "", 0, 150, "", "", 0, 20, principal).getTotal());
+        Assertions.assertEquals(2, profileService.searchByPerson("", "ovoz", 0, 150, "", "", 0, 20, principal).getTotal());
+        Assertions.assertEquals(1, profileService.searchByPerson("diy", "ovoz", 18, 30, "", "", 0, 20, principal).getTotal());
+        Assertions.assertEquals(2, profileService.searchByPerson("diy", "ovoz", 0, 30, "", "", 0, 20, principal).getTotal());
+        Assertions.assertEquals(2, profileService.searchByPerson("diy", "ovoz", 0, 30, "Россия", "", 0, 20, principal).getTotal());
+        Assertions.assertEquals(1, profileService.searchByPerson("diy", "ovoz", 0, 30, "Россия", "Москва", 0, 20, principal).getTotal());
     }
 }

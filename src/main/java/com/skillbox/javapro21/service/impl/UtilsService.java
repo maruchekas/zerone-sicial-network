@@ -1,6 +1,8 @@
 package com.skillbox.javapro21.service.impl;
 
+import com.skillbox.javapro21.api.response.Content;
 import com.skillbox.javapro21.api.response.DataResponse;
+import com.skillbox.javapro21.api.response.ListDataResponse;
 import com.skillbox.javapro21.api.response.MessageOkContent;
 import com.skillbox.javapro21.api.response.account.AuthData;
 import com.skillbox.javapro21.domain.Friendship;
@@ -21,6 +23,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -56,6 +59,23 @@ public class UtilsService {
         accountData.setMessage("ok");
         dataResponse.setData(accountData);
         return dataResponse;
+    }
+
+    public DataResponse<Content> getDataResponse(Content data) {
+        return new DataResponse<>()
+                .setError("ok")
+                .setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli())
+                .setData(data);
+    }
+
+    public ListDataResponse<Content> getListDataResponse(int total, int offset, int limit, List<Content> data) {
+        return new ListDataResponse<>()
+                .setError("ok")
+                .setTimestamp(new Date().getTime())
+                .setTotal(total)
+                .setOffset(offset)
+                .setPerPage(limit)
+                .setData(data);
     }
 
     /**
