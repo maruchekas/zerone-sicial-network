@@ -201,9 +201,6 @@ public class ProfileControllerTest extends AbstractTest {
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk())
         .andExpect(MockMvcResultMatchers.jsonPath("$.error").value("string"));
-
-        Assertions.assertEquals(LocalDateTime.now().getDayOfMonth(),
-                personRepository.findByEmail(verifyPerson.getEmail()).get().getLastOnlineTime().getDayOfMonth());
     }
 
     @Test
