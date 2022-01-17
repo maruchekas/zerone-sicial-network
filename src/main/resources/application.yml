@@ -10,9 +10,9 @@ spring:
     pathmatch:
       matching-strategy: ant_path_matcher
   datasource:
-    url: ${JDBC_DATABASE_URL}
-    username: ${JDBC_DATABASE_USERNAME}
-    password: ${JDBC_DATABASE_PASSWORD}
+    url: jdbc:postgresql://ec2-3-227-15-75.compute-1.amazonaws.com:5432/d7bpl25oifrii5
+    username: rccgqavsuohfal
+    password: ffa5552063947d650153c68fd58de02873993eabc1150389329642937747ebec    
   jpa:
     show-sql: false
     hibernate:
@@ -20,8 +20,8 @@ spring:
       dialect: org.hibernate.dialect.PostgreSQLDialect
 mailjet:
   mail:
-    key: ${MAIlJET_MAIL_FROM}
-    from: ${MAIlJET_MAIL_KEY}
+    from: ${MAIlJET_MAIL_FROM}
+    key: ${MAIlJET_MAIL_KEY}
     secret: ${MAIlJET_MAIL_SECRET}
     version: v3.1
     email_admin: ${MAIlJET_MAIL_ADMIN}

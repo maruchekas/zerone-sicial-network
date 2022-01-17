@@ -25,7 +25,6 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.security.Principal;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
@@ -79,7 +78,7 @@ public class PostServiceImpl implements PostService {
             throw new AuthorAndUserEqualsException("Пользователь не может менять данные в этом посте");
         post.setTitle(postRequest.getTitle())
                 .setPostText(postRequest.getPostText())
-                .setTime((publishDate == -1) ? LocalDateTime.now() : utilsService.getLocalDateTime(publishDate));
+                .setTime((publishDate == -1) ? LocalDateTime.now(ZoneOffset.UTC) : utilsService.getLocalDateTime(publishDate));
         post = postRepository.saveAndFlush(post);
         return getDataResponse(getPostData(post));
     }
@@ -127,11 +126,12 @@ public class PostServiceImpl implements PostService {
                     .orElseThrow(() -> new CommentNotFoundException("Комментария с данным id не существует"));
             postComment.setParent(parentPostComment);
         }
-        postComment.setCommentText(commentRequest.getCommentText())
+        postComment
+                .setCommentText(commentRequest.getCommentText())
                 .setIsBlocked(0)
                 .setPerson(person)
                 .setPost(post)
-                .setTime(LocalDateTime.now());
+                .setTime(LocalDateTime.now(ZoneOffset.UTC));
         postCommentRepository.save(postComment);
         return getCommentResponse(postComment);
     }
@@ -150,7 +150,7 @@ public class PostServiceImpl implements PostService {
             throw new CommentNotAuthorException("Пользователь не имеет прав редактировать данный комментарий");
         postComment
                 .setCommentText(commentRequest.getCommentText())
-                .setTime(LocalDateTime.now());
+                .setTime(LocalDateTime.now(ZoneOffset.UTC));
         postCommentRepository.save(postComment);
         return getCommentResponse(postComment);
     }
@@ -240,15 +240,26 @@ public class PostServiceImpl implements PostService {
 
     private CommentsData getCommentsData(PostComment postComment) {
         CommentsData commentsData = new CommentsData();
+        List<PostComment> postCommentsByParentId = postCommentRepository.findPostCommentsByParentId(postComment.getId());
         commentsData
                 .setCommentText(postComment.getCommentText())
                 .setId(postComment.getId())
                 .setPostId(postComment.getPost().getId())
                 .setTime(postComment.getTime().toInstant(ZoneOffset.UTC).toEpochMilli())
-                .setAuthorId(postComment.getPerson().getId())
-                .setBlocked(postComment.getIsBlocked() == 0);
+                .setAuthor(utilsService.getAuthData(postComment.getPerson(), null))
+                .setBlocked(postComment.getIsBlocked() == 0)
+                .setSubComments(getSubCommentsData(postCommentsByParentId));
         if (postComment.getParent() != null) commentsData.setParentId(postComment.getParent().getId());
         return commentsData;
+    }
+
+    private List<CommentsData> getSubCommentsData(List<PostComment> postCommentsByParentId) {
+        List<CommentsData> commentsDataList = new ArrayList<>();
+        postCommentsByParentId.forEach(postComment -> {
+            CommentsData commentsData = getCommentsData(postComment);
+            commentsDataList.add(commentsData);
+        });
+        return commentsDataList;
     }
 
     protected DataResponse<PostData> getDataResponse(PostData postData) {
@@ -259,13 +270,12 @@ public class PostServiceImpl implements PostService {
     }
 
     protected ListDataResponse<PostData> getPostsResponse(int offset, int itemPerPage, Page<Post> pageablePostList) {
-        ListDataResponse<PostData> contentListDataResponse = new ListDataResponse<>();
-        contentListDataResponse.setPerPage(itemPerPage);
-        contentListDataResponse.setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
-        contentListDataResponse.setOffset(offset);
-        contentListDataResponse.setTotal((int) pageablePostList.getTotalElements());
-        contentListDataResponse.setData(getPostForResponse(pageablePostList.toList()));
-        return contentListDataResponse;
+        return new ListDataResponse<PostData>()
+                .setPerPage(itemPerPage)
+                .setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli())
+                .setOffset(offset)
+                .setTotal((int) pageablePostList.getTotalElements())
+                .setData(getPostForResponse(pageablePostList.toList()));
     }
 
     private List<PostData> getPostForResponse(List<Post> listPosts) {
@@ -304,7 +314,9 @@ public class PostServiceImpl implements PostService {
         List<CommentsData> commentsDataArrayList = new ArrayList<>();
         pageablePostComments.forEach(postComment -> {
             CommentsData commentsData = getCommentsData(postComment);
-            commentsDataArrayList.add(commentsData);
+            if (commentsData.getParentId() == null) {
+                commentsDataArrayList.add(commentsData);
+            }
         });
         return commentsDataArrayList;
     }
