@@ -103,7 +103,7 @@ public class ProfileServiceImpl implements ProfileService {
                 post = new Post()
                         .setTitle(postRequest.getTitle())
                         .setPostText(postRequest.getPostText())
-                        .setTime(LocalDateTime.now())
+                        .setTime(LocalDateTime.now(ZoneOffset.UTC))
                         .setIsBlocked(0)
                         .setAuthor(dst);
             } else throw new InterlockedFriendshipStatusException("Один из пользователей заблокирован для другого");
