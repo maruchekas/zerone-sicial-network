@@ -34,7 +34,6 @@ build:
 #   image: maven:latest
 #   only:
 #     - develop
-#     - main
 
 deploy to develop:
   stage: develop

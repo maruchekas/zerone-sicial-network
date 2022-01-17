@@ -310,7 +310,7 @@ public class PostCommentControllerTest extends AbstractTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.data.comment_text").value(postCommentBlocked.getCommentText())).andReturn();
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .put("/recover", post2.getId(), postComment.getId())
+                        .put("/api/v1/post/{id}/comments/{comment_id}/recover", post2.getId(), postComment.getId())
                         .principal(() -> "test@test.rub"))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isNotFound()).andReturn();

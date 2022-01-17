@@ -44,8 +44,8 @@ public class AccountControllerTest extends AbstractTest {
     @BeforeEach
     public void setup() {
         super.setup();
-        String email = "ivan_zukkel@mail.ru";
-        String verifyEmail = "ivan_zykkel@mail.ru";
+        String email = "test1@test.ru";
+        String verifyEmail = "test@test.ru";
         String password = "1234";
         String firstName = "Arcadiy";
         String lastName = "Parovozov";
@@ -63,7 +63,6 @@ public class AccountControllerTest extends AbstractTest {
                 .setPassword(passwordEncoder.encode(password))
                 .setFirstName(firstName)
                 .setLastName(lastName)
-                .setConfirmationCode("123")
                 .setRegDate(reg_date)
                 .setConfirmationCode(conf_code)
                 .setMessagesPermission(MessagesPermission.ALL)
@@ -110,18 +109,16 @@ public class AccountControllerTest extends AbstractTest {
 
     @Test
     void recoveryPasswordMessage() throws Exception {
-        RecoveryRequest recoveryRequest = new RecoveryRequest();
-        recoveryRequest.setEmail(verifyPerson.getEmail());
-
         mockMvc.perform(MockMvcRequestBuilders
-                        .put("/api/v1/account/password/send_recovery_massage")
+                        .get("/api/v1/account/password/send_recovery_massage")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(recoveryRequest))
+//                        .content(mapper.writeValueAsString(recoveryRequest))
+                        .param("email", "test@test.ru")
+                        .param("code", "123")
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }
-
 
     @Test
     void verifyRecovery() throws Exception {
@@ -129,18 +126,19 @@ public class AccountControllerTest extends AbstractTest {
                         .get("/api/v1/account/password/recovery/complete")
                         .contentType(MediaType.APPLICATION_JSON)
                         .param("email", "test@test.ru")
-                        .param("code", "123"))
+                        .param("password", "123"))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
     @Test
     void recoveryPassword() throws Exception {
+        RecoveryRequest recoveryRequest = new RecoveryRequest();
+        recoveryRequest.setEmail(verifyPerson.getEmail());
         mockMvc.perform(MockMvcRequestBuilders
                         .put("/api/v1/account/password/recovery")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("email", "test@test.ru")
-                        .param("password", "1234"))
+                        .content(mapper.writeValueAsString(recoveryRequest)))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }

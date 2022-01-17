@@ -2,6 +2,7 @@ package com.skillbox.javapro21.service.impl;
 
 import com.skillbox.javapro21.api.request.post.PostRequest;
 import com.skillbox.javapro21.api.request.profile.EditProfileRequest;
+import com.skillbox.javapro21.api.response.Content;
 import com.skillbox.javapro21.api.response.DataResponse;
 import com.skillbox.javapro21.api.response.ListDataResponse;
 import com.skillbox.javapro21.api.response.MessageOkContent;
@@ -28,7 +29,10 @@ import java.security.Principal;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static com.skillbox.javapro21.domain.enumeration.FriendshipStatusType.*;
 
@@ -42,17 +46,20 @@ public class ProfileServiceImpl implements ProfileService {
     private final FriendshipRepository friendshipRepository;
     private final FriendshipStatusRepository friendshipStatusRepository;
 
+    @Override
     public DataResponse<AuthData> getPerson(Principal principal) {
         Person person = utilsService.findPersonByEmail(principal.getName());
         return getPersonDataResponse(person);
     }
 
+    @Override
     public DataResponse<AuthData> editPerson(Principal principal, EditProfileRequest editProfileRequest) {
         Person person = utilsService.findPersonByEmail(principal.getName());
         Person sPerson = savePersonByRequest(person, editProfileRequest);
         return getPersonDataResponse(sPerson);
     }
 
+    @Override
     public DataResponse<MessageOkContent> deletePerson(Principal principal) {
         Person person = utilsService.findPersonByEmail(principal.getName())
                 .setIsBlocked(2);
@@ -61,11 +68,13 @@ public class ProfileServiceImpl implements ProfileService {
         return utilsService.getMessageOkResponse();
     }
 
+    @Override
     public DataResponse<AuthData> getPersonById(Long id) throws PersonNotFoundException {
         Person person = personRepository.findPersonById(id).orElseThrow(() -> new PersonNotFoundException("Пользователя с данным айди не существует"));
         return getPersonDataResponse(person);
     }
 
+    @Override
     public ListDataResponse<PostData> getPersonWallById(Long id, int offset, int itemPerPage, Principal principal) throws PersonNotFoundException, InterlockedFriendshipStatusException {
         Person src = utilsService.findPersonByEmail(principal.getName());
         Person dst = personRepository.findPersonById(id).orElseThrow(() -> new PersonNotFoundException("Пользователя с данным id не существует"));
@@ -79,9 +88,10 @@ public class ProfileServiceImpl implements ProfileService {
             Page<Post> posts = postRepository.findPostsByPersonId(id, pageable);
             return postService.getPostsResponse(offset, itemPerPage, posts);
         }
-        throw new InterlockedFriendshipStatusException("Полльзователь заблокирован и не может смотреть посты");
+        throw new InterlockedFriendshipStatusException("Пользователь заблокирован и не может смотреть посты");
     }
 
+    @Override
     public DataResponse<PostData> postPostOnPersonWallById(Long id, Long publishDate, PostRequest postRequest, Principal principal) throws InterlockedFriendshipStatusException, PersonNotFoundException, PostNotFoundException {
         Person src = utilsService.findPersonByEmail(principal.getName());
         Person dst = personRepository.findPersonById(id).orElseThrow(() -> new PersonNotFoundException("Пользователя с данным id не существует"));
@@ -113,6 +123,7 @@ public class ProfileServiceImpl implements ProfileService {
 
     }
 
+    @Override
     public DataResponse<MessageOkContent> blockPersonById(Long id, Principal principal) throws BlockPersonHimselfException, InterlockedFriendshipStatusException, PersonNotFoundException, FriendshipNotFoundException {
         Person src = utilsService.findPersonByEmail(principal.getName());
         Person dst = personRepository.findPersonById(id).orElseThrow(() -> new PersonNotFoundException("Пользователя с данным id не существует"));
@@ -130,6 +141,7 @@ public class ProfileServiceImpl implements ProfileService {
         return utilsService.getMessageOkResponse();
     }
 
+    @Override
     public DataResponse<MessageOkContent> unblockPersonById(Long id, Principal principal) throws PersonNotFoundException, BlockPersonHimselfException, NonBlockedFriendshipException, InterlockedFriendshipStatusException, FriendshipNotFoundException {
         Person src = utilsService.findPersonByEmail(principal.getName());
         Person dst = personRepository.findPersonById(id).orElseThrow(() -> new PersonNotFoundException("Пользователя с данным id не существует"));
@@ -148,6 +160,17 @@ public class ProfileServiceImpl implements ProfileService {
         return utilsService.getMessageOkResponse();
     }
 
+    @Override
+    public ListDataResponse<Content> searchByPerson(String firstName, String lastName, Integer ageFrom, Integer ageTo, String country, String city, Integer offset, Integer limit, Principal principal) {
+        Person currentUser = utilsService.findPersonByEmail(principal.getName());
+        Pageable nextPage = PageRequest.of(offset, limit);
+        Page<Person> personPage = personRepository.findAllByNameAndAgeAndLocation(currentUser.getId(), firstName, lastName, ageFrom, ageTo, country, city, nextPage);
+        List<Content> data = personPage.getContent().stream()
+                .map(p -> utilsService.getAuthData(p, null))
+                .collect(Collectors.toList());
+        return utilsService.getListDataResponse((int) personPage.getTotalElements(), offset, limit, data);
+    }
+
     private DataResponse<AuthData> getPersonDataResponse(Person person) {
         return new DataResponse<AuthData>()
                 .setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli())
@@ -157,7 +180,10 @@ public class ProfileServiceImpl implements ProfileService {
 
     private Person savePersonByRequest(Person person, EditProfileRequest editProfileRequest) {
         Person personById = personRepository.findPersonById(person.getId()).orElseThrow();
-        String[] split = editProfileRequest.getBirthDate().split("\\+");
+        String[] split = null;
+        if (editProfileRequest.getBirthDate() != null) {
+            split = editProfileRequest.getBirthDate().split("\\+");
+        }
         personById
                 .setFirstName(editProfileRequest.getFirstName() != null
                         ? editProfileRequest.getFirstName() : person.getFirstName())

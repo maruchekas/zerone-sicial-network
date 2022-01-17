@@ -2,10 +2,11 @@ package com.skillbox.javapro21.controller;
 
 import com.skillbox.javapro21.aop.LastActivity;
 import com.skillbox.javapro21.api.request.post.PostRequest;
+import com.skillbox.javapro21.api.request.profile.EditProfileRequest;
+import com.skillbox.javapro21.api.response.Content;
 import com.skillbox.javapro21.api.response.DataResponse;
 import com.skillbox.javapro21.api.response.ListDataResponse;
 import com.skillbox.javapro21.api.response.MessageOkContent;
-import com.skillbox.javapro21.api.request.profile.*;
 import com.skillbox.javapro21.api.response.account.AuthData;
 import com.skillbox.javapro21.api.response.post.PostData;
 import com.skillbox.javapro21.exception.*;
@@ -18,9 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.*;
 
 import java.nio.file.attribute.UserPrincipalNotFoundException;
@@ -107,5 +105,21 @@ public class ProfileController {
     @LastActivity
     public ResponseEntity<DataResponse<MessageOkContent>> unblockPersonById(@PathVariable Long id,Principal principal) throws InterlockedFriendshipStatusException, BlockPersonHimselfException, PersonNotFoundException, NonBlockedFriendshipException, FriendshipNotFoundException {
         return new ResponseEntity<>(profileService.unblockPersonById(id, principal), HttpStatus.OK);
+    }
+
+    @Operation(summary = "Поиск по пользователю", security = @SecurityRequirement(name = "jwt"))
+    @LastActivity
+    @PreAuthorize("hasAuthority('user:write')")
+    @GetMapping("/search")
+    public ResponseEntity<ListDataResponse<Content>> searchByPerson(@RequestParam(name = "first_name", defaultValue = "") String firstName,
+                                                                    @RequestParam(name = "last_name", defaultValue = "") String lastName,
+                                                                    @RequestParam(name = "age_from", defaultValue = "0") Integer ageFrom,
+                                                                    @RequestParam(name = "age_to", defaultValue = "150") Integer ageTo,
+                                                                    @RequestParam(name = "country", defaultValue = "") String country,
+                                                                    @RequestParam(name = "city", defaultValue = "") String city,
+                                                                    @RequestParam(name = "offset", defaultValue = "0") Integer offset,
+                                                                    @RequestParam(name = "limit", defaultValue = "20") Integer limit,
+                                                                    Principal principal) {
+        return new ResponseEntity<>(profileService.searchByPerson(firstName, lastName, ageFrom, ageTo, country, city, offset, limit, principal), HttpStatus.OK);
     }
 }

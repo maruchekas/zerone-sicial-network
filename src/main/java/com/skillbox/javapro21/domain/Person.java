@@ -89,7 +89,14 @@ public class Person implements UserDetails {
     @Column(name = "user_type")
     private UserType userType;
 
-    //    @OneToMany(mappedBy = "person", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ManyToMany
+    @JoinTable(name = "person2dialog",
+            joinColumns = {@JoinColumn(name = "person_id")},
+            inverseJoinColumns = {@JoinColumn(name = "dialog_id")})
+    @ToString.Exclude
+    private Set<Dialog> dialogs;
+
+//    @OneToMany(mappedBy = "person", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 //    @JsonIgnoreProperties(value = {"post", "comment", "person"}, allowSetters = true)
 //    @ToString.Exclude
 //    private Set<BlockHistory> blocksLists = new HashSet<>();
