@@ -42,6 +42,9 @@ public class Message {
     @Column(name = "read_status")
     private ReadStatus readStatus;
 
+    @Column(name = "is_blocked")
+    private Integer isBlocked;
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JsonIgnoreProperties(
             value = {
@@ -77,6 +80,10 @@ public class Message {
     )
 //    @JoinColumn(name = "person_id")
     private Person recipient;
+
+    @ManyToOne
+    @JoinColumn(name = "dialog_id")
+    private Dialog dialog;
 
     @Override
     public boolean equals(Object o) {

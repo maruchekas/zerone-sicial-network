@@ -18,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 
-import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -83,7 +82,7 @@ public class UtilsService {
      * создание рандомного токена
      */
     public String getToken() {
-        return RandomStringUtils.randomAlphanumeric(6);
+        return RandomStringUtils.randomAlphanumeric(8);
     }
 
     /**
@@ -101,10 +100,10 @@ public class UtilsService {
                 .setId(person.getId())
                 .setFirstName(person.getFirstName())
                 .setLastName(person.getLastName())
-                .setRegDate(Timestamp.valueOf(person.getRegDate()))
+                .setRegDate(person.getRegDate().toInstant(ZoneOffset.UTC).toEpochMilli())
                 .setEmail(person.getEmail())
                 .setMessagePermission(person.getMessagesPermission())
-                .setLastOnlineTime(Timestamp.valueOf(person.getLastOnlineTime()))
+                .setLastOnlineTime(person.getLastOnlineTime().toInstant(ZoneOffset.UTC).toEpochMilli())
                 .setIsBlocked(isBlockedPerson(person))
                 .setToken(token);
         if (person.getPhone() != null) authData.setPhone(person.getPhone());
@@ -114,7 +113,7 @@ public class UtilsService {
             authData.setCity(Map.of("id", person.getId().toString(), "City", person.getTown()));
             authData.setCountry(Map.of("id", person.getId().toString(), "Country", person.getCountry()));
         }
-        if (person.getBirthDate() != null) authData.setBirthDate(Timestamp.valueOf(person.getBirthDate()));
+        if (person.getBirthDate() != null) authData.setBirthDate(person.getBirthDate().toInstant(ZoneOffset.UTC).toEpochMilli());
         return authData;
     }
 

@@ -45,6 +45,7 @@ public class PostServiceImpl implements PostService {
     private final PersonRepository personRepository;
     private final MailjetSender mailjetSender;
 
+    @Override
     public ListDataResponse<PostData> getPosts(String text, long dateFrom, long dateTo, int offset, int itemPerPage, String author, String tag, Principal principal) {
         LocalDateTime datetimeFrom = (dateFrom != -1) ? utilsService.getLocalDateTime(dateFrom) : LocalDateTime.now().minusYears(1);
         LocalDateTime datetimeTo = (dateTo != -1) ? utilsService.getLocalDateTime(dateTo) : LocalDateTime.now();
@@ -53,24 +54,26 @@ public class PostServiceImpl implements PostService {
         if ((text.matches("\\s*") || text.equals("")) && tag.equals("") && author.equals("")) {
             pageablePostList = postRepository.findAllPosts(datetimeFrom, datetimeTo, pageable);
         } else if (!text.isEmpty() && !text.matches("\\s*") && tag.equals("") && author.equals("")) {
-            pageablePostList = postRepository.findAllPostsByText(text, datetimeFrom, datetimeTo, pageable);
+            pageablePostList = postRepository.findAllPostsByText(text.toLowerCase(Locale.ROOT), datetimeFrom, datetimeTo, pageable);
         } else if (!text.trim().isEmpty() && tag.equals("") && !author.isEmpty()) {
-            pageablePostList = postRepository.findPostsByTextByAuthorWithoutTagsContainingByDateExcludingBlockers(text, datetimeFrom, datetimeTo, author, pageable);
+            pageablePostList = postRepository.findPostsByTextByAuthorWithoutTagsContainingByDateExcludingBlockers(text.toLowerCase(Locale.ROOT), datetimeFrom, datetimeTo, author.toLowerCase(Locale.ROOT), pageable);
         } else if ((text.matches("\\s*") || text.equals("")) && tag.equals("") && !author.isEmpty()) {
-            pageablePostList = postRepository.findAllPostsByAuthor(author, datetimeFrom, datetimeTo, pageable);
+            pageablePostList = postRepository.findAllPostsByAuthor(author.toLowerCase(Locale.ROOT), datetimeFrom, datetimeTo, pageable);
         } else {
             List<Long> tags = getTags(tag);
-            pageablePostList = postRepository.findPostsByTextByAuthorByTagsContainingByDateExcludingBlockers(text, datetimeFrom, datetimeTo, author, tags, pageable);
+            pageablePostList = postRepository.findPostsByTextByAuthorByTagsContainingByDateExcludingBlockers(text.toLowerCase(Locale.ROOT), datetimeFrom, datetimeTo, author.toLowerCase(Locale.ROOT), tags, pageable);
         }
         return getPostsResponse(offset, itemPerPage, pageablePostList);
 
     }
 
+    @Override
     public DataResponse<PostData> getPostsById(Long id, Principal principal) throws PostNotFoundException {
         PostData postData = getPostData(postRepository.findPostById(id).orElseThrow(() -> new PostNotFoundException("Поста с таким айди не существует или пост заблокирован модератором")));
         return getDataResponse(postData);
     }
 
+    @Override
     public DataResponse<PostData> putPostByIdAndMessageInDay(Long id, long publishDate, PostRequest postRequest, Principal principal) throws PostNotFoundException, AuthorAndUserEqualsException {
         Person person = utilsService.findPersonByEmail(principal.getName());
         Post post = postRepository.findPostById(id).orElseThrow(() -> new PostNotFoundException("Поста с таким айди не существует или пост заблокирован модератором"));
@@ -83,6 +86,7 @@ public class PostServiceImpl implements PostService {
         return getDataResponse(getPostData(post));
     }
 
+    @Override
     public DataResponse<PostDeleteResponse> deletePostById(Long id, Principal principal) throws PostNotFoundException, AuthorAndUserEqualsException {
         Person person = utilsService.findPersonByEmail(principal.getName());
         Post post = postRepository.findPostById(id).orElseThrow(() -> new PostNotFoundException("Поста с таким айди не существует или пост заблокирован модератором"));
@@ -97,6 +101,7 @@ public class PostServiceImpl implements PostService {
                         .setId(post.getId()));
     }
 
+    @Override
     public DataResponse<PostData> recoverPostById(Long id, Principal principal) throws PostNotFoundException, AuthorAndUserEqualsException, PostRecoveryException {
         Person person = utilsService.findPersonByEmail(principal.getName());
         Post post = postRepository.findDeletedPostById(id).orElseThrow(() -> new PostNotFoundException("Поста с таким айди не существует или пост заблокирован модератором"));
@@ -111,12 +116,15 @@ public class PostServiceImpl implements PostService {
         return getDataResponse(getPostData(post));
     }
 
+    @Override
     public ListDataResponse<CommentsData> getComments(Long id, int offset, int itemPerPage) throws PostNotFoundException {
         Post post = postRepository.findPostById(id).orElseThrow(() -> new PostNotFoundException("Поста с данным айди нет"));
         Pageable pageable = PageRequest.of(offset / itemPerPage, itemPerPage);
         return getListDataResponseWithComments(pageable, post);
     }
 
+    @Override
+    //:TODO добавить имя и фамилию в ответ на комментарий (parent_id)
     public DataResponse<CommentsData> postComments(Long id, CommentRequest commentRequest, Principal principal) throws PostNotFoundException, CommentNotFoundException {
         Person person = utilsService.findPersonByEmail(principal.getName());
         Post post = postRepository.findPostById(id).orElseThrow(() -> new PostNotFoundException("Поста с id " + id + "не существует"));
@@ -136,6 +144,7 @@ public class PostServiceImpl implements PostService {
         return getCommentResponse(postComment);
     }
 
+    @Override
     public DataResponse<CommentsData> putComments(Long id, Long commentId, CommentRequest commentRequest, Principal principal) throws PostNotFoundException, CommentNotFoundException, CommentNotAuthorException {
         Person person = utilsService.findPersonByEmail(principal.getName());
         PostComment postComment = null;
@@ -155,6 +164,7 @@ public class PostServiceImpl implements PostService {
         return getCommentResponse(postComment);
     }
 
+    @Override
     public DataResponse<CommentDelete> deleteComments(Long id, Long commentId, Principal principal) throws CommentNotFoundException, CommentNotAuthorException {
         Person person = utilsService.findPersonByEmail(principal.getName());
         PostComment postComment = postCommentRepository.findPostCommentByIdAndPostId(commentId, id)
@@ -170,6 +180,7 @@ public class PostServiceImpl implements PostService {
                         .setId(postComment.getId()));
     }
 
+    @Override
     public DataResponse<CommentsData> recoverComments(Long id, Long commentId, Principal principal) throws CommentNotFoundException, CommentNotAuthorException {
         Person person = utilsService.findPersonByEmail(principal.getName());
         PostComment postComment = postCommentRepository.findPostCommentByIdAndParentIdWhichIsDelete(commentId, id)
@@ -181,6 +192,7 @@ public class PostServiceImpl implements PostService {
         return getCommentResponse(postComment);
     }
 
+    @Override
     public DataResponse<MessageOkContent> ratPostController(Long id, Principal principal) throws PostNotFoundException, MailjetException, IOException {
         Post post = postRepository.findPostById(id).orElseThrow(() -> new PostNotFoundException("Пост не существует"));
         String message = "Жалоба от " + principal.getName() + " на пост с id: " + post.getId() + ", \n с названием: " + post.getTitle() + "\n и текстом " + post.getPostText();
@@ -188,6 +200,7 @@ public class PostServiceImpl implements PostService {
         return utilsService.getMessageOkResponse();
     }
 
+    @Override
     public DataResponse<MessageOkContent> ratCommentController(Long id, Long commentId, Principal principal) throws CommentNotFoundException, MailjetException, IOException {
         PostComment postComment = postCommentRepository.findPostCommentByIdAndPostId(commentId, id)
                 .orElseThrow(() -> new CommentNotFoundException("Комментария с данным parent_id не существует"));
@@ -196,11 +209,12 @@ public class PostServiceImpl implements PostService {
         return utilsService.getMessageOkResponse();
     }
 
+    @Override
     public ListDataResponse<PostData> getFeeds(String text, int offset, int itemPerPage, Principal principal) {
         Person person = utilsService.findPersonByEmail(principal.getName());
         Pageable pageable = PageRequest.of(offset / itemPerPage, itemPerPage);
         List<Long> friendsAndSubscribersIds = personRepository.findAllFriendsAndSubscribersByPersonId(person.getId());
-        Page<Post> postPage = postRepository.findPostsByTextExcludingBlockers(text, friendsAndSubscribersIds, pageable);
+        Page<Post> postPage = postRepository.findPostsByTextExcludingBlockers(text.toLowerCase(Locale.ROOT), friendsAndSubscribersIds, pageable);
         return getPostsResponse(offset, itemPerPage, postPage);
     }
 

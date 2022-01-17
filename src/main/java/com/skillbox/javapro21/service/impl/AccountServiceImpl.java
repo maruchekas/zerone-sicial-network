@@ -45,6 +45,7 @@ public class AccountServiceImpl implements AccountService {
     private final JwtGenerator jwtGenerator;
     private final NotificationTypeRepository notificationTypeRepository;
 
+    @Override
     public DataResponse<MessageOkContent> registration(RegisterRequest registerRequest) throws UserExistException, MailjetException, IOException {
         if (personRepository.findByEmail(registerRequest.getEmail()).isPresent()) {
             countRegisterPost = countRegisterPost + 1;
@@ -62,6 +63,7 @@ public class AccountServiceImpl implements AccountService {
         return utilsService.getMessageOkResponse();
     }
 
+    @Override
     public String verifyRegistration(String email, String code) throws TokenConfirmationException {
         Person person = utilsService.findPersonByEmail(email);
         if (person.getConfirmationCode().equals(code)) {
@@ -75,6 +77,7 @@ public class AccountServiceImpl implements AccountService {
         return "Пользователь подтвержден";
     }
 
+    @Override
     public String recoveryPasswordMessage(RecoveryRequest recoveryRequest) throws MailjetException, IOException {
         String token = utilsService.getToken();
         String text = confirmationUrl.getBaseUrl() + "/api/v1/account/password/send_recovery_massage?email=" + recoveryRequest.getEmail() + "&code=" + token;
@@ -88,6 +91,7 @@ public class AccountServiceImpl implements AccountService {
         confirmPersonAndSendEmail(registerRequest.getEmail(), text, token);
     }
 
+    @Override
     public String verifyRecovery(String email, String code) throws TokenConfirmationException {
         Person person = utilsService.findPersonByEmail(email);
         if (person.getConfirmationCode().equals(code)) {
@@ -95,6 +99,7 @@ public class AccountServiceImpl implements AccountService {
         } else throw new TokenConfirmationException("Не верный confirmation code");
     }
 
+    @Override
     public String recoveryPassword(String email, String password) {
         Person person = utilsService.findPersonByEmail(email);
         person.setPassword(password);
@@ -102,6 +107,7 @@ public class AccountServiceImpl implements AccountService {
         return "Пароль успешно изменен";
     }
 
+    @Override
     public DataResponse<MessageOkContent> changePassword(ChangePasswordRequest changePasswordRequest) {
         Person person = utilsService.findPersonByEmail(jwtGenerator.getLoginFromToken(changePasswordRequest.getToken()));
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
@@ -110,12 +116,14 @@ public class AccountServiceImpl implements AccountService {
         return utilsService.getMessageOkResponse();
     }
 
+    @Override
     public DataResponse<MessageOkContent> changeEmail(ChangeEmailRequest changeEmailRequest, Principal principal) {
         Person person = utilsService.findPersonByEmail(principal.getName());
         person.setEmail(changeEmailRequest.getEmail());
         return utilsService.getMessageOkResponse();
     }
 
+    @Override
     public DataResponse<MessageOkContent> changeNotifications(ChangeNotificationsRequest changeNotificationsRequest, Principal principal) {
         Person person = utilsService.findPersonByEmail(principal.getName());
         NotificationType notificationType = notificationTypeRepository.findNotificationTypeByPersonId(person.getId())
@@ -138,6 +146,7 @@ public class AccountServiceImpl implements AccountService {
         return utilsService.getMessageOkResponse();
     }
 
+    @Override
     public ListDataResponse<NotificationSettingData> getNotifications(Principal principal) {
         Person person = utilsService.findPersonByEmail(principal.getName());
         NotificationType notificationType = notificationTypeRepository.findNotificationTypeByPersonId(person.getId())
