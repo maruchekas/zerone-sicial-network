@@ -30,6 +30,7 @@ import java.util.Random;
 @Component
 @RequiredArgsConstructor
 public class ResourceServiceImpl implements ResourceService {
+    private final UtilsService utilsService;
     private final PersonRepository personRepository;
     private final Cloudinary cloudinary;
 
@@ -44,7 +45,7 @@ public class ResourceServiceImpl implements ResourceService {
     public DataResponse<Content> saveFileInStorage(String type, MultipartFile image, Principal principal) throws IOException {
         Person person = ((Person)(((UsernamePasswordAuthenticationToken) principal).getPrincipal()));
         DataResponse<Content> response = new DataResponse<>()
-                                            .setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
+                                            .setTimestamp(utilsService.getTimestamp());
 
         if (image == null) {
             log.info("Не принимаем никакой файл в хранилище");
