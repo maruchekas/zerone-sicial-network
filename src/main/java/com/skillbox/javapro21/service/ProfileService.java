@@ -1,6 +1,7 @@
 package com.skillbox.javapro21.service;
 
 import com.skillbox.javapro21.api.request.post.PostRequest;
+import com.skillbox.javapro21.api.response.Content;
 import com.skillbox.javapro21.api.response.DataResponse;
 import com.skillbox.javapro21.api.response.ListDataResponse;
 import com.skillbox.javapro21.api.response.MessageOkContent;
@@ -30,4 +31,6 @@ public interface ProfileService {
     DataResponse<MessageOkContent> blockPersonById(Long id, Principal principal) throws BlockPersonHimselfException, InterlockedFriendshipStatusException, PersonNotFoundException, FriendshipNotFoundException;
 
     DataResponse<MessageOkContent> unblockPersonById(Long id, Principal principal) throws PersonNotFoundException, BlockPersonHimselfException, NonBlockedFriendshipException, InterlockedFriendshipStatusException, FriendshipNotFoundException;
+
+    ListDataResponse<Content> searchByPerson(String firstName, String lastName, Integer ageFrom, Integer ageTo, String country, String city, Integer offset, Integer itemPerPage, Principal principal);
 }
