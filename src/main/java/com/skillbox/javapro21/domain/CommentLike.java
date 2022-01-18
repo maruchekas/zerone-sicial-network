@@ -2,15 +2,16 @@ package com.skillbox.javapro21.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.skillbox.javapro21.domain.marker.HavePerson;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.hibernate.Hibernate;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -18,8 +19,8 @@ import java.util.Set;
 @Getter
 @Entity
 @Accessors(chain = true)
-@Table(name = "post_comments")
-public class PostComment implements HavePerson {
+@Table(name = "comment_likes")
+public class CommentLike implements HavePerson {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,24 +29,6 @@ public class PostComment implements HavePerson {
 
     @Column(name = "time")
     private LocalDateTime time;
-
-    @ManyToOne
-    private PostComment parent;
-
-    @OneToMany
-    @JoinColumn(name = "parent_id")
-    private Set<PostComment> postComments = new HashSet<>();
-
-    @Column(name = "comment_text")
-    private String commentText;
-
-    @Column(name = "is_blocked")
-    private int isBlocked;
-
-    @ManyToOne
-    @JsonIgnoreProperties(value = {"block", "likes", "files", "comments", "tags", "author"}, allowSetters = true)
-    @JoinColumn(name = "post_id")
-    private Post post;
 
     @ManyToOne
     @JsonIgnoreProperties(
@@ -57,24 +40,29 @@ public class PostComment implements HavePerson {
                     "incMessages",
                     "posts",
                     "postLikes",
+                    "commentLikes",
                     "comments",
                     "notifications",
             },
             allowSetters = true
     )
-    @JoinColumn(name = "author_id")
     private Person person;
+
+    @ManyToOne
+    @JsonIgnoreProperties(value = {"parent", "postComments", "commentText", "isBlocked", "post", "person"}, allowSetters = true)
+    private PostComment comment;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        PostComment that = (PostComment) o;
-        return id != null && Objects.equals(id, that.id);
+        CommentLike commentLike = (CommentLike) o;
+        return id != null && Objects.equals(id, commentLike.id);
     }
 
     @Override
     public int hashCode() {
         return getClass().hashCode();
     }
+
 }

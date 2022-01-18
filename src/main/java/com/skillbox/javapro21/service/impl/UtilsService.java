@@ -61,6 +61,9 @@ public class UtilsService {
         return dataResponse;
     }
 
+    /**
+     * Шаблон для DataResponse
+     * */
     public DataResponse<Content> getDataResponse(Content data) {
         return new DataResponse<>()
                 .setError("ok")
@@ -68,10 +71,13 @@ public class UtilsService {
                 .setData(data);
     }
 
+    /**
+     * Шаблон для ListDataResponse
+     * */
     public ListDataResponse<Content> getListDataResponse(int total, int offset, int limit, List<Content> data) {
         return new ListDataResponse<>()
                 .setError("ok")
-                .setTimestamp(new Date().getTime())
+                .setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli())
                 .setTotal(total)
                 .setOffset(offset)
                 .setPerPage(limit)
@@ -126,6 +132,9 @@ public class UtilsService {
                 DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
     }
 
+    /**
+     * Получение Timestamp
+     * */
     public long getTimestamp() {
         return LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli();
     }
