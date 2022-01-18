@@ -78,7 +78,7 @@ public class DialogsServiceImpl implements DialogsService {
                 if (dialogs.get(0) != null) {
                     return new DataResponse<DialogContent>()
                             .setError("")
-                            .setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli())
+                            .setTimestamp(utilsService.getTimestamp())
                             .setData(new DialogContent().setId(dialogs.get(0).getId()));
                 } else {
                     Set<Person> personSet = new HashSet<>();
@@ -101,7 +101,7 @@ public class DialogsServiceImpl implements DialogsService {
                     personToDialogRepository.save(person2ToDialog);
                     return new DataResponse<DialogContent>()
                             .setError("")
-                            .setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli())
+                            .setTimestamp(utilsService.getTimestamp())
                             .setData(new DialogContent().setId(savedDialog.getId()));
                 }
             } else {
@@ -125,7 +125,7 @@ public class DialogsServiceImpl implements DialogsService {
                 }
                 return new DataResponse<DialogContent>()
                         .setError("")
-                        .setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli())
+                        .setTimestamp(utilsService.getTimestamp())
                         .setData(new DialogContent().setId(savedDialog.getId()));
             }
         }
@@ -149,7 +149,7 @@ public class DialogsServiceImpl implements DialogsService {
         }
         return new DataResponse<CountContent>()
                 .setError("")
-                .setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli())
+                .setTimestamp(utilsService.getTimestamp())
                 .setData(new CountContent().setCount(count));
     }
 
@@ -200,7 +200,7 @@ public class DialogsServiceImpl implements DialogsService {
         dialogRepository.save(dialog);
         return new DataResponse<LinkContent>()
                 .setError("")
-                .setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli())
+                .setTimestamp(utilsService.getTimestamp())
                 .setData(new LinkContent()
                         .setLink(token));
     }
@@ -298,7 +298,7 @@ public class DialogsServiceImpl implements DialogsService {
         Message save = messageRepository.save(message);
         return new DataResponse<MessageIdContent>()
                 .setError("")
-                .setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli())
+                .setTimestamp(utilsService.getTimestamp())
                 .setData(new MessageIdContent().setMessageId(save.getId()));
     }
 
@@ -360,7 +360,7 @@ public class DialogsServiceImpl implements DialogsService {
         }
         return new DataResponse<LastActivityContent>()
                 .setError("")
-                .setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli())
+                .setTimestamp(utilsService.getTimestamp())
                 .setData(lastActivityContent);
     }
 
@@ -379,7 +379,7 @@ public class DialogsServiceImpl implements DialogsService {
                 .setError("")
                 .setOffset(offset)
                 .setPerPage(itemPerPage)
-                .setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli())
+                .setTimestamp(utilsService.getTimestamp())
                 .setTotal((int) personToDialogs.getTotalElements())
                 .setData(getMessageForResponse(personToDialogs.toList()));
     }
@@ -398,21 +398,21 @@ public class DialogsServiceImpl implements DialogsService {
     private DataResponse<DialogPersonIdContent> getDataResponseWithListPersonsId(List<Long> usersIds) {
         return new DataResponse<DialogPersonIdContent>()
                 .setError("")
-                .setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli())
+                .setTimestamp(utilsService.getTimestamp())
                 .setData(new DialogPersonIdContent().setUserIds(usersIds));
     }
 
     private DataResponse<DialogContent> getDataResponseWithId(int id) {
         return new DataResponse<DialogContent>()
                 .setError("")
-                .setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli())
+                .setTimestamp(utilsService.getTimestamp())
                 .setData(new DialogContent().setId(id));
     }
 
     private DataResponse<MessageContent> getDataResponseWithMessageData(Message message, PersonToDialog p2d) {
         return new DataResponse<MessageContent>()
                 .setError("")
-                .setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli())
+                .setTimestamp(utilsService.getTimestamp())
                 .setData(getMessageData(message, p2d));
     }
 
@@ -422,7 +422,7 @@ public class DialogsServiceImpl implements DialogsService {
                 .setError("")
                 .setOffset(offset)
                 .setPerPage(itemPerPage)
-                .setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli())
+                .setTimestamp(utilsService.getTimestamp())
                 .setTotal((int) allMessagesByPersonIdAndQuery.getTotalElements())
                 .setData(getDialogsForResponse(allMessagesByPersonIdAndQuery.toList()));
     }
