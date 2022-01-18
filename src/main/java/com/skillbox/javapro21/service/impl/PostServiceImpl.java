@@ -237,22 +237,6 @@ public class PostServiceImpl implements PostService {
         return getPostsResponse(offset, itemPerPage, postPage);
     }
 
-    protected ListDataResponse<PostData> getPostsResponse(int offset, int itemPerPage, Page<Post> pageablePostList, Page<Post> pageablePostList2) {
-        List<Post> postsForResponse = new ArrayList<>(pageablePostList.toList());
-        List<Post> bestPosts = new ArrayList<>(pageablePostList2.toList());
-        for (Post p : bestPosts) {
-            if (!postsForResponse.contains(p)) {
-                postsForResponse.add(p);
-            }
-        }
-        return new ListDataResponse<PostData>()
-                .setOffset(offset)
-                .setPerPage(itemPerPage)
-                .setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli())
-                .setTotal(postsForResponse.size())
-                .setData(getPostForResponse(postsForResponse));
-    }
-
     private void sendMessageForAdministration(String message) throws MailjetException, IOException {
         mailjetSender.send(adminEmail, message);
     }
@@ -325,6 +309,21 @@ public class PostServiceImpl implements PostService {
                 .setOffset(offset)
                 .setTotal((int) pageablePostList.getTotalElements())
                 .setData(getPostForResponse(pageablePostList.toList()));
+    }
+
+    protected ListDataResponse<PostData> getPostsResponse(int offset, int itemPerPage, Page<Post> pageablePostList, Page<Post> bestPosts) {
+        List<Post> postsForResponse = new ArrayList<>(pageablePostList.toList());
+        for (Post p : bestPosts.toList()) {
+            if (!postsForResponse.contains(p)) {
+                postsForResponse.add(p);
+            }
+        }
+        return new ListDataResponse<PostData>()
+                .setOffset(offset)
+                .setPerPage(itemPerPage)
+                .setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli())
+                .setTotal(postsForResponse.size())
+                .setData(getPostForResponse(postsForResponse));
     }
 
     private List<PostData> getPostForResponse(List<Post> listPosts) {
