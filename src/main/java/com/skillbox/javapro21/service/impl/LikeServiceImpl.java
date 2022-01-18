@@ -13,16 +13,18 @@ import com.skillbox.javapro21.repository.PostCommentRepository;
 import com.skillbox.javapro21.repository.PostLikeRepository;
 import com.skillbox.javapro21.repository.PostRepository;
 import com.skillbox.javapro21.service.LikeService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
+@RequiredArgsConstructor
 @Service
 public class LikeServiceImpl implements LikeService{
 
@@ -37,14 +39,6 @@ public class LikeServiceImpl implements LikeService{
     private final CommentLikeRepository commentLikeRepository;
     private final PostCommentRepository postCommentRepository;
 
-    @Autowired
-    public LikeServiceImpl(UtilsService utilsService, PostLikeRepository postLikeRepository, PostRepository postRepository, CommentLikeRepository commentLikeRepository, PostCommentRepository postCommentRepository) {
-        this.utilsService = utilsService;
-        this.postLikeRepository = postLikeRepository;
-        this.postRepository = postRepository;
-        this.commentLikeRepository = commentLikeRepository;
-        this.postCommentRepository = postCommentRepository;
-    }
 
     @Override
     public DataResponse<Content> isLiked(LikeRequest request, Principal principal) throws BadArgumentException {

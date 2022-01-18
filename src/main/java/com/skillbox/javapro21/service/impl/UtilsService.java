@@ -132,6 +132,9 @@ public class UtilsService {
                 DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
     }
 
+    /**
+     * Получение Timestamp
+     * */
     public long getTimestamp() {
         return LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli();
     }
