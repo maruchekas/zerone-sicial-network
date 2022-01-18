@@ -12,6 +12,7 @@ import com.skillbox.javapro21.api.response.post.PostData;
 import com.skillbox.javapro21.api.response.post.PostDeleteResponse;
 import com.skillbox.javapro21.config.MailjetSender;
 import com.skillbox.javapro21.domain.*;
+import com.skillbox.javapro21.domain.enumeration.FriendshipStatusType;
 import com.skillbox.javapro21.exception.*;
 import com.skillbox.javapro21.repository.*;
 import com.skillbox.javapro21.service.PostService;
@@ -29,6 +30,9 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.skillbox.javapro21.domain.enumeration.FriendshipStatusType.BLOCKED;
+import static com.skillbox.javapro21.domain.enumeration.FriendshipStatusType.INTERLOCKED;
 
 @Slf4j
 @Component
@@ -64,7 +68,6 @@ public class PostServiceImpl implements PostService {
             pageablePostList = postRepository.findPostsByTextByAuthorByTagsContainingByDateExcludingBlockers(text.toLowerCase(Locale.ROOT), datetimeFrom, datetimeTo, author.toLowerCase(Locale.ROOT), tags, pageable);
         }
         return getPostsResponse(offset, itemPerPage, pageablePostList);
-
     }
 
     @Override
@@ -214,7 +217,22 @@ public class PostServiceImpl implements PostService {
         Person person = utilsService.findPersonByEmail(principal.getName());
         Pageable pageable = PageRequest.of(offset / itemPerPage, itemPerPage);
         List<Long> friendsAndSubscribersIds = personRepository.findAllFriendsAndSubscribersByPersonId(person.getId());
-        Page<Post> postPage = postRepository.findPostsByTextExcludingBlockers(text.toLowerCase(Locale.ROOT), friendsAndSubscribersIds, pageable);
+        List<Long> blocksPersonsList = personRepository.findAllBlocksPersons(person.getId());
+        blocksPersonsList.add(person.getId());
+        Page<Post> postPage;
+        if (!text.isEmpty()) {
+            postPage = postRepository.findPostsByTextContainingNoBlocked(text.toLowerCase(Locale.ROOT), friendsAndSubscribersIds, pageable);
+        } else {
+            postPage = postRepository.findPostsContainingNoBlocked(friendsAndSubscribersIds, pageable);
+        }
+        if (postPage.getTotalElements() == 0 ) {
+            postPage = postRepository.findBestPostsByPerson(blocksPersonsList, PageRequest.of(0, 10));
+            return getPostsResponse(0, 10, postPage);
+        }
+        if (postPage.getTotalElements() > 0 && postPage.getTotalElements() <= 10) {
+            Page<Post> postPage2 = postRepository.findBestPostsByPerson(blocksPersonsList, PageRequest.of(0, 10));
+            return getPostsResponse(offset, itemPerPage, postPage, postPage2);
+        }
         return getPostsResponse(offset, itemPerPage, postPage);
     }
 
@@ -290,6 +308,21 @@ public class PostServiceImpl implements PostService {
                 .setOffset(offset)
                 .setTotal((int) pageablePostList.getTotalElements())
                 .setData(getPostForResponse(pageablePostList.toList()));
+    }
+
+    protected ListDataResponse<PostData> getPostsResponse(int offset, int itemPerPage, Page<Post> pageablePostList, Page<Post> bestPosts) {
+        List<Post> postsForResponse = new ArrayList<>(pageablePostList.toList());
+        for (Post p : bestPosts.toList()) {
+            if (!postsForResponse.contains(p)) {
+                postsForResponse.add(p);
+            }
+        }
+        return new ListDataResponse<PostData>()
+                .setOffset(offset)
+                .setPerPage(itemPerPage)
+                .setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli())
+                .setTotal(postsForResponse.size())
+                .setData(getPostForResponse(postsForResponse));
     }
 
     private List<PostData> getPostForResponse(List<Post> listPosts) {
