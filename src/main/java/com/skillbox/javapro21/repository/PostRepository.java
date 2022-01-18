@@ -1,6 +1,7 @@
 package com.skillbox.javapro21.repository;
 
 import com.skillbox.javapro21.domain.Post;
+import com.skillbox.javapro21.domain.enumeration.FriendshipStatusType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -118,6 +119,10 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
     Page<Post> findPostsContainingNoBlocked(List<Long> friendsAndSubscribersIds, Pageable pageable);
 
     @Query("select p from Post p " +
+            "join Person ps on ps.id = p.author.id " +
+            "where p.author.id not in (:ids) " +
+            "and p.isBlocked = 0 " +
+            "and ps.isBlocked = 0 " +
             "order by p.likes.size desc")
-    Page<Post> findBestPosts(Pageable pageable);
+    Page<Post> findBestPostsByPerson(List<Long> ids, Pageable pageable);
 }

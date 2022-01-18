@@ -56,4 +56,14 @@ public interface PersonRepository extends JpaRepository<Person, Integer> {
                     "AND is_blocked = 0",
             nativeQuery = true)
     Page<Person> findAllByNameAndAgeAndLocation(Long currUserId, String firstName, String lastName, Integer ageFrom, Integer ageTo, String country, String city, Pageable page);
+
+    @Query("select p.id from Person p " +
+            "left join Friendship f on f.srcPerson.id = p.id " +
+            "left join FriendshipStatus fs on fs.id = f.friendshipStatus.id " +
+            "where f.srcPerson.id = :id " +
+            "and ( " +
+            "fs.friendshipStatusType = 'BLOCKED' " +
+            "or fs.friendshipStatusType = 'INTERLOCKED' " +
+            ") group by p.id" )
+    List<Long> findAllBlocksPersons(Long id);
 }
