@@ -20,7 +20,7 @@ public interface PersonRepository extends JpaRepository<Person, Integer> {
     Optional<Person> findPersonById(Long id);
 
     @Query("select p.id from Person p " +
-            "join Friendship f on f.srcPerson.id = p.id " +
+            "join Friendship f on f.dstPerson.id = p.id " +
             "join FriendshipStatus fs on fs.id = f.friendshipStatus.id " +
             "where f.srcPerson.id = :id " +
             "and ( fs.friendshipStatusType = 'FRIEND' or fs.friendshipStatusType = 'SUBSCRIBED' ) " +
@@ -56,7 +56,7 @@ public interface PersonRepository extends JpaRepository<Person, Integer> {
     Page<Person> findAllByNameAndAgeAndLocation(Long currUserId, String firstName, String lastName, Integer ageFrom, Integer ageTo, String country, String city, Pageable page);
 
     @Query("select p.id from Person p " +
-            "join Friendship f on f.srcPerson.id = p.id " +
+            "join Friendship f on f.dstPerson.id = p.id " +
             "join FriendshipStatus fs on fs.id = f.friendshipStatus.id " +
             "where f.srcPerson.id = :id " +
             "and ( fs.friendshipStatusType = 'BLOCKED' or fs.friendshipStatusType = 'INTERLOCKED') " +
