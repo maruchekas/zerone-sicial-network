@@ -217,7 +217,6 @@ public class PostServiceImpl implements PostService {
         Person person = utilsService.findPersonByEmail(principal.getName());
         Pageable pageable = PageRequest.of(offset / itemPerPage, itemPerPage);
         List<Long> friendsAndSubscribersIds = personRepository.findAllFriendsAndSubscribersByPersonId(person.getId());
-        friendsAndSubscribersIds.add(person.getId());
         List<Long> blocksPersonsList = personRepository.findAllBlocksPersons(person.getId());
         blocksPersonsList.add(person.getId());
         Page<Post> postPage;
