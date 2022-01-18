@@ -11,7 +11,7 @@ public class EditProfileRequest implements Content {
     @JsonProperty(value = "last_name")
     private String lastName;
     @JsonProperty(value = "birth_date")
-    private String birthDate;
+    private long birthDate;
     private String phone;
     private String photo;
     private String about;

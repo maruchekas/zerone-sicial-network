@@ -28,6 +28,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.security.Principal;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -274,7 +275,7 @@ public class ProfileControllerTest extends AbstractTest {
     void editPerson() throws Exception {
         EditProfileRequest editProfileRequest = new EditProfileRequest();
         editProfileRequest.setFirstName("Oleg");
-        editProfileRequest.setBirthDate(personRepository.findByEmail("test1@test.ru").get().getBirthDate().toString());
+        editProfileRequest.setBirthDate(Instant.from(personRepository.findByEmail("test1@test.ru").get().getBirthDate()).toEpochMilli());
 
         mockMvc.perform(MockMvcRequestBuilders
                         .put("/api/v1/users/me")

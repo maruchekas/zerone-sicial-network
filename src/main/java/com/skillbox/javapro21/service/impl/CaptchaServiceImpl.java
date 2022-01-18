@@ -22,7 +22,6 @@ import java.util.Base64;
 @Component
 @RequiredArgsConstructor
 public class CaptchaServiceImpl implements CaptchaService {
-
     private final CaptchaRepository captchaRepository;
 
     public CaptchaResponse getNewCaptcha() {
