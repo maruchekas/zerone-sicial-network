@@ -173,7 +173,7 @@ public class ProfileServiceImpl implements ProfileService {
 
     private DataResponse<AuthData> getPersonDataResponse(Person person) {
         return new DataResponse<AuthData>()
-                .setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli())
+                .setTimestamp(utilsService.getTimestamp())
                 .setError("string")
                 .setData(utilsService.getAuthData(person, null));
     }

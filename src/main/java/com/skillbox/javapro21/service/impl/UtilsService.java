@@ -54,7 +54,7 @@ public class UtilsService {
      */
     public DataResponse<MessageOkContent> getMessageOkResponse() {
         DataResponse<MessageOkContent> dataResponse = new DataResponse<>();
-        dataResponse.setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
+        dataResponse.setTimestamp(getTimestamp());
         MessageOkContent accountData = new MessageOkContent();
         accountData.setMessage("ok");
         dataResponse.setData(accountData);
@@ -67,7 +67,7 @@ public class UtilsService {
     public DataResponse<Content> getDataResponse(Content data) {
         return new DataResponse<>()
                 .setError("ok")
-                .setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli())
+                .setTimestamp(getTimestamp())
                 .setData(data);
     }
 
@@ -130,6 +130,10 @@ public class UtilsService {
         return LocalDateTime.parse(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
                         .format(new Date(dateWithTimestampAccessor)),
                 DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+    }
+
+    public long getTimestamp() {
+        return LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli();
     }
 
     /**

@@ -96,7 +96,7 @@ public class PostServiceImpl implements PostService {
         postRepository.save(post);
         return new DataResponse<PostDeleteResponse>()
                 .setError("")
-                .setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli())
+                .setTimestamp(utilsService.getTimestamp())
                 .setData(new PostDeleteResponse()
                         .setId(post.getId()));
     }
@@ -175,7 +175,7 @@ public class PostServiceImpl implements PostService {
         } else throw new CommentNotAuthorException("Удаление пользователю " + person.getEmail() + "недоступно");
         return new DataResponse<CommentDelete>()
                 .setError("")
-                .setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli())
+                .setTimestamp(utilsService.getTimestamp())
                 .setData(new CommentDelete()
                         .setId(postComment.getId()));
     }
@@ -224,7 +224,7 @@ public class PostServiceImpl implements PostService {
 
     private DataResponse<CommentsData> getCommentResponse(PostComment postComment) {
         return new DataResponse<CommentsData>().setError("")
-                .setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli())
+                .setTimestamp(utilsService.getTimestamp())
                 .setData(getCommentsData(postComment));
     }
 
@@ -236,7 +236,7 @@ public class PostServiceImpl implements PostService {
     private ListDataResponse<CommentsData> getPostCommentResponse(Page<PostComment> pageablePostComments, Pageable pageable) {
         ListDataResponse<CommentsData> commentsDataListDataResponse = new ListDataResponse<>();
         commentsDataListDataResponse.setPerPage(pageable.getPageSize())
-                .setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli())
+                .setTimestamp(utilsService.getTimestamp())
                 .setOffset((int) pageable.getOffset())
                 .setTotal(pageablePostComments.getTotalPages())
                 .setData(getCommentDataForResponse(pageablePostComments.toList()));
@@ -279,14 +279,14 @@ public class PostServiceImpl implements PostService {
     protected DataResponse<PostData> getDataResponse(PostData postData) {
         return new DataResponse<PostData>()
                 .setError("")
-                .setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli())
+                .setTimestamp(utilsService.getTimestamp())
                 .setData(postData);
     }
 
     protected ListDataResponse<PostData> getPostsResponse(int offset, int itemPerPage, Page<Post> pageablePostList) {
         return new ListDataResponse<PostData>()
                 .setPerPage(itemPerPage)
-                .setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli())
+                .setTimestamp(utilsService.getTimestamp())
                 .setOffset(offset)
                 .setTotal((int) pageablePostList.getTotalElements())
                 .setData(getPostForResponse(pageablePostList.toList()));
