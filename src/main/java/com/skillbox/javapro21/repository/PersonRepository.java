@@ -62,4 +62,23 @@ public interface PersonRepository extends JpaRepository<Person, Integer> {
             "and ( fs.friendshipStatusType = 'BLOCKED' or fs.friendshipStatusType = 'INTERLOCKED') " +
             "and ( p.isBlocked = 1 or p.isBlocked = 2 ) " )
     List<Long> findAllBlocksPersons(Long id);
+
+    @Query("select p from Person p " +
+            "join Friendship f on f.dstPerson.id = p.id " +
+            "join FriendshipStatus fs on fs.id = f.friendshipStatus.id " +
+            "where f.srcPerson.id = :id " +
+            "and fs.friendshipStatusType = 'FRIEND' " +
+            "and p.isBlocked = 0 " +
+            "order by p.firstName asc")
+    Page<Person> findAllPersonFriends(Long id, Pageable pageable);
+
+    @Query("select p from Person p " +
+            "join Friendship f on f.dstPerson.id = p.id " +
+            "join FriendshipStatus fs on fs.id = f.friendshipStatus.id " +
+            "where f.srcPerson.id = :id " +
+            "and p.firstName = :name " +
+            "and fs.friendshipStatusType = 'FRIEND' " +
+            "and p.isBlocked = 0 " +
+            "order by p.firstName asc")
+    Page<Person> findAllPersonFriendsAndName(Long id, String name, Pageable pageable);
 }
