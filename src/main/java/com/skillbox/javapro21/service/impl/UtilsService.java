@@ -141,7 +141,7 @@ public class UtilsService {
         return LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli();
     }
 
-    public static long getTimestampFromLocalDateTime(LocalDateTime localDateTime){
+    public long getTimestampFromLocalDateTime(LocalDateTime localDateTime){
         return ZonedDateTime.of(localDateTime, ZoneId.systemDefault()).toInstant().getEpochSecond();
     }
 

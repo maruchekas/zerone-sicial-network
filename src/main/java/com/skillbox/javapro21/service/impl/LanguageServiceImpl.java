@@ -23,6 +23,7 @@ import java.util.List;
 public class LanguageServiceImpl implements LanguageService {
 
     private final LanguageRepository languageRepository;
+    private final UtilsService utilsService;
 
     @Override
     public ListDataResponse<LanguageData> getLanguage(String language, int offset, int itemPerPage) {
@@ -41,7 +42,7 @@ public class LanguageServiceImpl implements LanguageService {
         languageDataListDataResponse.setOffset(offset);
         languageDataListDataResponse.setPerPage(itemPerPage);
         languageDataListDataResponse.setTotal((int) languages.getTotalElements());
-        languageDataListDataResponse.setTimestamp(UtilsService.getTimestampFromLocalDateTime(LocalDateTime.now()));
+        languageDataListDataResponse.setTimestamp(utilsService.getTimestampFromLocalDateTime(LocalDateTime.now()));
         languageDataListDataResponse.setData(getLanguagesForResponse(languages.toList()));
 
         return languageDataListDataResponse;

@@ -16,6 +16,7 @@ import com.skillbox.javapro21.domain.enumeration.FriendshipStatusType;
 import com.skillbox.javapro21.exception.*;
 import com.skillbox.javapro21.repository.*;
 import com.skillbox.javapro21.service.ProfileService;
+import com.skillbox.javapro21.service.TagService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -35,10 +36,11 @@ import static com.skillbox.javapro21.domain.enumeration.FriendshipStatusType.*;
 @RequiredArgsConstructor
 public class ProfileServiceImpl implements ProfileService {
     private final UtilsService utilsService;
+    private final PostServiceImpl postService;
+    private final TagService tagService;
     private final PersonRepository personRepository;
     private final PostRepository postRepository;
     private final TagRepository tagRepository;
-    private final PostServiceImpl postService;
     private final FriendshipRepository friendshipRepository;
     private final FriendshipStatusRepository friendshipStatusRepository;
 
@@ -92,7 +94,7 @@ public class ProfileServiceImpl implements ProfileService {
         Person src = utilsService.findPersonByEmail(principal.getName());
         Person dst = personRepository.findPersonById(id).orElseThrow(() -> new PersonNotFoundException("Пользователя с данным id не существует"));
         Post post;
-        Set<Tag> tags = addTagsToPost(postRequest.getTags());
+        Set<Tag> tags = tagService.addTagsToPost(postRequest.getTags());
 
         if (src.getId().equals(id)) {
             post = new Post()
@@ -203,24 +205,6 @@ public class ProfileServiceImpl implements ProfileService {
                         ? LocalDateTime.from(LocalDateTime.parse(Arrays.asList(split).get(0)).atZone(ZoneOffset.UTC)) : person.getBirthDate());
         personRepository.save(personById);
         return personById;
-    }
-
-    private Set<Tag> addTagsToPost(String[] tagsString) {
-        Set<Tag> tags = new HashSet<>();
-        for (String tagFromNewPost : tagsString
-        ) {
-            Tag tag = tagRepository.findByName(tagFromNewPost);
-            if (tag != null) {
-                tags.add(tag);
-            } else {
-                Tag newTag = new Tag();
-                newTag.setTag(tagFromNewPost);
-                tagRepository.save(newTag);
-                tags.add(newTag);
-            }
-        }
-
-        return tags;
     }
 
 }
