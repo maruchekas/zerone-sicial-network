@@ -1,14 +1,14 @@
 package com.skillbox.javapro21.service.impl;
 
+import com.skillbox.javapro21.api.request.dialogs.DialogRequestForCreate;
 import com.skillbox.javapro21.api.response.DataResponse;
 import com.skillbox.javapro21.api.response.ListDataResponse;
 import com.skillbox.javapro21.api.response.MessageOkContent;
 import com.skillbox.javapro21.api.response.account.AuthData;
+import com.skillbox.javapro21.api.response.friends.StatusContent;
 import com.skillbox.javapro21.domain.FriendshipStatus;
 import com.skillbox.javapro21.domain.Person;
 import com.skillbox.javapro21.domain.enumeration.FriendshipStatusType;
-import com.skillbox.javapro21.repository.FriendshipRepository;
-import com.skillbox.javapro21.repository.FriendshipStatusRepository;
 import com.skillbox.javapro21.repository.PersonRepository;
 import com.skillbox.javapro21.service.FriendsService;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +19,9 @@ import org.springframework.stereotype.Component;
 
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.skillbox.javapro21.domain.enumeration.FriendshipStatusType.FRIEND;
 import static com.skillbox.javapro21.domain.enumeration.FriendshipStatusType.REQUEST;
@@ -29,8 +31,6 @@ import static com.skillbox.javapro21.domain.enumeration.FriendshipStatusType.REQ
 public class FriendsServiceImpl implements FriendsService {
     private final PersonRepository personRepository;
     private final UtilsService utilsService;
-    private final FriendshipRepository friendshipRepository;
-    private final FriendshipStatusRepository friendshipStatusRepository;
 
     @Override
     public ListDataResponse<AuthData> getFriends(String name, int offset, int itemPerPage, Principal principal) {
@@ -78,6 +78,33 @@ public class FriendsServiceImpl implements FriendsService {
             personPage = personRepository.findAllRequestByName(person.getId(), name, pageable);
         }
         return getListDataResponse(personPage, pageable);
+    }
+
+    @Override
+    public ListDataResponse<AuthData> recommendationsFriends(int offset, int itemPerPage, Principal principal) {
+        Person person = utilsService.findPersonByEmail(principal.getName());
+        Pageable pageable = PageRequest.of(offset, itemPerPage);
+        List<Long> idsFriends = personRepository.findAllPersonFriends(person.getId(), pageable).toList()
+                .stream().map(Person::getId).toList();
+        Page<Person> personPage = personRepository.findRecommendedFriendsByPerson(person.getId(), idsFriends, pageable);
+        return getListDataResponse(personPage, pageable);
+    }
+
+    @Override
+    public DataResponse<StatusContent> isFriend(DialogRequestForCreate users, Principal principal) {
+        Person person = utilsService.findPersonByEmail(principal.getName());
+        List<Long> idsFriends = personRepository.findAllFriendsByPersonId(person.getId());
+        idsFriends.retainAll(users.getUsersIds());
+        if (idsFriends.size() > 0) {
+            return new DataResponse<StatusContent>()
+                    .setError("")
+                    .setTimestamp(utilsService.getTimestamp())
+                    .setData(new StatusContent().setUserId(person.getId()).setStatus("FRIEND"));
+        }
+        return new DataResponse<StatusContent>()
+                .setError("")
+                .setTimestamp(utilsService.getTimestamp())
+                .setData(new StatusContent().setUserId(person.getId()).setStatus("NO FRIEND"));
     }
 
     private ListDataResponse<AuthData> getListDataResponse(Page<Person> personsPage, Pageable pageable) {
