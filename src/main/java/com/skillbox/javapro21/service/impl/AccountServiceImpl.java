@@ -160,7 +160,7 @@ public class AccountServiceImpl implements AccountService {
                         .setMessage(true)
                         .setFriendsBirthday(true));
         ListDataResponse<NotificationSettingData> dataResponse = new ListDataResponse<>();
-        dataResponse.setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
+        dataResponse.setTimestamp(utilsService.getTimestamp());
         dataListNotification(notificationType);
         dataResponse.setData(dataListNotification(notificationType));
         return dataResponse;

@@ -53,7 +53,7 @@ public class AuthServiceImpl implements AuthService {
     private DataResponse<AuthData> getSuccessAuthResponse(Person person, String token) {
         DataResponse<AuthData> dataResponse = new DataResponse<>();
         dataResponse.setError("ok");
-        dataResponse.setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
+        dataResponse.setTimestamp(utilsService.getTimestamp());
         AuthData authData = utilsService.getAuthData(person, token);
         dataResponse.setData(authData);
         return dataResponse;

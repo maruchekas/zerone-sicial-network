@@ -54,24 +54,30 @@ public class UtilsService {
      */
     public DataResponse<MessageOkContent> getMessageOkResponse() {
         DataResponse<MessageOkContent> dataResponse = new DataResponse<>();
-        dataResponse.setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
+        dataResponse.setTimestamp(getTimestamp());
         MessageOkContent accountData = new MessageOkContent();
         accountData.setMessage("ok");
         dataResponse.setData(accountData);
         return dataResponse;
     }
 
+    /**
+     * Шаблон для DataResponse
+     * */
     public DataResponse<Content> getDataResponse(Content data) {
         return new DataResponse<>()
                 .setError("ok")
-                .setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli())
+                .setTimestamp(getTimestamp())
                 .setData(data);
     }
 
+    /**
+     * Шаблон для ListDataResponse
+     * */
     public ListDataResponse<Content> getListDataResponse(int total, int offset, int limit, List<Content> data) {
         return new ListDataResponse<>()
                 .setError("ok")
-                .setTimestamp(new Date().getTime())
+                .setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli())
                 .setTotal(total)
                 .setOffset(offset)
                 .setPerPage(limit)
@@ -124,6 +130,13 @@ public class UtilsService {
         return LocalDateTime.parse(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
                         .format(new Date(dateWithTimestampAccessor)),
                 DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+    }
+
+    /**
+     * Получение Timestamp
+     * */
+    public long getTimestamp() {
+        return LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli();
     }
 
     /**
