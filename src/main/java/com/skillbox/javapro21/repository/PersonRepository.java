@@ -118,7 +118,4 @@ public interface PersonRepository extends JpaRepository<Person, Integer> {
             "and p.isBlocked = 0 " +
             "order by p.firstName asc")
     Page<Person> findRecommendedFriendsByPerson(Long id, List<Long> idsFriends, Pageable pageable);
-
-    @Query("select ")
-    Person findIsFriend(List<Long> usersIds, List<Long> idsFriends);
 }
