@@ -166,7 +166,7 @@ public class UtilsService {
         } else if (friendshipStatusType.equals(REQUEST)) {
             fst = REQUEST;
         }
-        saveNewFriendshipForSrcAndDst(src, dst, fst);
+        saveNewFriendshipForSrcAndDst(dst, src, fst);
     }
 
     private void setOneFriendshipStatusTypeForSrcAndDst(Person src, Person dst, FriendshipStatusType friendshipStatusType) {
@@ -190,6 +190,8 @@ public class UtilsService {
             createNewFriendship(src, dst, fst);
         }
     }
+
+
 
     private FriendshipStatus saveFriendshipStatus(FriendshipStatus friendshipStatus, FriendshipStatusType type) {
         friendshipStatus.setFriendshipStatusType(type).setTime(LocalDateTime.now(ZoneOffset.UTC));

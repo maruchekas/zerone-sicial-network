@@ -4,6 +4,7 @@ import com.skillbox.javapro21.api.response.DataResponse;
 import com.skillbox.javapro21.api.response.ListDataResponse;
 import com.skillbox.javapro21.api.response.MessageOkContent;
 import com.skillbox.javapro21.api.response.account.AuthData;
+import com.skillbox.javapro21.domain.FriendshipStatus;
 import com.skillbox.javapro21.domain.Person;
 import com.skillbox.javapro21.domain.enumeration.FriendshipStatusType;
 import com.skillbox.javapro21.repository.FriendshipRepository;
@@ -19,6 +20,9 @@ import org.springframework.stereotype.Component;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.skillbox.javapro21.domain.enumeration.FriendshipStatusType.FRIEND;
+import static com.skillbox.javapro21.domain.enumeration.FriendshipStatusType.REQUEST;
 
 @Component
 @RequiredArgsConstructor
@@ -45,8 +49,8 @@ public class FriendsServiceImpl implements FriendsService {
     public DataResponse<MessageOkContent> deleteFriend(Long id, Principal principal) {
         Person src = utilsService.findPersonByEmail(principal.getName());
         Person dst = personRepository.findPersonById(id).orElseThrow();
-        utilsService.createFriendship(src, dst, FriendshipStatusType.DECLINED);
-        utilsService.createFriendship(dst, src, FriendshipStatusType.SUBSCRIBED);
+        utilsService.createFriendship(src, dst, FriendshipStatusType.SUBSCRIBED);
+        utilsService.createFriendship(dst, src, FriendshipStatusType.DECLINED);
         return utilsService.getMessageOkResponse();
     }
 
@@ -54,8 +58,26 @@ public class FriendsServiceImpl implements FriendsService {
     public DataResponse<MessageOkContent> editFriend(Long id, Principal principal) {
         Person src = utilsService.findPersonByEmail(principal.getName());
         Person dst = personRepository.findPersonById(id).orElseThrow();
-        utilsService.createFriendship(src, dst, FriendshipStatusType.REQUEST);
+        FriendshipStatus friendshipStatus = utilsService.getFriendshipStatus(dst.getId(), src.getId());
+        if (friendshipStatus != null && friendshipStatus.getFriendshipStatusType().equals(REQUEST)) {
+            utilsService.createFriendship(src, dst, FRIEND);
+        } else {
+            utilsService.createFriendship(dst, src, REQUEST);
+        }
         return utilsService.getMessageOkResponse();
+    }
+
+    @Override
+    public ListDataResponse<AuthData> requestFriends(String name, int offset, int itemPerPage, Principal principal) {
+        Person person = utilsService.findPersonByEmail(principal.getName());
+        Pageable pageable = PageRequest.of(offset, itemPerPage);
+        Page<Person> personPage;
+        if (name.equals("")) {
+            personPage = personRepository.findAllRequest(person.getId(), pageable);
+        } else {
+            personPage = personRepository.findAllRequestByName(person.getId(), name, pageable);
+        }
+        return getListDataResponse(personPage, pageable);
     }
 
     private ListDataResponse<AuthData> getListDataResponse(Page<Person> personsPage, Pageable pageable) {

@@ -15,4 +15,6 @@ public interface FriendsService {
     DataResponse<MessageOkContent> deleteFriend(Long id, Principal principal);
 
     DataResponse<MessageOkContent> editFriend(Long id, Principal principal);
+
+    ListDataResponse<AuthData> requestFriends(String name, int offset, int itemPerPage, Principal principal);
 }

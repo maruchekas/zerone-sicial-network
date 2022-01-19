@@ -49,4 +49,14 @@ public class FriendsController {
                                                                      Principal principal) {
         return new ResponseEntity<>(friendsService.editFriend(id, principal), HttpStatus.OK);
     }
+
+    @Operation(summary = "Получить список входящик заявок на добавление в друзья")
+    @GetMapping("/request")
+    @LastActivity
+    public ResponseEntity<ListDataResponse<AuthData>> requestFriends(@RequestParam(name = "name", defaultValue = "") String name,
+                                                                 @RequestParam(name = "offset", defaultValue = "0") int offset,
+                                                                 @RequestParam(name = "item_per_page", defaultValue = "20") int itemPerPage,
+                                                                 Principal principal) {
+        return new ResponseEntity<>(friendsService.requestFriends(name, offset, itemPerPage, principal), HttpStatus.OK);
+    }
 }
