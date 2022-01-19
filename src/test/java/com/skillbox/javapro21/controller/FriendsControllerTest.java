@@ -1,22 +1,28 @@
 package com.skillbox.javapro21.controller;
 
 import com.skillbox.javapro21.AbstractTest;
-import com.skillbox.javapro21.domain.Dialog;
-import com.skillbox.javapro21.domain.Message;
+import com.skillbox.javapro21.domain.FriendshipStatus;
 import com.skillbox.javapro21.domain.Person;
+import com.skillbox.javapro21.domain.enumeration.FriendshipStatusType;
 import com.skillbox.javapro21.domain.enumeration.MessagesPermission;
-import com.skillbox.javapro21.repository.DialogRepository;
-import com.skillbox.javapro21.repository.MessageRepository;
 import com.skillbox.javapro21.repository.PersonRepository;
-import com.skillbox.javapro21.repository.PersonToDialogRepository;
+import com.skillbox.javapro21.service.impl.UtilsService;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.time.LocalDateTime;
 
@@ -29,26 +35,24 @@ public class FriendsControllerTest extends AbstractTest {
     @Autowired
     private PersonRepository personRepository;
     @Autowired
-    private PersonToDialogRepository personToDialogRepository;
-    @Autowired
-    private MessageRepository messageRepository;
+    private UtilsService utilsService;
 
-    private Person verifyPerson;
-    private Person verifyPersonWithPost;
+    private Person verifyPersonSrc;
+    private Person verifyPersonDst;
 
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
 
     @BeforeEach
     public void setup() {
         super.setup();
-        String verifyEmail = "test@test.ru";
+        String verifyEmail = "test99@test.ru";
         String password = "1234";
         String firstName = "Arcadiy";
         String lastName = "Parovozov";
         LocalDateTime reg_date = LocalDateTime.now();
         String conf_code = "123";
 
-        verifyPerson = new Person()
+        verifyPersonSrc = new Person()
                 .setEmail(verifyEmail)
                 .setPassword(passwordEncoder.encode(password))
                 .setFirstName(firstName)
@@ -63,9 +67,9 @@ public class FriendsControllerTest extends AbstractTest {
                 .setBirthDate(LocalDateTime.of(2000, 1, 1, 10, 0))
                 .setCountry("Россия")
                 .setTown("Москва");
-        personRepository.save(verifyPerson);
+        personRepository.save(verifyPersonSrc);
 
-        verifyPersonWithPost = new Person()
+        verifyPersonDst = new Person()
                 .setEmail(verifyEmail + "b")
                 .setPassword(passwordEncoder.encode(password))
                 .setFirstName(firstName + "-Канефоль")
@@ -80,10 +84,59 @@ public class FriendsControllerTest extends AbstractTest {
                 .setBirthDate(LocalDateTime.of(2010, 1, 1, 10, 0))
                 .setCountry("Россия")
                 .setTown("Санкт-Петербург");
-        personRepository.save(verifyPersonWithPost);
+        personRepository.save(verifyPersonDst);
+    }
 
+    @AfterEach
+    public void cleanup() {
+        personRepository.deleteAll();
+    }
 
+    @Test
+    @WithMockUser(username = "test9999@test.ru", authorities = "user:write")
+    void getFriends() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/api/v1/friends")
+                        .principal(() -> "test99@test.ru")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.total").value(0)).andReturn();
+
+        utilsService.createFriendship(verifyPersonSrc, verifyPersonDst, FriendshipStatusType.FRIEND);
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/api/v1/friends")
+                        .principal(() -> "test99@test.ru")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.total").value(1)).andReturn();
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/api/v1/friends")
+                        .principal(() -> "test99@test.ru")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.total").value(1)).andReturn();
     }
 
 
+    @Test
+    @WithMockUser(username = "test99@test.ru", authorities = "user:write")
+    void deleteFriend() throws Exception {
+        utilsService.createFriendship(verifyPersonSrc, verifyPersonDst, FriendshipStatusType.FRIEND);
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .delete("/api/v1/friends/{id}", verifyPersonDst.getId())
+                        .principal(() -> "test99@test.ru")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.message").value("ok")).andReturn();
+
+        FriendshipStatus friendshipStatus = utilsService.getFriendshipStatus(verifyPersonDst.getId(), verifyPersonSrc.getId());
+        Assertions.assertEquals(FriendshipStatusType.SUBSCRIBED, friendshipStatus.getFriendshipStatusType());
+    }
 }

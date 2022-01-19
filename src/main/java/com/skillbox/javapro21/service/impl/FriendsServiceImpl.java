@@ -19,9 +19,7 @@ import org.springframework.stereotype.Component;
 
 import java.security.Principal;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static com.skillbox.javapro21.domain.enumeration.FriendshipStatusType.FRIEND;
 import static com.skillbox.javapro21.domain.enumeration.FriendshipStatusType.REQUEST;
