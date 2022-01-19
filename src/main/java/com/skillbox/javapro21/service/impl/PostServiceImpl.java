@@ -82,11 +82,31 @@ public class PostServiceImpl implements PostService {
         Post post = postRepository.findPostById(id).orElseThrow(() -> new PostNotFoundException("Поста с таким айди не существует или пост заблокирован модератором"));
         if (!person.getId().equals(post.getAuthor().getId()))
             throw new AuthorAndUserEqualsException("Пользователь не может менять данные в этом посте");
+        Set<Tag> tags = addTagsToPost(postRequest.getTags());
         post.setTitle(postRequest.getTitle())
                 .setPostText(postRequest.getPostText())
+                .setTags(tags)
                 .setTime((publishDate == -1) ? LocalDateTime.now(ZoneOffset.UTC) : utilsService.getLocalDateTime(publishDate));
         post = postRepository.saveAndFlush(post);
         return getDataResponse(getPostData(post));
+    }
+
+    private Set<Tag> addTagsToPost(String[] tagsString) {
+        Set<Tag> tags = new HashSet<>();
+        for (String tagFromNewPost : tagsString
+        ) {
+            Tag tag = tagRepository.findByName(tagFromNewPost);
+            if (tag != null) {
+                tags.add(tag);
+            } else {
+                Tag newTag = new Tag();
+                newTag.setTag(tagFromNewPost);
+                tagRepository.save(newTag);
+                tags.add(newTag);
+            }
+        }
+
+        return tags;
     }
 
     @Override

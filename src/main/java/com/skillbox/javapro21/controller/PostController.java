@@ -77,8 +77,8 @@ public class PostController {
     @DeleteMapping("/post/{id}")
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
-    public ResponseEntity<DataResponse<PostDeleteResponse>> putPostByIdAndMessageInDay(@PathVariable Long id,
-                                                                                       Principal principal) throws PostNotFoundException, AuthorAndUserEqualsException {
+    public ResponseEntity<DataResponse<PostDeleteResponse>> deletePostById(@PathVariable Long id,
+                                                                           Principal principal) throws PostNotFoundException, AuthorAndUserEqualsException {
         return new ResponseEntity<>(postService.deletePostById(id, principal), HttpStatus.OK);
     }
 

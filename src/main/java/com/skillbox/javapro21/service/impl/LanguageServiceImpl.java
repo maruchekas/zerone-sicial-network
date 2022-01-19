@@ -41,7 +41,7 @@ public class LanguageServiceImpl implements LanguageService {
         languageDataListDataResponse.setOffset(offset);
         languageDataListDataResponse.setPerPage(itemPerPage);
         languageDataListDataResponse.setTotal((int) languages.getTotalElements());
-        languageDataListDataResponse.setTimestamp(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
+        languageDataListDataResponse.setTimestamp(UtilsService.getTimestampFromLocalDateTime(LocalDateTime.now()));
         languageDataListDataResponse.setData(getLanguagesForResponse(languages.toList()));
 
         return languageDataListDataResponse;
