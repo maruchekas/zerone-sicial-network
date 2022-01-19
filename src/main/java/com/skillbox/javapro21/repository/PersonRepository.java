@@ -46,11 +46,11 @@ public interface PersonRepository extends JpaRepository<Person, Integer> {
                         "WHERE f.src_person_id = :currUserId " +
                             "AND fs.name IN ('BLOCKED', 'WASBLOCKED', 'INTERLOCKED')" +
                     ")" +
-                    "AND first_name LIKE CONCAT('%', :firstName, '%') " +
-                    "AND last_name LIKE CONCAT('%', :lastName, '%') " +
+                    "AND first_name ILIKE CONCAT('%', :firstName, '%') " +
+                    "AND last_name ILIKE CONCAT('%', :lastName, '%') " +
                     "AND DATE_PART('year', AGE(birth_date)) BETWEEN :ageFrom AND :ageTo " +
-                    "AND country LIKE CONCAT('%', :country, '%') " +
-                    "AND town LIKE CONCAT('%', :city, '%')" +
+                    "AND country ILIKE CONCAT('%', :country, '%') " +
+                    "AND town ILIKE CONCAT('%', :city, '%')" +
                     "AND is_blocked = 0",
             nativeQuery = true)
     Page<Person> findAllByNameAndAgeAndLocation(Long currUserId, String firstName, String lastName, Integer ageFrom, Integer ageTo, String country, String city, Pageable page);

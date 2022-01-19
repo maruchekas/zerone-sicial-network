@@ -125,4 +125,56 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
             "and ps.isBlocked = 0 " +
             "order by p.likes.size desc")
     Page<Post> findBestPostsByPerson(List<Long> ids, Pageable pageable);
+
+    @Query(value =
+            "(" +
+            "SELECT p.id FROM posts p " +
+            "JOIN persons ps ON ps.id = p.author_id " +
+            "WHERE ps.id IN (" +
+                            "SELECT p.id FROM persons p " +
+                            "JOIN friendship f on f.dst_person_id = p.id " +
+                            "JOIN friendship_statuses fst on fst.id = f.status_id " +
+                            "WHERE f.src_person_id = :id " +
+                                "AND (fst.name = 'FRIEND' OR fst.name = 'SUBSCRIBED')" +
+                            ") " +
+                "AND p.is_Blocked = 0 " +
+                "AND ps.is_Blocked = 0 " +
+                "AND (p.title ILIKE CONCAT('%', :text,'%') OR p.post_text ILIKE CONCAT('%', :text,'%')) " +
+            "ORDER BY p.time DESC" +
+            ") " +
+            "UNION ALL " +
+            "(" +
+            "SELECT p.id FROM posts p " +
+                "JOIN persons ps ON ps.id = p.author_id " +
+                "LEFT JOIN post_likes pl ON pl.post_id = p.id " +
+                "WHERE p.author_id NOT IN (" +
+                                            "(" +
+                                            "SELECT p.id FROM persons p " +
+                                            "JOIN friendship f ON f.dst_person_id = p.id " +
+                                            "JOIN friendship_statuses fst ON fst.id = f.status_id " +
+                                            "WHERE f.src_person_id = :id " +
+                                                "AND (fst.name = 'FRIEND' OR fst.name = 'SUBSCRIBED')" +
+                                            ") " +
+                                            "UNION ALL " +
+                                            "(" +
+                                            "SELECT p.id FROM persons p " +
+                                            "JOIN friendship f ON f.dst_person_id = p.id " +
+                                            "JOIN friendship_statuses fs ON fs.id = f.status_id " +
+                                            "WHERE f.src_person_id = :id" +
+                                                "AND (fs.name = 'BLOCKED' OR fs.name = 'INTERLOCKED') " +
+                                                "OR (p.is_blocked != 0) " +
+                                            "GROUP BY p.id" +
+                                            ") " +
+                                          ") " +
+                "AND p.id != :id " +
+                "AND p.is_Blocked = 0 " +
+                "AND ps.is_Blocked = 0 " +
+                "AND (p.title ILIKE CONCAT('%', :text,'%') OR p.post_text ILIKE CONCAT('%', :text,'%')) " +
+            "GROUP BY p.id " +
+            "ORDER BY count(pl) DESC, p.time DESC" +
+            ")",
+            nativeQuery = true)
+    Page<Post> getEndlessFeedsForPerson(Long id, String text, Pageable pageable);
+
+    Page<Post> findAllByIdIn(List<Long> ids, Pageable pageable);
 }
