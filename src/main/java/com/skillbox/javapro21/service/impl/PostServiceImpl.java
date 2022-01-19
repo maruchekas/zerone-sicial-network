@@ -12,10 +12,10 @@ import com.skillbox.javapro21.api.response.post.PostData;
 import com.skillbox.javapro21.api.response.post.PostDeleteResponse;
 import com.skillbox.javapro21.config.MailjetSender;
 import com.skillbox.javapro21.domain.*;
-import com.skillbox.javapro21.domain.enumeration.FriendshipStatusType;
 import com.skillbox.javapro21.exception.*;
 import com.skillbox.javapro21.repository.*;
 import com.skillbox.javapro21.service.PostService;
+import com.skillbox.javapro21.service.TagService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,9 +31,6 @@ import java.time.ZoneOffset;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.skillbox.javapro21.domain.enumeration.FriendshipStatusType.BLOCKED;
-import static com.skillbox.javapro21.domain.enumeration.FriendshipStatusType.INTERLOCKED;
-
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -42,6 +39,7 @@ public class PostServiceImpl implements PostService {
     private String adminEmail;
 
     private final UtilsService utilsService;
+    private final TagService tagService;
     private final PostRepository postRepository;
     private final TagRepository tagRepository;
     private final PostLikeRepository postLikeRepository;
@@ -82,31 +80,13 @@ public class PostServiceImpl implements PostService {
         Post post = postRepository.findPostById(id).orElseThrow(() -> new PostNotFoundException("Поста с таким айди не существует или пост заблокирован модератором"));
         if (!person.getId().equals(post.getAuthor().getId()))
             throw new AuthorAndUserEqualsException("Пользователь не может менять данные в этом посте");
-        Set<Tag> tags = addTagsToPost(postRequest.getTags());
+        Set<Tag> tags = tagService.addTagsToPost(postRequest.getTags());
         post.setTitle(postRequest.getTitle())
                 .setPostText(postRequest.getPostText())
                 .setTags(tags)
                 .setTime((publishDate == -1) ? LocalDateTime.now(ZoneOffset.UTC) : utilsService.getLocalDateTime(publishDate));
         post = postRepository.saveAndFlush(post);
         return getDataResponse(getPostData(post));
-    }
-
-    private Set<Tag> addTagsToPost(String[] tagsString) {
-        Set<Tag> tags = new HashSet<>();
-        for (String tagFromNewPost : tagsString
-        ) {
-            Tag tag = tagRepository.findByName(tagFromNewPost);
-            if (tag != null) {
-                tags.add(tag);
-            } else {
-                Tag newTag = new Tag();
-                newTag.setTag(tagFromNewPost);
-                tagRepository.save(newTag);
-                tags.add(newTag);
-            }
-        }
-
-        return tags;
     }
 
     @Override
