@@ -39,7 +39,7 @@ public class LikeController {
     @LastActivity
     @PreAuthorize("hasAuthority('user:write')")
     @GetMapping("/likes")
-    public ResponseEntity<DataResponse<Content>> getLikes(@RequestBody LikeRequest request) throws BadArgumentException, PostLikeNotFoundException, CommentLikeNotFoundException {
+    public ResponseEntity<DataResponse<Content>> getLikes(@RequestBody LikeRequest request) throws BadArgumentException, PostLikeNotFoundException, CommentLikeNotFoundException, PostNotFoundException, PostCommentNotFoundException {
         return new ResponseEntity<>(likeService.getLikes(request), HttpStatus.OK);
     }
 
@@ -57,7 +57,7 @@ public class LikeController {
     @PreAuthorize("hasAuthority('user:write')")
     @DeleteMapping("/likes")
     public ResponseEntity<DataResponse<Content>> deleteLike(@RequestBody LikeRequest request,
-                                                            Principal principal) throws PostLikeNotFoundException, CommentLikeNotFoundException, BadArgumentException {
+                                                            Principal principal) throws PostLikeNotFoundException, CommentLikeNotFoundException, BadArgumentException, PostCommentNotFoundException, PostNotFoundException {
         return new ResponseEntity<>(likeService.deleteLike(request, principal), HttpStatus.OK);
     }
 }
