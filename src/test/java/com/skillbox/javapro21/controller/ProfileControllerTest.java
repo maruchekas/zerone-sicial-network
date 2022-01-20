@@ -30,8 +30,10 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import java.security.Principal;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static com.skillbox.javapro21.domain.enumeration.FriendshipStatusType.*;
 
@@ -273,9 +275,10 @@ public class ProfileControllerTest extends AbstractTest {
     @Test
     @WithMockUser(username = "test1@test.ru", authorities = "user:write")
     void editPerson() throws Exception {
+        Optional<Person> byEmail = personRepository.findByEmail("test1@test.ru");
         EditProfileRequest editProfileRequest = new EditProfileRequest();
         editProfileRequest.setFirstName("Oleg");
-        editProfileRequest.setBirthDate(Instant.from(personRepository.findByEmail("test1@test.ru").get().getBirthDate()).toEpochMilli());
+        editProfileRequest.setBirthDate(byEmail.get().getBirthDate().toInstant(ZoneOffset.UTC).toEpochMilli());
 
         mockMvc.perform(MockMvcRequestBuilders
                         .put("/api/v1/users/me")

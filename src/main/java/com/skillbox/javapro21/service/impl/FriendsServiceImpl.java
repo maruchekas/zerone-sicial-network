@@ -21,8 +21,7 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.skillbox.javapro21.domain.enumeration.FriendshipStatusType.FRIEND;
-import static com.skillbox.javapro21.domain.enumeration.FriendshipStatusType.REQUEST;
+import static com.skillbox.javapro21.domain.enumeration.FriendshipStatusType.*;
 
 @Component
 @RequiredArgsConstructor
@@ -47,8 +46,7 @@ public class FriendsServiceImpl implements FriendsService {
     public DataResponse<MessageOkContent> deleteFriend(Long id, Principal principal) {
         Person src = utilsService.findPersonByEmail(principal.getName());
         Person dst = personRepository.findPersonById(id).orElseThrow();
-        utilsService.createFriendship(src, dst, FriendshipStatusType.SUBSCRIBED);
-        utilsService.createFriendship(dst, src, FriendshipStatusType.DECLINED);
+        utilsService.createFriendship(src, dst, FriendshipStatusType.DECLINED);
         return utilsService.getMessageOkResponse();
     }
 
@@ -56,8 +54,9 @@ public class FriendsServiceImpl implements FriendsService {
     public DataResponse<MessageOkContent> editFriend(Long id, Principal principal) {
         Person src = utilsService.findPersonByEmail(principal.getName());
         Person dst = personRepository.findPersonById(id).orElseThrow();
-        FriendshipStatus friendshipStatus = utilsService.getFriendshipStatus(dst.getId(), src.getId());
-        if (friendshipStatus != null && friendshipStatus.getFriendshipStatusType().equals(REQUEST)) {
+        FriendshipStatus friendshipStatusDst = utilsService.getFriendshipStatus(dst.getId(), src.getId());
+        if (friendshipStatusDst != null && (friendshipStatusDst.getFriendshipStatusType().equals(REQUEST)
+                || friendshipStatusDst.getFriendshipStatusType().equals(SUBSCRIBED)) ) {
             utilsService.createFriendship(src, dst, FRIEND);
         } else {
             utilsService.createFriendship(dst, src, REQUEST);

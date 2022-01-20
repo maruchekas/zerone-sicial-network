@@ -144,7 +144,7 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     @Override
-    public DataResponse<MessageOkContent> unblockPersonById(Long id, Principal principal) throws PersonNotFoundException, BlockPersonHimselfException, NonBlockedFriendshipException, InterlockedFriendshipStatusException, FriendshipNotFoundException {
+    public DataResponse<MessageOkContent> unblockPersonById(Long id, Principal principal) throws PersonNotFoundException, BlockPersonHimselfException, NonBlockedFriendshipException, FriendshipNotFoundException {
         Person src = utilsService.findPersonByEmail(principal.getName());
         Person dst = personRepository.findPersonById(id).orElseThrow(() -> new PersonNotFoundException("Пользователя с данным id не существует"));
         Optional<Friendship> optionalFriendship = friendshipRepository.findFriendshipBySrcPersonAndDstPerson(src.getId(), id);

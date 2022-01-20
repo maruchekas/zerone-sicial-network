@@ -157,16 +157,13 @@ public class UtilsService {
         saveNewFriendshipForSrcAndDst(dst, src, WASBLOCKED);
     }
 
-    private void setFriendshipStatusTypeForSrc(Person src, Person dst, FriendshipStatusType friendshipStatusType) {
-        FriendshipStatusType fst = null;
-        if (friendshipStatusType.equals(DECLINED)) {
-            fst = DECLINED;
-        } else if (friendshipStatusType.equals(SUBSCRIBED)) {
-            fst = SUBSCRIBED;
-        } else if (friendshipStatusType.equals(REQUEST)) {
-            fst = REQUEST;
+    private void setFriendshipStatusTypeForSrc(Person src, Person dst, FriendshipStatusType fst) {
+        if (fst.equals(DECLINED)) {
+            saveNewFriendshipForSrcAndDst(src, dst, fst);
+            saveNewFriendshipForSrcAndDst(dst, src, SUBSCRIBED);
+        } else {
+            saveNewFriendshipForSrcAndDst(src, dst, fst);
         }
-        saveNewFriendshipForSrcAndDst(dst, src, fst);
     }
 
     private void setOneFriendshipStatusTypeForSrcAndDst(Person src, Person dst, FriendshipStatusType friendshipStatusType) {
