@@ -23,8 +23,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.time.LocalDateTime;
 
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -361,27 +360,33 @@ class LikeControllerTest extends AbstractTest {
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isNotFound());
 
-        LikeRequest postLikeNotFountRequest = new LikeRequest();
-        postLikeNotFountRequest.setType("Post");
-        postLikeNotFountRequest.setItemId(post3.getId());
+        LikeRequest postWithNoLikeRequest = new LikeRequest();
+        postWithNoLikeRequest.setType("Post");
+        postWithNoLikeRequest.setItemId(post3.getId());
         mockMvc.perform(MockMvcRequestBuilders
                         .get("/api/v1/likes")
                         .principal(() -> "person1@test.ru")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(postLikeNotFountRequest)))
+                        .content(mapper.writeValueAsString(postWithNoLikeRequest)))
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.status().isNotFound());
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.likes").value(0))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.users").isArray())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.users", hasSize(0)));
 
-        LikeRequest commentLikeNotFountRequest = new LikeRequest();
-        commentLikeNotFountRequest.setType("Post");
-        commentLikeNotFountRequest.setItemId(comment5.getId());
+        LikeRequest commentWithNoLike = new LikeRequest();
+        commentWithNoLike.setType("Comment");
+        commentWithNoLike.setItemId(comment5.getId());
         mockMvc.perform(MockMvcRequestBuilders
                         .get("/api/v1/likes")
                         .principal(() -> "person1@test.ru")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(commentLikeNotFountRequest)))
+                        .content(mapper.writeValueAsString(commentWithNoLike)))
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.status().isNotFound());
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.likes").value(0))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.users").isArray())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.users", hasSize(0)));
 
         LikeRequest badTypeRequest = new LikeRequest();
         badTypeRequest.setType("Пост");

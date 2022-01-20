@@ -58,25 +58,18 @@ public class LikeServiceImpl implements LikeService{
     }
 
     @Override
-    public DataResponse<Content> getLikes(LikeRequest request) throws BadArgumentException, CommentLikeNotFoundException, PostLikeNotFoundException {
+    public DataResponse<Content> getLikes(LikeRequest request) throws BadArgumentException, PostNotFoundException, PostCommentNotFoundException {
         switch (request.getType()) {
             case POST -> {
-                List<PostLike> likes = postLikeRepository.findPostLikeByPostId(request.getItemId());
-                if (likes.isEmpty()) {
-                    throw new PostLikeNotFoundException("Пост с id = " + request.getItemId() + " не имеет лайков");
-                }
+                List<PostLike> likes = postLikeRepository.findPostLikeByPostId(getPost(request.getItemId()).getId());
                 return utilsService.getDataResponse(createLikeData(likes));
             }
             case COMMENT -> {
-                List<CommentLike> likes = commentLikeRepository.findAllByCommentId(request.getItemId());
-                if (likes.isEmpty()) {
-                    throw new CommentLikeNotFoundException("Комментарий с id = " + request.getItemId() + " не имеет лайков");
-                }
+                List<CommentLike> likes = commentLikeRepository.findAllByCommentId(getComment(request.getItemId()).getId());
                 return utilsService.getDataResponse(createLikeData(likes));
             }
             default -> throw new BadArgumentException(UNEXPECTED + request.getType());
         }
-
     }
 
     @Override
@@ -85,25 +78,17 @@ public class LikeServiceImpl implements LikeService{
 
         switch (request.getType()) {
             case POST -> {
-                Optional<Post> possiblePost = postRepository.findPostById(request.getItemId());
-                if (possiblePost.isEmpty()) {
-                    throw new PostNotFoundException("Поста с id = " + request.getItemId() + DOES_NOT_EXIST);
-                }
                 postLikeRepository.save(new PostLike()
                                             .setTime(LocalDateTime.now())
                                             .setPerson(currentUser)
-                                            .setPost(possiblePost.get()));
+                                            .setPost(getPost(request.getItemId())));
                 return getLikes(request);
             }
             case COMMENT -> {
-                Optional<PostComment> possibleComment = postCommentRepository.findById(request.getItemId());
-                if (possibleComment.isEmpty()) {
-                    throw new PostCommentNotFoundException("Комментария с id = " + request.getItemId() + DOES_NOT_EXIST);
-                }
                 commentLikeRepository.save(new CommentLike()
                                                 .setTime(LocalDateTime.now())
                                                 .setPerson(currentUser)
-                                                .setComment(possibleComment.get()));
+                                                .setComment(getComment(request.getItemId())));
                 return getLikes(request);
             }
             default -> throw new BadArgumentException(UNEXPECTED + request.getType());
@@ -111,30 +96,54 @@ public class LikeServiceImpl implements LikeService{
     }
 
     @Override
-    public DataResponse<Content> deleteLike(LikeRequest request, Principal principal) throws PostLikeNotFoundException, CommentLikeNotFoundException, BadArgumentException {
+    public DataResponse<Content> deleteLike(LikeRequest request, Principal principal) throws PostLikeNotFoundException, CommentLikeNotFoundException, BadArgumentException, PostNotFoundException, PostCommentNotFoundException {
         Person currentUser = utilsService.findPersonByEmail(principal.getName());
 
         switch (request.getType()) {
             case POST -> {
-                Optional<PostLike> possiblePostLike = postLikeRepository.findByPersonIdAndPostId(currentUser.getId(), request.getItemId());
-                if (possiblePostLike.isEmpty()) {
-                    throw new PostLikeNotFoundException("Лайка на пост с id = " + request.getItemId() + " от пользователя " + currentUser.getEmail() + DOES_NOT_EXIST);
-                }
-                postLikeRepository.delete(possiblePostLike.get());
+                postLikeRepository.delete(getPostLike(currentUser, request.getItemId()));
                 return getLikes(request);
             }
             case COMMENT -> {
-                Optional<CommentLike> possibleCommentLike = commentLikeRepository.findByPersonIdAndCommentId(currentUser.getId(), request.getItemId());
-                if (possibleCommentLike.isEmpty()) {
-                    throw new CommentLikeNotFoundException("Лайка на комментарий с id = " + request.getItemId() + " от пользователя " + currentUser.getEmail() + DOES_NOT_EXIST);
-                }
-                commentLikeRepository.delete(possibleCommentLike.get());
+                commentLikeRepository.delete(getCommentLike(currentUser, request.getItemId()));
                 return getLikes(request);
             }
             default -> throw new BadArgumentException(UNEXPECTED + request.getType());
         }
     }
 
+
+    private Post getPost(Long id) throws PostNotFoundException {
+        Optional<Post> possiblePost = postRepository.findPostById(id);
+        if (possiblePost.isEmpty()) {
+            throw new PostNotFoundException("Поста с id = " + id + DOES_NOT_EXIST);
+        }
+        return possiblePost.get();
+    }
+
+    private PostComment getComment(Long id) throws PostCommentNotFoundException {
+        Optional<PostComment> possibleComment = postCommentRepository.findById(id);
+        if (possibleComment.isEmpty()) {
+            throw new PostCommentNotFoundException("Комментария с id = " + id + DOES_NOT_EXIST);
+        }
+        return possibleComment.get();
+    }
+
+    private PostLike getPostLike(Person person, Long postId) throws PostLikeNotFoundException {
+        Optional<PostLike> possiblePostLike = postLikeRepository.findByPersonIdAndPostId(person.getId(), postId);
+        if (possiblePostLike.isEmpty()) {
+            throw new PostLikeNotFoundException("Лайка на пост с id = " + postId + " от пользователя " + person.getEmail() + DOES_NOT_EXIST);
+        }
+        return possiblePostLike.get();
+    }
+
+    private CommentLike getCommentLike(Person person, Long postId) throws CommentLikeNotFoundException {
+        Optional<CommentLike> possibleCommentLike = commentLikeRepository.findByPersonIdAndCommentId(person.getId(), postId);
+        if (possibleCommentLike.isEmpty()) {
+            throw new CommentLikeNotFoundException("Лайка на комментарий с id = " + postId + " от пользователя " + person.getEmail() + DOES_NOT_EXIST);
+        }
+        return possibleCommentLike.get();
+    }
 
     private <T> LikeBoolean createLikeBooleanData(Optional<T> possibleEntity) {
         LikeBoolean data = new LikeBoolean();

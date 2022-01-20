@@ -31,7 +31,7 @@ public class LikeController {
     @PreAuthorize("hasAuthority('user:write')")
     @GetMapping("/liked")
     public ResponseEntity<DataResponse<Content>> isLiked(@RequestBody LikeRequest request,
-                                                         Principal principal) throws BadArgumentException {
+                                                         Principal principal) throws CustomException {
         return new ResponseEntity<>(likeService.isLiked(request, principal), HttpStatus.OK);
     }
 
@@ -39,7 +39,7 @@ public class LikeController {
     @LastActivity
     @PreAuthorize("hasAuthority('user:write')")
     @GetMapping("/likes")
-    public ResponseEntity<DataResponse<Content>> getLikes(@RequestBody LikeRequest request) throws BadArgumentException, PostLikeNotFoundException, CommentLikeNotFoundException {
+    public ResponseEntity<DataResponse<Content>> getLikes(@RequestBody LikeRequest request) throws CustomException {
         return new ResponseEntity<>(likeService.getLikes(request), HttpStatus.OK);
     }
 
@@ -48,7 +48,7 @@ public class LikeController {
     @PreAuthorize("hasAuthority('user:write')")
     @PutMapping("/likes")
     public ResponseEntity<DataResponse<Content>> putLike(@RequestBody LikeRequest request,
-                                                         Principal principal) throws PostNotFoundException, PostCommentNotFoundException, BadArgumentException, PostLikeNotFoundException, CommentLikeNotFoundException {
+                                                         Principal principal) throws CustomException {
         return new ResponseEntity<>(likeService.putLike(request, principal), HttpStatus.OK);
     }
 
@@ -57,7 +57,7 @@ public class LikeController {
     @PreAuthorize("hasAuthority('user:write')")
     @DeleteMapping("/likes")
     public ResponseEntity<DataResponse<Content>> deleteLike(@RequestBody LikeRequest request,
-                                                            Principal principal) throws PostLikeNotFoundException, CommentLikeNotFoundException, BadArgumentException {
+                                                            Principal principal) throws CustomException {
         return new ResponseEntity<>(likeService.deleteLike(request, principal), HttpStatus.OK);
     }
 }
