@@ -29,7 +29,6 @@ import java.security.Principal;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -130,7 +129,7 @@ public class ProfileServiceImpl implements ProfileService {
         if (src.getId().equals(dst.getId()))
             throw new BlockPersonHimselfException("Пользователь пытается заблокировать сам себя");
         Optional<Friendship> optionalFriendship = friendshipRepository.findFriendshipBySrcPersonAndDstPerson(src.getId(), id);
-        Friendship friendship = optionalFriendship.orElseThrow(FriendshipNotFoundException::new);
+        Friendship friendship = optionalFriendship.orElseThrow(() -> new FriendshipNotFoundException("Дружбы с данным id не существует"));
         if (utilsService.isBlockedBy(src.getId(), dst.getId(), optionalFriendship)) {
             if (!friendship.getFriendshipStatus().getFriendshipStatusType().equals(BLOCKED)) {
                 utilsService.createFriendship(src, dst, BLOCKED);
@@ -150,7 +149,7 @@ public class ProfileServiceImpl implements ProfileService {
         if (dst.getIsBlocked() == 2) throw new PersonNotFoundException("Попытка работы с удаленным пользователем");
         if (utilsService.isBlockedBy(src.getId(), dst.getId(), optionalFriendship))
             throw new NonBlockedFriendshipException("Пользователь не может разблокировать не заблокированного пользователя");
-        Friendship friendship = optionalFriendship.orElseThrow(FriendshipNotFoundException::new);
+        Friendship friendship = optionalFriendship.orElseThrow(() -> new FriendshipNotFoundException("Дружбы с данным id не существует"));
         if (friendship.getFriendshipStatus().getFriendshipStatusType().equals(BLOCKED)) {
             friendshipStatusRepository.delete(utilsService.getFriendshipStatus(src.getId(), dst.getId()));
             friendshipStatusRepository.delete(utilsService.getFriendshipStatus(dst.getId(), src.getId()));
