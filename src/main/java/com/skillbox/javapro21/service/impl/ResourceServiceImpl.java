@@ -13,12 +13,15 @@ import com.skillbox.javapro21.repository.PersonRepository;
 import com.skillbox.javapro21.service.ResourceService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.URL;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -34,11 +37,28 @@ public class ResourceServiceImpl implements ResourceService {
     private final PersonRepository personRepository;
     private final Cloudinary cloudinary;
 
-    public String createDefaultRoboticAvatar(String username){
-        int setNum = new Random().nextInt(4);
-        String randomString = RandomStringUtils.randomAlphabetic(5);
+    public String setDefaultAvatarToUser(String userEmail) throws IOException {
+        String format = "png";
+        int setNum = new Random().nextInt(4) + 1;
+        String urlCreatedAvatar =  Constants.BASE_ROBOTIC_AVA_URL
+                + userEmail + Constants.AVATAR_CONFIG + setNum;
 
-        return Constants.BASE_ROBOTIC_AVA_URL + username + randomString + Constants.AVATAR_CONFIG + setNum;
+        Map params = getMap(userEmail, 360);
+        BufferedImage image = ImageIO.read(new URL(urlCreatedAvatar));
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ImageIO.write(image, format, baos);
+        byte[] bytes = baos.toByteArray();
+
+        Map uploadResult = cloudinary.uploader().upload(bytes, params);
+
+        return uploadResult.get("url").toString();
+    }
+
+    private Map getMap(String userEmail, int transformationParams) {
+        return ObjectUtils.asMap(
+                "public_id", Constants.CLOUDINARY_AVATARS_FOLDER + userEmail,
+                "transformation", new Transformation<>().width(transformationParams).height(transformationParams)
+        );
     }
 
     @Override
@@ -64,10 +84,7 @@ public class ResourceServiceImpl implements ResourceService {
     }
 
     private AvatarUploadData saveUserAvatar(MultipartFile image, Person person) throws IOException {
-        Map params = ObjectUtils.asMap(
-                "public_id", Constants.CLOUDINARY_AVATARS_FOLDER + person.getEmail(),
-                "transformation", new Transformation<>().width(1024).height(1024)
-        );
+        Map params = getMap(person.getEmail(), 1024);
         Map uploadResult = cloudinary.uploader().upload(image.getBytes(), params);
         String url = uploadResult.get("url").toString();
         AvatarUploadData data = new AvatarUploadData()
