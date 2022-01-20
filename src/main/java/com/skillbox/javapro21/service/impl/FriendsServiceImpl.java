@@ -55,7 +55,8 @@ public class FriendsServiceImpl implements FriendsService {
         Person src = utilsService.findPersonByEmail(principal.getName());
         Person dst = personRepository.findPersonById(id).orElseThrow();
         FriendshipStatus friendshipStatusDst = utilsService.getFriendshipStatus(dst.getId(), src.getId());
-        if (friendshipStatusDst != null && (friendshipStatusDst.getFriendshipStatusType().equals(REQUEST)
+        FriendshipStatus friendshipStatusSrc = utilsService.getFriendshipStatus(src.getId(), dst.getId());
+        if (friendshipStatusDst != null && (friendshipStatusSrc.getFriendshipStatusType().equals(REQUEST)
                 || friendshipStatusDst.getFriendshipStatusType().equals(SUBSCRIBED)) ) {
             utilsService.createFriendship(src, dst, FRIEND);
         } else {
