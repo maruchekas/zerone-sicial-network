@@ -23,8 +23,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.security.Principal;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.Map;
 import java.util.Random;
@@ -43,23 +41,17 @@ public class ResourceServiceImpl implements ResourceService {
         String urlCreatedAvatar =  Constants.BASE_ROBOTIC_AVA_URL
                 + userEmail + Constants.AVATAR_CONFIG + setNum;
 
-        Map params = getMap(userEmail, 360);
+        Map params = getUploadParamsMap(userEmail, 360);
         BufferedImage image = ImageIO.read(new URL(urlCreatedAvatar));
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ImageIO.write(image, format, baos);
         byte[] bytes = baos.toByteArray();
 
         Map uploadResult = cloudinary.uploader().upload(bytes, params);
-
+        baos.close();
         return uploadResult.get("url").toString();
     }
 
-    private Map getMap(String userEmail, int transformationParams) {
-        return ObjectUtils.asMap(
-                "public_id", Constants.CLOUDINARY_AVATARS_FOLDER + userEmail,
-                "transformation", new Transformation<>().width(transformationParams).height(transformationParams)
-        );
-    }
 
     @Override
     public DataResponse<Content> saveFileInStorage(String type, MultipartFile image, Principal principal) throws IOException {
@@ -72,19 +64,17 @@ public class ResourceServiceImpl implements ResourceService {
             return response.setData(new MessageOkContent().setMessage("Ничего не сохраняем"));
         }
 
-        switch (type) {
-            case "IMAGE" -> {
-                AvatarUploadData data = saveUserAvatar(image, person);
-                response.setData(data);
-                log.info("Пользователь {} сохранил свой аватар в хранилище", person.getEmail());
-                return response;
-            }
-            default -> throw new IllegalStateException("Unexpected value: " + type);
+        if ("IMAGE".equals(type)) {
+            AvatarUploadData data = saveCustomUserAvatar(image, person);
+            response.setData(data);
+            log.info("Пользователь {} сохранил свой аватар в хранилище", person.getEmail());
+            return response;
         }
+        throw new IllegalStateException("Unexpected value: " + type);
     }
 
-    private AvatarUploadData saveUserAvatar(MultipartFile image, Person person) throws IOException {
-        Map params = getMap(person.getEmail(), 1024);
+    private AvatarUploadData saveCustomUserAvatar(MultipartFile image, Person person) throws IOException {
+        Map params = getUploadParamsMap(person.getEmail(), 1024);
         Map uploadResult = cloudinary.uploader().upload(image.getBytes(), params);
         String url = uploadResult.get("url").toString();
         AvatarUploadData data = new AvatarUploadData()
@@ -99,4 +89,12 @@ public class ResourceServiceImpl implements ResourceService {
         personRepository.save(person);
         return data;
     }
+
+    private Map getUploadParamsMap(String userEmail, int transformationParams) {
+        return ObjectUtils.asMap(
+                "public_id", Constants.CLOUDINARY_AVATARS_FOLDER + userEmail,
+                "transformation", new Transformation<>().width(transformationParams).height(transformationParams)
+        );
+    }
+
 }

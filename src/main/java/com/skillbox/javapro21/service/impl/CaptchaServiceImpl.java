@@ -8,7 +8,6 @@ import com.skillbox.javapro21.repository.CaptchaRepository;
 import com.skillbox.javapro21.service.CaptchaService;
 import lombok.RequiredArgsConstructor;
 import org.imgscalr.Scalr;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.imageio.ImageIO;
