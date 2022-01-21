@@ -9,7 +9,6 @@ import com.skillbox.javapro21.domain.Friendship;
 import com.skillbox.javapro21.domain.FriendshipStatus;
 import com.skillbox.javapro21.domain.Person;
 import com.skillbox.javapro21.domain.enumeration.FriendshipStatusType;
-import com.skillbox.javapro21.exception.InterlockedFriendshipStatusException;
 import com.skillbox.javapro21.repository.FriendshipRepository;
 import com.skillbox.javapro21.repository.FriendshipStatusRepository;
 import com.skillbox.javapro21.repository.PersonRepository;
@@ -110,7 +109,7 @@ public class UtilsService {
                 .setEmail(person.getEmail())
                 .setMessagePermission(person.getMessagesPermission())
                 .setLastOnlineTime(person.getLastOnlineTime().toInstant(ZoneOffset.UTC).toEpochMilli())
-                .setIsBlocked(isBlockedPerson(person))
+                .setBlocked(isBlockedPerson(person).equals("true"))
                 .setToken(token);
         if (person.getPhone() != null) authData.setPhone(person.getPhone());
         if (person.getPhoto() != null) authData.setPhoto(person.getPhoto());
@@ -119,7 +118,8 @@ public class UtilsService {
             authData.setCity(Map.of("id", person.getId().toString(), "City", person.getTown()));
             authData.setCountry(Map.of("id", person.getId().toString(), "Country", person.getCountry()));
         }
-        if (person.getBirthDate() != null) authData.setBirthDate(person.getBirthDate().toInstant(ZoneOffset.UTC).toEpochMilli());
+        if (person.getBirthDate() != null)
+            authData.setBirthDate(person.getBirthDate().toInstant(ZoneOffset.UTC).toEpochMilli());
         return authData;
     }
 
@@ -152,7 +152,7 @@ public class UtilsService {
     /**
      * создание отношений между пользователями
      */
-    public void createFriendship(Person src, Person dst, FriendshipStatusType friendshipStatusType) throws InterlockedFriendshipStatusException {
+    public void createFriendship(Person src, Person dst, FriendshipStatusType friendshipStatusType) {
         switch (friendshipStatusType) {
             case BLOCKED -> setFriendshipStatusBlocked(src, dst);
             case INTERLOCKED -> setFriendshipStatusBlocked(dst, src);
@@ -162,30 +162,17 @@ public class UtilsService {
     }
 
     private void setFriendshipStatusBlocked(Person src, Person dst) {
-        FriendshipStatus friendshipStatusSrc = getFriendshipStatus(src.getId(), dst.getId());
-        FriendshipStatus friendshipStatusSrcAfterSave = saveFriendshipStatus(friendshipStatusSrc, BLOCKED);
-        Friendship friendshipSrc = friendshipRepository.findFriendshipBySrcPersonAndDstPerson(src.getId(), dst.getId()).orElseThrow();
-        saveFriendship(friendshipSrc, src, dst, friendshipStatusSrcAfterSave);
-
-        FriendshipStatus friendshipStatusDst = getFriendshipStatus(dst.getId(), src.getId());
-        FriendshipStatus friendshipStatusDstAfterSave = saveFriendshipStatus(friendshipStatusDst, WASBLOCKED);
-        Friendship friendshipDst = friendshipRepository.findFriendshipBySrcPersonAndDstPerson(dst.getId(), src.getId()).orElseThrow();
-        saveFriendship(friendshipDst, dst, src, friendshipStatusDstAfterSave);
+        saveNewFriendshipForSrcAndDst(src, dst, BLOCKED);
+        saveNewFriendshipForSrcAndDst(dst, src, WASBLOCKED);
     }
 
-    private void setFriendshipStatusTypeForSrc(Person src, Person dst, FriendshipStatusType friendshipStatusType) {
-        FriendshipStatusType fst = null;
-        if (friendshipStatusType.equals(DECLINED)) {
-            fst = DECLINED;
-        } else if (friendshipStatusType.equals(SUBSCRIBED)) {
-            fst = SUBSCRIBED;
-        } else if (friendshipStatusType.equals(REQUEST)) {
-            fst = REQUEST;
+    private void setFriendshipStatusTypeForSrc(Person src, Person dst, FriendshipStatusType fst) {
+        if (fst.equals(DECLINED)) {
+            saveNewFriendshipForSrcAndDst(src, dst, fst);
+            saveNewFriendshipForSrcAndDst(dst, src, SUBSCRIBED);
+        } else {
+            saveNewFriendshipForSrcAndDst(src, dst, fst);
         }
-        FriendshipStatus friendshipStatusSrcDst = getFriendshipStatus(src.getId(), dst.getId());
-        FriendshipStatus friendshipStatusSrcAfterSave = saveFriendshipStatus(friendshipStatusSrcDst, fst);
-        Friendship friendshipSrc = friendshipRepository.findFriendshipBySrcPersonAndDstPerson(src.getId(), dst.getId()).orElseThrow();
-        saveFriendship(friendshipSrc, src, dst, friendshipStatusSrcAfterSave);
     }
 
     private void setOneFriendshipStatusTypeForSrcAndDst(Person src, Person dst, FriendshipStatusType friendshipStatusType) {
@@ -195,20 +182,38 @@ public class UtilsService {
         } else if (friendshipStatusType.equals(FRIEND)) {
             fst = FRIEND;
         }
-        FriendshipStatus friendshipStatusSrc = getFriendshipStatus(src.getId(), dst.getId());
-        FriendshipStatus friendshipStatusSrcAfterSave = saveFriendshipStatus(friendshipStatusSrc, fst);
-        Friendship friendshipSrc = friendshipRepository.findFriendshipBySrcPersonAndDstPerson(src.getId(), dst.getId()).orElseThrow();
-        saveFriendship(friendshipSrc, src, dst, friendshipStatusSrcAfterSave);
-
-        FriendshipStatus friendshipStatusDst = getFriendshipStatus(dst.getId(), src.getId());
-        FriendshipStatus friendshipStatusDstAfterSave = saveFriendshipStatus(friendshipStatusDst, fst);
-        Friendship friendshipDst = friendshipRepository.findFriendshipBySrcPersonAndDstPerson(src.getId(), dst.getId()).orElseThrow();
-        saveFriendship(friendshipDst, src, dst, friendshipStatusDstAfterSave);
+        saveNewFriendshipForSrcAndDst(src, dst, fst);
+        saveNewFriendshipForSrcAndDst(dst, src, fst);
     }
 
+    private void saveNewFriendshipForSrcAndDst(Person src, Person dst, FriendshipStatusType fst) {
+        FriendshipStatus friendshipStatus = getFriendshipStatus(src.getId(), dst.getId());
+        if (friendshipStatus != null) {
+            FriendshipStatus friendshipStatusSrcAfterSave = saveFriendshipStatus(friendshipStatus, fst);
+            Friendship friendshipSrc = friendshipRepository.findFriendshipBySrcPersonAndDstPerson(src.getId(), dst.getId()).orElseThrow();
+            saveFriendship(friendshipSrc, src, dst, friendshipStatusSrcAfterSave);
+        } else {
+            createNewFriendship(src, dst, fst);
+        }
+    }
+
+
+
     private FriendshipStatus saveFriendshipStatus(FriendshipStatus friendshipStatus, FriendshipStatusType type) {
-        friendshipStatus.setFriendshipStatusType(type).setTime(LocalDateTime.now());
+        friendshipStatus.setFriendshipStatusType(type).setTime(LocalDateTime.now(ZoneOffset.UTC));
         return friendshipStatusRepository.save(friendshipStatus);
+    }
+
+    private void createNewFriendship(Person src, Person dst, FriendshipStatusType type) {
+        FriendshipStatus friendshipStatus = new FriendshipStatus()
+                .setFriendshipStatusType(type)
+                .setTime(LocalDateTime.now(ZoneOffset.UTC));
+        FriendshipStatus saveFSSrc = friendshipStatusRepository.save(friendshipStatus);
+        Friendship friendshipSrc = new Friendship()
+                .setSrcPerson(src)
+                .setDstPerson(dst)
+                .setFriendshipStatus(saveFSSrc);
+        friendshipRepository.save(friendshipSrc);
     }
 
     /**
