@@ -20,7 +20,9 @@ import org.springframework.stereotype.Component;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
@@ -137,6 +139,10 @@ public class UtilsService {
      * */
     public long getTimestamp() {
         return LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli();
+    }
+
+    public long getTimestampFromLocalDateTime(LocalDateTime localDateTime){
+        return ZonedDateTime.of(localDateTime, ZoneId.systemDefault()).toInstant().getEpochSecond();
     }
 
     /**

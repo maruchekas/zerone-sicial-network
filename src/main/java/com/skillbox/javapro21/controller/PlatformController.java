@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@Tag(name = "Контроллер для работы с аккаунтом")
+@Tag(name = "Контроллер для работы с платформой")
 @RequestMapping("/api/v1/platform")
 public class PlatformController {
 
