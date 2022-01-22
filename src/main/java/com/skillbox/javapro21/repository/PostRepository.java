@@ -33,6 +33,24 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
                                                                               LocalDateTime dateTo, String author,
                                                                               List<Long> tags, Pageable pageable);
 
+    @Query("select p from Post p " +
+            "join Person ps on ps.id = p.author.id " +
+            "join PostToTag pst on pst.postId = p.id " +
+            "join Tag tag on pst.tagId = tag.id " +
+            "where pst.tagId in (:tagIds) " +
+            "and p.isBlocked = 0 " +
+            "and ps.isBlocked = 0 " +
+            "and (p.time between :dateFrom and :dateTo and p.time < CURRENT_TIMESTAMP) " +
+            "and (LOWER(p.title) like %:text% or LOWER(p.postText) like %:text%) " +
+            "and (LOWER(ps.firstName) like %:author% or LOWER(ps.lastName) like %:author%) " +
+            "and (LOWER(tag.tag) in :tags) " +
+            "group by p.id " +
+            "order by p.time desc")
+    Page<Post> findPostsContainingTextByAuthorByTagsByDateExcludingBlockers(String text, LocalDateTime dateFrom,
+                                                                              LocalDateTime dateTo, String author,
+                                                                              String[] tags,
+                                                                              List<Long> tagIds, Pageable pageable);
+
     @Query("SELECT p FROM Post p " +
             "left join Person ps on ps.id = p.author.id " +
             "where p.isBlocked = 0 " +
