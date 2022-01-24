@@ -57,9 +57,9 @@ public class PostController {
     @GetMapping("/post/{id}")
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
-    public ResponseEntity<DataResponse<PostData>> getPostsById(@PathVariable Long id,
+    public ResponseEntity<DataResponse<PostData>> getPostById(@PathVariable Long id,
                                                                Principal principal) throws PostNotFoundException {
-        return new ResponseEntity<>(postService.getPostsById(id, principal), HttpStatus.OK);
+        return new ResponseEntity<>(postService.getPostById(id, principal), HttpStatus.OK);
     }
 
     @Operation(summary = "Изменение публикации по id и отложенная публикация", security = @SecurityRequirement(name = "jwt"))
@@ -97,8 +97,9 @@ public class PostController {
     @LastActivity
     public ResponseEntity<ListDataResponse<CommentsData>> getComments(@PathVariable Long id,
                                                                       @RequestParam(name = "offset", defaultValue = "0") int offset,
-                                                                      @RequestParam(name = "item_per_page", defaultValue = "5") int itemPerPage) throws PostNotFoundException {
-        return new ResponseEntity<>(postService.getComments(id, offset, itemPerPage), HttpStatus.OK);
+                                                                      @RequestParam(name = "item_per_page", defaultValue = "5") int itemPerPage,
+                                                                      Principal principal) throws PostNotFoundException {
+        return new ResponseEntity<>(postService.getComments(id, offset, itemPerPage, principal), HttpStatus.OK);
     }
 
     @Operation(summary = "Добавление комментариев к посту", security = @SecurityRequirement(name = "jwt"))

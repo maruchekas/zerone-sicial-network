@@ -22,6 +22,8 @@ public class CommentsData implements Content {
     private AuthData author;
     @JsonProperty("is_blocked")
     private boolean isBlocked;
+    private boolean thisPersonDidLike;
+    private int likes;
     @JsonProperty("sub_comments")
     private List<CommentsData> subComments;
 }
