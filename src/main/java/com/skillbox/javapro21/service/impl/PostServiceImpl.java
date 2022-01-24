@@ -48,21 +48,21 @@ public class PostServiceImpl implements PostService {
     private final MailjetSender mailjetSender;
 
     @Override
-    public ListDataResponse<PostData> getPosts(String text, long dateFrom, long dateTo, int offset, int itemPerPage, String author, String tag, Principal principal) {
+    public ListDataResponse<PostData> getPosts(String text, long dateFrom, long dateTo, int offset, int itemPerPage, String author, String[] tags, Principal principal) {
         LocalDateTime datetimeFrom = (dateFrom != -1) ? utilsService.getLocalDateTime(dateFrom) : LocalDateTime.now().minusYears(1);
         LocalDateTime datetimeTo = (dateTo != -1) ? utilsService.getLocalDateTime(dateTo) : LocalDateTime.now();
         Pageable pageable = PageRequest.of(offset / itemPerPage, itemPerPage);
         Page<Post> pageablePostList;
-        if ((text.matches("\\s*") || text.equals("")) && tag.equals("") && author.equals("")) {
+        if ((text.matches("\\s*") || text.equals("")) && tags.length == 0 && author.equals("")) {
             pageablePostList = postRepository.findAllPosts(datetimeFrom, datetimeTo, pageable);
-        } else if (!text.isEmpty() && !text.matches("\\s*") && tag.equals("") && author.equals("")) {
+        } else if (!text.isEmpty() && !text.matches("\\s*") && tags.length == 0 && author.equals("")) {
             pageablePostList = postRepository.findAllPostsByText(text.toLowerCase(Locale.ROOT), datetimeFrom, datetimeTo, pageable);
-        } else if (!text.trim().isEmpty() && tag.equals("") && !author.isEmpty()) {
+        } else if (!text.trim().isEmpty() && tags.length == 0 && !author.isEmpty()) {
             pageablePostList = postRepository.findPostsByTextByAuthorWithoutTagsContainingByDateExcludingBlockers(text.toLowerCase(Locale.ROOT), datetimeFrom, datetimeTo, author.toLowerCase(Locale.ROOT), pageable);
-        } else if ((text.matches("\\s*") || text.equals("")) && tag.equals("") && !author.isEmpty()) {
+        } else if ((text.matches("\\s*") || text.equals("")) && tags.length == 0 && !author.isEmpty()) {
             pageablePostList = postRepository.findAllPostsByAuthor(author.toLowerCase(Locale.ROOT), datetimeFrom, datetimeTo, pageable);
         } else {
-            List<Long> tags = getTags(tag);
+            List<Long> tagsId = getTags(tags);
             pageablePostList = postRepository.findPostsByTextByAuthorByTagsContainingByDateExcludingBlockers(text.toLowerCase(Locale.ROOT), datetimeFrom, datetimeTo, author.toLowerCase(Locale.ROOT), tags, pageable);
         }
         return getPostsResponse(offset, itemPerPage, pageablePostList);
@@ -368,8 +368,9 @@ public class PostServiceImpl implements PostService {
         return commentsDataArrayList;
     }
 
-    private List<Long> getTags(String tag) {
-        return Arrays.stream(tag.split(";"))
+    private List<Long> getTags(String[] tags) {
+
+        return Arrays.stream(tags)
                 .map(t -> tagRepository.findByTag(t).orElse(null))
                 .filter(Objects::nonNull)
                 .map(Tag::getId)

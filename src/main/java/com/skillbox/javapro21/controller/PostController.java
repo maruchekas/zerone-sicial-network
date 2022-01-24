@@ -48,9 +48,9 @@ public class PostController {
                                                                @RequestParam(name = "offset", defaultValue = "0") int offset,
                                                                @RequestParam(name = "item_per_page", defaultValue = "20") int itemPerPage,
                                                                @RequestParam(name = "author", defaultValue = "") String author,
-                                                               @RequestParam(name = "tag", defaultValue = "") String tag,
+                                                               @RequestParam(name = "tag", defaultValue = "") String[] tags,
                                                                Principal principal) {
-        return new ResponseEntity<>(postService.getPosts(text, dateFrom, dateTo, offset, itemPerPage, author, tag, principal), HttpStatus.OK);
+        return new ResponseEntity<>(postService.getPosts(text, dateFrom, dateTo, offset, itemPerPage, author, tags, principal), HttpStatus.OK);
     }
 
     @Operation(summary = "Поиск публикации по id", security = @SecurityRequirement(name = "jwt"))
