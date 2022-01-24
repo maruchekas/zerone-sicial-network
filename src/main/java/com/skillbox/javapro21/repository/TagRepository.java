@@ -14,7 +14,8 @@ public interface TagRepository extends JpaRepository<Tag, Integer> {
 
     Optional<Tag> findById(Long id);
 
-    @Query("select t from Tag t where t.tag = :tag")
+    @Query("select t " +
+            "from Tag t where t.tag = :tag ")
     Optional<Tag> findByTag(String tag);
 
     @Query("select t from Tag t ")

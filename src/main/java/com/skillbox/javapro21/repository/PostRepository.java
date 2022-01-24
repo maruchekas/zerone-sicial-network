@@ -15,7 +15,7 @@ import java.util.Optional;
 @Repository
 public interface PostRepository extends JpaRepository<Post, Integer> {
     @Query("select p from Post p " +
-            "where p.isBlocked = 0 and p.id = :id")
+            "where p.isBlocked = 0 and p.id = :id ")
     Optional<Post> findPostById(Long id);
 
     @Query("select p from Post p " +
