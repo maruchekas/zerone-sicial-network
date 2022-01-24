@@ -44,8 +44,8 @@ public class AccountControllerTest extends AbstractTest {
     @BeforeEach
     public void setup() {
         super.setup();
-        String email = "test1@test.ru";
-        String verifyEmail = "test@test.ru";
+        String email = "test222@test.ru";
+        String verifyEmail = "test1@test.ru";
         String password = "1234";
         String firstName = "Arcadiy";
         String lastName = "Parovozov";
@@ -101,7 +101,7 @@ public class AccountControllerTest extends AbstractTest {
         mockMvc.perform(MockMvcRequestBuilders
                         .get("/api/v1/account/register/complete")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("email", "test@test.ru")
+                        .param("email", "test1@test.ru")
                         .param("code", "123"))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk());
@@ -113,7 +113,7 @@ public class AccountControllerTest extends AbstractTest {
                         .get("/api/v1/account/password/send_recovery_massage")
                         .contentType(MediaType.APPLICATION_JSON)
 //                        .content(mapper.writeValueAsString(recoveryRequest))
-                        .param("email", "test@test.ru")
+                        .param("email", "test1@test.ru")
                         .param("code", "123")
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultHandlers.print())
@@ -125,7 +125,7 @@ public class AccountControllerTest extends AbstractTest {
         mockMvc.perform(MockMvcRequestBuilders
                         .get("/api/v1/account/password/recovery/complete")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("email", "test@test.ru")
+                        .param("email", "test1@test.ru")
                         .param("password", "123"))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk());
@@ -144,7 +144,7 @@ public class AccountControllerTest extends AbstractTest {
     }
 
     @Test
-    @WithMockUser(username = "test@test.ru", authorities = "user:write")
+    @WithMockUser(username = "test1@test.ru", authorities = "user:write")
     void changePassword() throws Exception {
         ChangePasswordRequest changePasswordRequest = new ChangePasswordRequest();
         changePasswordRequest.setPassword(verifyPerson.getPassword());
@@ -152,7 +152,7 @@ public class AccountControllerTest extends AbstractTest {
 
         mockMvc.perform(MockMvcRequestBuilders
                         .put("/api/v1/account/password/set")
-                        .principal(() -> "test@test.ru")
+                        .principal(() -> "test1@test.ru")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(changePasswordRequest))
                         .accept(MediaType.APPLICATION_JSON))
@@ -161,14 +161,14 @@ public class AccountControllerTest extends AbstractTest {
     }
 
     @Test
-    @WithMockUser(username = "test@test.ru", authorities = "user:write")
+    @WithMockUser(username = "test1@test.ru", authorities = "user:write")
     void changeEmail() throws Exception {
         ChangeEmailRequest changeEmailRequest = new ChangeEmailRequest();
         changeEmailRequest.setEmail(verifyPerson.getEmail());
 
         mockMvc.perform(MockMvcRequestBuilders
                         .put("/api/v1/account/email")
-                        .principal(() -> "test@test.ru")
+                        .principal(() -> "test1@test.ru")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(changeEmailRequest))
                         .accept(MediaType.APPLICATION_JSON))
@@ -177,7 +177,7 @@ public class AccountControllerTest extends AbstractTest {
     }
 
     @Test
-    @WithMockUser(username = "test@test.ru", authorities = "user:write")
+    @WithMockUser(username = "test1@test.ru", authorities = "user:write")
     void changeNotifications() throws Exception {
         ChangeNotificationsRequest changeNotificationsRequest = new ChangeNotificationsRequest();
         changeNotificationsRequest.setNotificationTypeStatus(NotificationTypeStatus.MESSAGE);
@@ -185,7 +185,7 @@ public class AccountControllerTest extends AbstractTest {
 
         mockMvc.perform(MockMvcRequestBuilders
                         .put("/api/v1/account/notifications")
-                        .principal(() -> "test@test.ru")
+                        .principal(() -> "test1@test.ru")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(changeNotificationsRequest))
                         .accept(MediaType.APPLICATION_JSON))
@@ -194,11 +194,11 @@ public class AccountControllerTest extends AbstractTest {
     }
 
     @Test
-    @WithMockUser(username = "test@test.ru", authorities = "user:write")
+    @WithMockUser(username = "test1@test.ru", authorities = "user:write")
     void getNotifications() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders
                         .get("/api/v1/account/notifications")
-                        .principal(() -> "test@test.ru"))
+                        .principal(() -> "test1@test.ru"))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }

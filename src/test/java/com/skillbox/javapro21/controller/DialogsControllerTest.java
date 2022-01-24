@@ -268,7 +268,7 @@ public class DialogsControllerTest extends AbstractTest {
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.data.id").value(sDialog.getId())).andReturn();
 
-        Assertions.assertEquals(Optional.empty(), dialogRepository.findById(sDialog.getId()));
+        Assertions.assertEquals(Optional.empty(), dialogRepository.findDialogById(sDialog.getId()));
     }
 
     @Test
@@ -312,9 +312,9 @@ public class DialogsControllerTest extends AbstractTest {
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.data.link")
-                        .value(dialogRepository.findById(sDialog.getId()).get().getCode())).andReturn();
+                        .value(dialogRepository.findDialogById(sDialog.getId()).get().getCode())).andReturn();
 
-        Optional<Dialog> dialog = dialogRepository.findById(sDialog.getId());
+        Optional<Dialog> dialog = dialogRepository.findDialogById(sDialog.getId());
         LincRequest lincRequest = new LincRequest();
         lincRequest.setLink(dialog.get().getCode());
 

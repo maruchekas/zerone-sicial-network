@@ -13,5 +13,5 @@ public interface ResourceService {
 
     DataResponse<Content> saveFileInStorage(String type, MultipartFile image, Principal principal) throws IOException;
 
-    String createDefaultRoboticAvatar(String username);
+    String setDefaultAvatarToUser(String username) throws IOException;
 }

@@ -11,6 +11,7 @@ import com.skillbox.javapro21.domain.Dialog;
 import com.skillbox.javapro21.domain.Message;
 import com.skillbox.javapro21.domain.Person;
 import com.skillbox.javapro21.domain.PersonToDialog;
+import com.skillbox.javapro21.domain.enumeration.ReadStatus;
 import com.skillbox.javapro21.exception.MessageNotFoundException;
 import com.skillbox.javapro21.exception.PersonNotFoundException;
 import com.skillbox.javapro21.exception.UserExistOnDialogException;
@@ -46,7 +47,7 @@ public class DialogsServiceImpl implements DialogsService {
     @Override
     public ListDataResponse<DialogContent> getDialogs(String query, int offset, int itemPerPage, Principal principal) {
         Person person = utilsService.findPersonByEmail(principal.getName());
-        Pageable pageable = PageRequest.of(offset / itemPerPage, itemPerPage);
+        Pageable pageable = PageRequest.of(offset, itemPerPage);
         Page<PersonToDialog> allMessagesByPersonIdAndQuery;
         if (query.equals("")) {
             allMessagesByPersonIdAndQuery = personToDialogRepository.findDialogsByPerson(person.getId(), pageable);
@@ -75,59 +76,21 @@ public class DialogsServiceImpl implements DialogsService {
                                 return null;
                             }
                         }).toList();
-                if (dialogs.get(0) != null) {
+                Optional<Dialog> first = dialogs.stream().filter(Objects::nonNull).findFirst();
+                if (first.isPresent()) {
                     return new DataResponse<DialogContent>()
                             .setError("")
                             .setTimestamp(utilsService.getTimestamp())
-                            .setData(new DialogContent().setId(dialogs.get(0).getId()));
+                            .setData(new DialogContent().setId(first.get().getId()));
                 } else {
-                    Set<Person> personSet = new HashSet<>();
-                    personSet.add(person);
-                    personSet.add(personDst.get());
-                    Dialog dialog = new Dialog()
-                            .setPersons(personSet)
-                            .setTitle(personDst.get().getFirstName())
-                            .setIsBlocked(0);
-                    Dialog savedDialog = dialogRepository.save(dialog);
-                    PersonToDialog person1ToDialog = new PersonToDialog()
-                            .setLastCheck(LocalDateTime.now(ZoneOffset.UTC))
-                            .setDialogId(savedDialog.getId())
-                            .setPersonId(person.getId());
-                    PersonToDialog person2ToDialog = new PersonToDialog()
-                            .setLastCheck(LocalDateTime.now(ZoneOffset.UTC))
-                            .setDialogId(savedDialog.getId())
-                            .setPersonId(personDst.get().getId());
-                    personToDialogRepository.save(person1ToDialog);
-                    personToDialogRepository.save(person2ToDialog);
-                    return new DataResponse<DialogContent>()
-                            .setError("")
-                            .setTimestamp(utilsService.getTimestamp())
-                            .setData(new DialogContent().setId(savedDialog.getId()));
+                    setNewDialogForTwoPerson(person, personDst.get());
                 }
             } else {
-                Set<Person> personSet = new HashSet<>(personList);
-                Dialog dialog = new Dialog()
-                        .setPersons(personSet)
-                        .setTitle("New chat with " + personList.stream().findFirst().get().getFirstName() + " and other.")
-                        .setIsBlocked(0);
-                Dialog savedDialog = dialogRepository.save(dialog);
-                PersonToDialog creatorDialog = new PersonToDialog()
-                        .setLastCheck(LocalDateTime.now(ZoneOffset.UTC))
-                        .setDialogId(savedDialog.getId())
-                        .setPersonId(person.getId());
-                personToDialogRepository.save(creatorDialog);
-                for (Person p : personList) {
-                    PersonToDialog personToDialog = new PersonToDialog()
-                            .setLastCheck(LocalDateTime.now(ZoneOffset.UTC))
-                            .setDialogId(savedDialog.getId())
-                            .setPersonId(p.getId());
-                    personToDialogRepository.save(personToDialog);
-                }
-                return new DataResponse<DialogContent>()
-                        .setError("")
-                        .setTimestamp(utilsService.getTimestamp())
-                        .setData(new DialogContent().setId(savedDialog.getId()));
+                setNewDialogForTwoPerson(person, personDst.get());
             }
+        } else {
+            setNewChat(person, personList);
+
         }
         return null;
     }
@@ -138,8 +101,7 @@ public class DialogsServiceImpl implements DialogsService {
         List<PersonToDialog> dialogs = personToDialogRepository.findDialogsByPersonId(person.getId());
         int count = 0;
         for (PersonToDialog p2d : dialogs) {
-            dialogRepository.findById(p2d.getDialogId());
-            count += dialogRepository.findById(p2d.getDialogId()).orElseThrow().getMessages().stream()
+            count += dialogRepository.findDialogById(p2d.getDialogId()).orElseThrow().getMessages().stream()
                     .filter(message -> {
                         if (!message.getAuthor().getId().equals(person.getId())) {
                             return message.getReadStatus().equals(SENT);
@@ -155,7 +117,7 @@ public class DialogsServiceImpl implements DialogsService {
 
     @Override
     public DataResponse<DialogContent> deleteDialog(int id) {
-        Dialog dialog = dialogRepository.findById(id).orElseThrow();
+        Dialog dialog = dialogRepository.findDialogById(id).orElseThrow();
         dialog.setIsBlocked(2);
         Dialog save = dialogRepository.save(dialog);
         return getDataResponseWithId(save.getId());
@@ -165,16 +127,9 @@ public class DialogsServiceImpl implements DialogsService {
     public DataResponse<DialogPersonIdContent> putPersonsInDialog(int id, DialogRequestForCreate listPersons, Principal principal) {
         utilsService.findPersonByEmail(principal.getName());
         List<Person> personList = personRepository.findAllById(listPersons.getUsersIds());
-        Dialog dialog = dialogRepository.findById(id).orElseThrow();
+        Dialog dialog = dialogRepository.findDialogById(id).orElseThrow();
         dialog.setPersons(new HashSet<>(personList));
-        Dialog save = dialogRepository.save(dialog);
-        for (Person p : personList) {
-            PersonToDialog personToDialog = new PersonToDialog()
-                    .setLastCheck(LocalDateTime.now(ZoneOffset.UTC))
-                    .setDialogId(save.getId())
-                    .setPersonId(p.getId());
-            personToDialogRepository.save(personToDialog);
-        }
+        dialogRepository.save(dialog);
         return getDataResponseWithListPersonsId(listPersons.getUsersIds());
     }
 
@@ -182,7 +137,7 @@ public class DialogsServiceImpl implements DialogsService {
     public DataResponse<DialogPersonIdContent> deletePersonsInDialog(int id, DialogRequestForCreate listPersons, Principal principal) {
         utilsService.findPersonByEmail(principal.getName());
         List<Person> personList = personRepository.findAllById(listPersons.getUsersIds());
-        Dialog dialog = dialogRepository.findById(id).orElseThrow();
+        Dialog dialog = dialogRepository.findDialogById(id).orElseThrow();
         for (Person p : personList) {
             dialog.getPersons().remove(p);
         }
@@ -193,9 +148,10 @@ public class DialogsServiceImpl implements DialogsService {
         return getDataResponseWithListPersonsId(listPersons.getUsersIds());
     }
 
+    @Override
     public DataResponse<LinkContent> inviteLink(int id, Principal principal) {
         String token = utilsService.getToken();
-        Dialog dialog = dialogRepository.findById(id).orElseThrow();
+        Dialog dialog = dialogRepository.findDialogById(id).orElseThrow();
         dialog.setCode(token);
         dialogRepository.save(dialog);
         return new DataResponse<LinkContent>()
@@ -216,12 +172,6 @@ public class DialogsServiceImpl implements DialogsService {
                     .setCode("")
                     .setPersons(personSet);
             Dialog sDialog = dialogRepository.save(dialog);
-            PersonToDialog personToDialog = new PersonToDialog();
-            personToDialog
-                    .setDialogId(sDialog.getId())
-                    .setPersonId(person.getId())
-                    .setLastCheck(LocalDateTime.now(ZoneOffset.UTC));
-            personToDialogRepository.save(personToDialog);
             List<Long> list = new ArrayList<>();
             for (Person p : personSet) {
                 list.add(p.getId());
@@ -238,32 +188,35 @@ public class DialogsServiceImpl implements DialogsService {
         PersonToDialog p2d = personToDialogRepository.findDialogByPersonIdAndDialogId(person.getId(), id);
         p2d.setLastCheck(LocalDateTime.now(ZoneOffset.UTC));
         personToDialogRepository.save(p2d);
-        Page<Message> personToDialogs;
+        Page<Message> messages;
         Pageable pageable = PageRequest.of(offset / itemPerPage, itemPerPage);
         if (fromMessageId == -1) {
             if (query.equals("")) {
-                personToDialogs = messageRepository.findByDialogIdAndPersonId(id, person.getId(), pageable);
+                messages = messageRepository.findByDialogIdAndPersonId(id, person.getId(), pageable);
             } else {
-                personToDialogs = messageRepository.findByDialogIdAndPersonIdAndQuery(id, person.getId(), query.toLowerCase(Locale.ROOT), pageable);
+                messages = messageRepository.findByDialogIdAndPersonIdAndQuery(id, person.getId(), query.toLowerCase(Locale.ROOT), pageable);
             }
         } else {
             messageRepository.findById(fromMessageId).orElseThrow(() -> new MessageNotFoundException("Сообщения с данным id не существует"));
             if (query.equals("")) {
-                personToDialogs = messageRepository.findByDialogIdAndPersonIdAndMessageId(id, person.getId(), fromMessageId, pageable);
+                messages = messageRepository.findByDialogIdAndPersonIdAndMessageId(id, person.getId(), fromMessageId, pageable);
             } else {
-                personToDialogs = messageRepository.findByDialogIdAndPersonIdAndQueryAndMessageId(id, person.getId(), query.toLowerCase(Locale.ROOT), fromMessageId, pageable);
+                messages = messageRepository.findByDialogIdAndPersonIdAndQueryAndMessageId(id, person.getId(), query.toLowerCase(Locale.ROOT), fromMessageId, pageable);
             }
         }
-        return getListDataResponseWithMessage(offset, itemPerPage, personToDialogs);
+        return getListDataResponseWithMessage(offset, itemPerPage, messages);
     }
 
     @Override
     public DataResponse<MessageContent> postMessagesById(int id, MessageTextRequest messageText, Principal principal) {
+        if (messageText.getMessageText().trim().equals("")) {
+            return null;
+        }
         Person person = utilsService.findPersonByEmail(principal.getName());
         PersonToDialog p2d = personToDialogRepository.findDialogByPersonIdAndDialogId(person.getId(), id);
         p2d.setLastCheck(LocalDateTime.now(ZoneOffset.UTC));
         personToDialogRepository.save(p2d);
-        Dialog dialog = dialogRepository.findById(id).orElseThrow();
+        Dialog dialog = dialogRepository.findDialogById(id).orElseThrow();
         List<Person> allPersonsByDialogId = personRepository.findAllByDialogId(id);
         List<Person> personList = allPersonsByDialogId.stream().filter(p -> !p.getId().equals(person.getId())).toList();
         Message message = new Message()
@@ -374,14 +327,14 @@ public class DialogsServiceImpl implements DialogsService {
         }
     }
 
-    private ListDataResponse<MessageContent> getListDataResponseWithMessage(int offset, int itemPerPage, Page<Message> personToDialogs) {
+    private ListDataResponse<MessageContent> getListDataResponseWithMessage(int offset, int itemPerPage, Page<Message> messagePage) {
         return new ListDataResponse<MessageContent>()
                 .setError("")
                 .setOffset(offset)
                 .setPerPage(itemPerPage)
                 .setTimestamp(utilsService.getTimestamp())
-                .setTotal((int) personToDialogs.getTotalElements())
-                .setData(getMessageForResponse(personToDialogs.toList()));
+                .setTotal((int) messagePage.getTotalElements())
+                .setData(getMessageForResponse(messagePage.toList()));
     }
 
     private List<MessageContent> getMessageForResponse(List<Message> messages) {
@@ -416,7 +369,6 @@ public class DialogsServiceImpl implements DialogsService {
                 .setData(getMessageData(message, p2d));
     }
 
-
     private ListDataResponse<DialogContent> getListDataResponse(int offset, int itemPerPage, Page<PersonToDialog> allMessagesByPersonIdAndQuery) {
         return new ListDataResponse<DialogContent>()
                 .setError("")
@@ -444,8 +396,7 @@ public class DialogsServiceImpl implements DialogsService {
                     .setId(dialog.getId())
                     .setUnreadCount(dialog.getMessages().stream()
                             .filter(message -> message.getReadStatus().equals(SENT)).count());
-            data.setLastMessage(getMessageData(
-                    dialog.getMessages().stream().max(Comparator.comparing(Message::getId)).get(), p2d));
+            data.setLastMessage(getMessageData(dialog.getMessages().stream().max(Comparator.comparing(Message::getTime)).get(), p2d));
         } else {
             data.setLastMessage(new MessageContent());
         }
@@ -453,12 +404,68 @@ public class DialogsServiceImpl implements DialogsService {
     }
 
     private MessageContent getMessageData(Message message, PersonToDialog personToDialog) {
+        ReadStatus readStatus;
+        if (personToDialog != null && personToDialog.getLastCheck() != null) {
+            readStatus = message.getTime().isBefore(personToDialog.getLastCheck()) ? READ : SENT;
+            if (readStatus.equals(READ) && message.getReadStatus().equals(SENT)) {
+                message.setReadStatus(READ);
+                messageRepository.save(message);
+            }
+        } else {
+            readStatus = message.getReadStatus();
+        }
         return new MessageContent()
                 .setMessageText(message.getMessageText())
                 .setAuthor(utilsService.getAuthData(message.getAuthor(), null))
-                .setRecipientId(utilsService.getAuthData(message.getRecipient(), null))
+                .setRecipient(utilsService.getAuthData(message.getRecipient(), null))
                 .setId(message.getId())
                 .setTime(message.getTime().toInstant(ZoneOffset.UTC).toEpochMilli())
-                .setReadStatus(message.getTime().isAfter(personToDialog.getLastCheck()) ? SENT : READ);
+                .setReadStatus(readStatus);
+    }
+
+    private DataResponse<DialogContent> setNewDialogForTwoPerson(Person personSrc, Person personDst) {
+        Set<Person> personSet = new HashSet<>();
+        personSet.add(personSrc);
+        personSet.add(personDst);
+        Dialog dialog = new Dialog()
+                .setPersons(personSet)
+                .setTitle(personDst.getFirstName())
+                .setIsBlocked(0);
+        Dialog savedDialog = dialogRepository.save(dialog);
+        Message message = new Message()
+                .setTime(LocalDateTime.now(ZoneOffset.UTC))
+                .setReadStatus(READ)
+                .setAuthor(personSrc)
+                .setRecipient(personDst)
+                .setDialog(savedDialog)
+                .setIsBlocked(1)
+                .setMessageText("");
+        messageRepository.save(message);
+        return new DataResponse<DialogContent>()
+                .setError("")
+                .setTimestamp(utilsService.getTimestamp())
+                .setData(new DialogContent().setId(savedDialog.getId()));
+    }
+
+    private DataResponse<DialogContent> setNewChat(Person person, List<Person> personList) {
+        Set<Person> personSet = new HashSet<>(personList);
+        Dialog dialog = new Dialog()
+                .setPersons(personSet)
+                .setTitle("New chat with " + personList.stream().findFirst().get().getFirstName() + " and other.")
+                .setIsBlocked(0);
+        Dialog savedDialog = dialogRepository.save(dialog);
+        Message message = new Message()
+                .setTime(LocalDateTime.now(ZoneOffset.UTC))
+                .setReadStatus(READ)
+                .setRecipient(personSet.stream().findFirst().get())
+                .setAuthor(person)
+                .setDialog(dialog)
+                .setIsBlocked(1)
+                .setMessageText("");
+        messageRepository.save(message);
+        return new DataResponse<DialogContent>()
+                .setError("")
+                .setTimestamp(utilsService.getTimestamp())
+                .setData(new DialogContent().setId(savedDialog.getId()));
     }
 }
