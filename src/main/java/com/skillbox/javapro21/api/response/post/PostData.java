@@ -21,7 +21,8 @@ public class PostData implements Content {
     private String postText;
     @JsonProperty("is_blocked")
     private boolean isBlocked;
-    private boolean my_like;
+    @JsonProperty("my_like")
+    private boolean myLike;
     private int likes;
     private List<CommentsData> comments;
     private String type;

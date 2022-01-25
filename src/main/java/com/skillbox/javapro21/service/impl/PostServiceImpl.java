@@ -281,7 +281,7 @@ public class PostServiceImpl implements PostService {
                 .setTime(postComment.getTime().toInstant(ZoneOffset.UTC).toEpochMilli())
                 .setAuthor(utilsService.getAuthData(postComment.getPerson(), null))
                 .setBlocked(postComment.getIsBlocked() == 0)
-                .setMy_like(likes.stream().map(CommentLike::getPerson).toList().contains(currentPerson))
+                .setMyLike(likes.stream().map(CommentLike::getPerson).toList().contains(currentPerson))
                 .setLikes(likes.size())
                 .setSubComments(getSubCommentsData(postCommentsByParentId, currentPerson));
         if (postComment.getParent() != null) commentsData.setParentId(postComment.getParent().getId());
@@ -353,7 +353,7 @@ public class PostServiceImpl implements PostService {
                 .setTitle(post.getTitle())
                 .setPostText(post.getPostText())
                 .setBlocked(post.getIsBlocked() != 0)
-                .setMy_like(likes.stream().map(PostLike::getPerson).toList().contains(currentPerson))
+                .setMyLike(likes.stream().map(PostLike::getPerson).toList().contains(currentPerson))
                 .setLikes(likes.size())
                 .setComments(getCommentsDataResponseForPost(post.getId(), currentPerson))
                 .setType(post.getTime().isBefore(LocalDateTime.now()) ? "POSTED" : "QUEUED")
