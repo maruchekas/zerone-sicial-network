@@ -25,7 +25,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.security.Principal;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -144,7 +146,7 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     @Override
-    public DataResponse<MessageOkContent> unblockPersonById(Long id, Principal principal) throws PersonNotFoundException, BlockPersonHimselfException, NonBlockedFriendshipException, InterlockedFriendshipStatusException, FriendshipNotFoundException {
+    public DataResponse<MessageOkContent> unblockPersonById(Long id, Principal principal) throws PersonNotFoundException, BlockPersonHimselfException, NonBlockedFriendshipException, FriendshipNotFoundException {
         Person src = utilsService.findPersonByEmail(principal.getName());
         Person dst = personRepository.findPersonById(id).orElseThrow(() -> new PersonNotFoundException("Пользователя с данным id не существует"));
         Optional<Friendship> optionalFriendship = friendshipRepository.findFriendshipBySrcPersonAndDstPerson(src.getId(), id);
@@ -182,10 +184,6 @@ public class ProfileServiceImpl implements ProfileService {
 
     private Person savePersonByRequest(Person person, EditProfileRequest editProfileRequest) {
         Person personById = personRepository.findPersonById(person.getId()).orElseThrow();
-        String[] split = null;
-        if (editProfileRequest.getBirthDate() != null) {
-            split = editProfileRequest.getBirthDate().split("\\+");
-        }
         personById
                 .setFirstName(editProfileRequest.getFirstName() != null
                         ? editProfileRequest.getFirstName() : person.getFirstName())
@@ -201,8 +199,8 @@ public class ProfileServiceImpl implements ProfileService {
                         ? editProfileRequest.getCity() : person.getTown())
                 .setCountry(editProfileRequest.getCountry() != null
                         ? editProfileRequest.getCountry() : person.getCountry())
-                .setBirthDate(editProfileRequest.getBirthDate() != null
-                        ? LocalDateTime.from(LocalDateTime.parse(Arrays.asList(split).get(0)).atZone(ZoneOffset.UTC)) : person.getBirthDate());
+                .setBirthDate(editProfileRequest.getBirthDate() != 0
+                        ? LocalDateTime.ofInstant(Instant.ofEpochMilli(editProfileRequest.getBirthDate()), ZoneOffset.UTC) : person.getBirthDate());
         personRepository.save(personById);
         return personById;
     }
