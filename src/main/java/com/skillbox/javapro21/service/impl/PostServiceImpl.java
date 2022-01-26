@@ -50,6 +50,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public ListDataResponse<PostData> getPosts(String text, long dateFrom, long dateTo, int offset, int itemPerPage, String author, String[] tags, Principal principal) {
+        Person currentPerson = utilsService.findPersonByEmail(principal.getName());
         LocalDateTime datetimeFrom = (dateFrom != -1) ? utilsService.getLocalDateTime(dateFrom) : LocalDateTime.now().minusYears(1);
         LocalDateTime datetimeTo = (dateTo != -1) ? utilsService.getLocalDateTime(dateTo) : LocalDateTime.now();
         Pageable pageable = PageRequest.of(offset / itemPerPage, itemPerPage);
