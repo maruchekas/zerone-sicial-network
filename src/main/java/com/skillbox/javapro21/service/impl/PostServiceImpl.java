@@ -221,7 +221,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public ListDataResponse<PostData> getFeeds(String text, int offset, int itemPerPage, Principal principal) {
-        Person person = utilsService.findPersonByEmail(principal.getName());
+        Person currentPerson = utilsService.findPersonByEmail(principal.getName());
         Pageable pageable = PageRequest.of(offset, itemPerPage);
 
         String query =
@@ -232,12 +232,12 @@ public class PostServiceImpl implements PostService {
                                 "SELECT p.id FROM persons p " +
                                 "JOIN friendship f on f.dst_person_id = p.id " +
                                 "JOIN friendship_statuses fst on fst.id = f.status_id " +
-                                "WHERE f.src_person_id = " + person.getId() + " " +
+                                "WHERE f.src_person_id = (?) " +
                                     "AND (fst.name = 'FRIEND' OR fst.name = 'SUBSCRIBED')" +
                                 ") " +
                     "AND p.is_Blocked = 0 " +
                     "AND ps.is_Blocked = 0 " +
-                    "AND (p.title ILIKE CONCAT('%', '" + text + "','%') OR p.post_text ILIKE CONCAT('%', '" + text + "','%')) " +
+                    "AND (p.title ILIKE CONCAT('%', (?), '%') OR p.post_text ILIKE CONCAT('%', (?),'%')) " +
                 "ORDER BY p.time DESC" +
                 ") " +
                 "UNION ALL " +
@@ -250,7 +250,7 @@ public class PostServiceImpl implements PostService {
                                             "SELECT p.id FROM persons p " +
                                             "JOIN friendship f ON f.dst_person_id = p.id " +
                                             "JOIN friendship_statuses fst ON fst.id = f.status_id " +
-                                            "WHERE f.src_person_id = " + person.getId() + " " +
+                                            "WHERE f.src_person_id = (?) " +
                                                 "AND (fst.name = 'FRIEND' OR fst.name = 'SUBSCRIBED')" +
                                             ") " +
                                             "UNION ALL " +
@@ -258,22 +258,26 @@ public class PostServiceImpl implements PostService {
                                             "SELECT p.id FROM persons p " +
                                             "JOIN friendship f ON f.dst_person_id = p.id " +
                                             "JOIN friendship_statuses fs ON fs.id = f.status_id " +
-                                            "WHERE f.src_person_id = " + person.getId() + " " +
+                                            "WHERE f.src_person_id = (?) " +
                                                 "AND (fs.name = 'BLOCKED' OR fs.name = 'INTERLOCKED') " +
                                                 "OR (p.is_blocked != 0) " +
                                             "GROUP BY p.id" +
                                             ") " +
                                         ") " +
-                    "AND p.id != " + person.getId() + " " +
+                    "AND p.id != (?) " +
                     "AND p.is_Blocked = 0 " +
                     "AND ps.is_Blocked = 0 " +
-                    "AND (p.title ILIKE CONCAT('%', '" + text + "','%') OR p.post_text ILIKE CONCAT('%', '" + text + "','%')) " +
+                    "AND (p.title ILIKE CONCAT('%', (?),'%') OR p.post_text ILIKE CONCAT('%', (?),'%')) " +
                 "GROUP BY p.id " +
                 "ORDER BY count(pl) DESC, p.time DESC" +
                 ")";
-        List<Long> ids = jdbcTemplate.query(query, (ResultSet rs, int rowNum) -> rs.getLong("id"));
+        List<Long> ids = jdbcTemplate.query(
+                query,
+                (ResultSet rs, int rowNum) -> rs.getLong("id"),
+                currentPerson.getId(), text, text,
+                currentPerson.getId(), currentPerson.getId(), currentPerson.getId(), text, text);
         Page<Post> result = postRepository.findAllByIdIn(ids, pageable);
-        return getPostsResponse(offset, itemPerPage, result);
+        return getPostsResponse(offset, itemPerPage, result, currentPerson);
     }
 
     private void sendMessageForAdministration(String message) throws MailjetException, IOException {
