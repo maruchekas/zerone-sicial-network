@@ -22,10 +22,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.security.Principal;
+import java.sql.ResultSet;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
@@ -47,6 +49,7 @@ public class PostServiceImpl implements PostService {
     private final PersonRepository personRepository;
     private final CommentLikeRepository commentLikeRepository;
     private final MailjetSender mailjetSender;
+    private final JdbcTemplate jdbcTemplate;
 
     @Override
     public ListDataResponse<PostData> getPosts(String text, long dateFrom, long dateTo, int offset, int itemPerPage, String author, String[] tags, Principal principal) {
@@ -218,26 +221,63 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public ListDataResponse<PostData> getFeeds(String text, int offset, int itemPerPage, Principal principal) {
-        Person person = utilsService.findPersonByEmail(principal.getName());
-        Pageable pageable = PageRequest.of(offset / itemPerPage, itemPerPage);
-        List<Long> friendsAndSubscribersIds = personRepository.findAllFriendsAndSubscribersByPersonId(person.getId());
-        List<Long> blocksPersonsList = personRepository.findAllBlocksPersons(person.getId());
-        blocksPersonsList.add(person.getId());
-        Page<Post> postPage;
-        if (!text.isEmpty()) {
-            postPage = postRepository.findPostsByTextContainingNoBlocked(text.toLowerCase(Locale.ROOT), friendsAndSubscribersIds, pageable);
-        } else {
-            postPage = postRepository.findPostsContainingNoBlocked(friendsAndSubscribersIds, pageable);
-        }
-        if (postPage.getTotalElements() == 0 ) {
-            postPage = postRepository.findBestPostsByPerson(blocksPersonsList, PageRequest.of(0, 10));
-            return getPostsResponse(0, 10, postPage, person);
-        }
-        if (postPage.getTotalElements() > 0 && postPage.getTotalElements() <= 10) {
-            Page<Post> postPage2 = postRepository.findBestPostsByPerson(blocksPersonsList, PageRequest.of(0, 10));
-            return getPostsResponse(offset, itemPerPage, postPage, postPage2, person);
-        }
-        return getPostsResponse(offset, itemPerPage, postPage, person);
+        Person currentPerson = utilsService.findPersonByEmail(principal.getName());
+        Pageable pageable = PageRequest.of(offset, itemPerPage);
+
+        String query =
+                "(" +
+                "SELECT p.id FROM posts p " +
+                "JOIN persons ps ON ps.id = p.author_id " +
+                "WHERE ps.id IN (" +
+                                "SELECT p.id FROM persons p " +
+                                "JOIN friendship f on f.dst_person_id = p.id " +
+                                "JOIN friendship_statuses fst on fst.id = f.status_id " +
+                                "WHERE f.src_person_id = (?) " +
+                                    "AND (fst.name = 'FRIEND' OR fst.name = 'SUBSCRIBED')" +
+                                ") " +
+                    "AND p.is_Blocked = 0 " +
+                    "AND ps.is_Blocked = 0 " +
+                    "AND (p.title ILIKE CONCAT('%', (?), '%') OR p.post_text ILIKE CONCAT('%', (?),'%')) " +
+                "ORDER BY p.time DESC" +
+                ") " +
+                "UNION ALL " +
+                "(" +
+                "SELECT p.id FROM posts p " +
+                "JOIN persons ps ON ps.id = p.author_id " +
+                "LEFT JOIN post_likes pl ON pl.post_id = p.id " +
+                "WHERE p.author_id NOT IN (" +
+                                            "(" +
+                                            "SELECT p.id FROM persons p " +
+                                            "JOIN friendship f ON f.dst_person_id = p.id " +
+                                            "JOIN friendship_statuses fst ON fst.id = f.status_id " +
+                                            "WHERE f.src_person_id = (?) " +
+                                                "AND (fst.name = 'FRIEND' OR fst.name = 'SUBSCRIBED')" +
+                                            ") " +
+                                            "UNION ALL " +
+                                            "(" +
+                                            "SELECT p.id FROM persons p " +
+                                            "JOIN friendship f ON f.dst_person_id = p.id " +
+                                            "JOIN friendship_statuses fs ON fs.id = f.status_id " +
+                                            "WHERE f.src_person_id = (?) " +
+                                                "AND (fs.name = 'BLOCKED' OR fs.name = 'INTERLOCKED') " +
+                                                "OR (p.is_blocked != 0) " +
+                                            "GROUP BY p.id" +
+                                            ") " +
+                                        ") " +
+                    "AND p.id != (?) " +
+                    "AND p.is_Blocked = 0 " +
+                    "AND ps.is_Blocked = 0 " +
+                    "AND (p.title ILIKE CONCAT('%', (?),'%') OR p.post_text ILIKE CONCAT('%', (?),'%')) " +
+                "GROUP BY p.id " +
+                "ORDER BY count(pl) DESC, p.time DESC" +
+                ")";
+        List<Long> ids = jdbcTemplate.query(
+                query,
+                (ResultSet rs, int rowNum) -> rs.getLong("id"),
+                currentPerson.getId(), text, text,
+                currentPerson.getId(), currentPerson.getId(), currentPerson.getId(), text, text);
+        Page<Post> result = postRepository.findAllByIdIn(ids, pageable);
+        return getPostsResponse(offset, itemPerPage, result, currentPerson);
     }
 
     private void sendMessageForAdministration(String message) throws MailjetException, IOException {
