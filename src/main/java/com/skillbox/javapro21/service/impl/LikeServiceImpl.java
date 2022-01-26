@@ -32,6 +32,7 @@ public class LikeServiceImpl implements LikeService{
     private static final String COMMENT = "Comment";
     private static final String UNEXPECTED = "Unexpected value: ";
     private static final String DOES_NOT_EXIST = " не существует";
+    private static final String CHEAT = "Ты уже поставил лайк, хватит!";
 
     private final UtilsService utilsService;
     private final PostLikeRepository postLikeRepository;
@@ -73,23 +74,31 @@ public class LikeServiceImpl implements LikeService{
     }
 
     @Override
-    public DataResponse<Content> putLike(LikeRequest request, Principal principal) throws PostNotFoundException, PostCommentNotFoundException, BadArgumentException, PostLikeNotFoundException, CommentLikeNotFoundException {
+    public DataResponse<Content> putLike(LikeRequest request, Principal principal) throws PostNotFoundException, PostCommentNotFoundException, BadArgumentException, PostLikeNotFoundException, CommentLikeNotFoundException, CheatingException {
         Person currentUser = utilsService.findPersonByEmail(principal.getName());
 
         switch (request.getType()) {
             case POST -> {
-                postLikeRepository.save(new PostLike()
-                                            .setTime(LocalDateTime.now())
-                                            .setPerson(currentUser)
-                                            .setPost(getPost(request.getItemId())));
-                return getLikes(request);
+                Optional<PostLike> possiblePostLike = postLikeRepository.findByPersonIdAndPostId(currentUser.getId(), request.getItemId());
+                if (possiblePostLike.isEmpty()) {
+                    postLikeRepository.save(new PostLike()
+                            .setTime(LocalDateTime.now())
+                            .setPerson(currentUser)
+                            .setPost(getPost(request.getItemId())));
+                    return getLikes(request);
+                }
+                throw new CheatingException(CHEAT);
             }
             case COMMENT -> {
-                commentLikeRepository.save(new CommentLike()
-                                                .setTime(LocalDateTime.now())
-                                                .setPerson(currentUser)
-                                                .setComment(getComment(request.getItemId())));
-                return getLikes(request);
+                Optional<CommentLike> possibleCommentLike = commentLikeRepository.findByPersonIdAndCommentId(currentUser.getId(), request.getItemId());
+                if (possibleCommentLike.isEmpty()) {
+                    commentLikeRepository.save(new CommentLike()
+                            .setTime(LocalDateTime.now())
+                            .setPerson(currentUser)
+                            .setComment(getComment(request.getItemId())));
+                    return getLikes(request);
+                }
+                throw new CheatingException(CHEAT);
             }
             default -> throw new BadArgumentException(UNEXPECTED + request.getType());
         }
