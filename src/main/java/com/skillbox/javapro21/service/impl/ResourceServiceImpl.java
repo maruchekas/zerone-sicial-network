@@ -35,6 +35,7 @@ public class ResourceServiceImpl implements ResourceService {
     private final PersonRepository personRepository;
     private final Cloudinary cloudinary;
 
+
     public String setDefaultAvatarToUser(String userEmail) throws IOException {
         String format = "png";
         int setNum = new Random().nextInt(4) + 1;
@@ -96,5 +97,4 @@ public class ResourceServiceImpl implements ResourceService {
                 "transformation", new Transformation<>().width(transformationParams).height(transformationParams)
         );
     }
-
 }

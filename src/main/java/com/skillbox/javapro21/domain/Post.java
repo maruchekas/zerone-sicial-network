@@ -60,7 +60,7 @@ public class Post {
             inverseJoinColumns = @JoinColumn(name = "tag_id"))
     @JsonIgnoreProperties(value = {"posts"}, allowSetters = true)
     @ToString.Exclude
-    private List<Tag> tags = new ArrayList<>();
+    private Set<Tag> tags = new HashSet<>();
 
     @ManyToOne
     @JsonIgnoreProperties(

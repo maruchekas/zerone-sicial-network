@@ -32,7 +32,9 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.Optional;
 
 import static com.skillbox.javapro21.domain.enumeration.FriendshipStatusType.*;
@@ -204,11 +206,11 @@ public class ProfileControllerTest extends AbstractTest {
         tagRepository.save(tag1);
         tagRepository.save(tag2);
 
-        List<Tag> tags = new ArrayList<>();
+        Set<Tag> tags = new HashSet<>();
         tags.add(tag1);
         tags.add(tag2);
 
-        List<Tag> tag = new ArrayList<>();
+        Set<Tag> tag = new HashSet<>();
         tag.add(tag2);
 
         post1 = new Post()

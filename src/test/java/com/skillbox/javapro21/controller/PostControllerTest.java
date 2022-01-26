@@ -27,9 +27,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -102,11 +100,11 @@ public class PostControllerTest extends AbstractTest {
         tagRepository.save(tag1);
         tagRepository.save(tag2);
 
-        List<Tag> tags = new ArrayList<>();
+        Set<Tag> tags = new HashSet<>();
         tags.add(tag1);
         tags.add(tag2);
 
-        List<Tag> tag = new ArrayList<>();
+        Set<Tag> tag = new HashSet<>();
         tag.add(tag2);
 
         post1 = new Post()

@@ -18,7 +18,7 @@ import java.security.Principal;
 
 @Service
 public interface PostService {
-    ListDataResponse<PostData> getPosts(String text, long dateFrom, long dateTo, int offset, int itemPerPage, String author, String tag, Principal principal);
+    ListDataResponse<PostData> getPosts(String text, long dateFrom, long dateTo, int offset, int itemPerPage, String author, String[] tags, Principal principal);
 
     DataResponse<PostData> getPostById(Long id, Principal principal) throws PostNotFoundException;
 

@@ -11,13 +11,12 @@ import com.skillbox.javapro21.api.response.post.PostData;
 import com.skillbox.javapro21.domain.Friendship;
 import com.skillbox.javapro21.domain.Person;
 import com.skillbox.javapro21.domain.Post;
+import com.skillbox.javapro21.domain.Tag;
 import com.skillbox.javapro21.domain.enumeration.FriendshipStatusType;
 import com.skillbox.javapro21.exception.*;
-import com.skillbox.javapro21.repository.FriendshipRepository;
-import com.skillbox.javapro21.repository.FriendshipStatusRepository;
-import com.skillbox.javapro21.repository.PersonRepository;
-import com.skillbox.javapro21.repository.PostRepository;
+import com.skillbox.javapro21.repository.*;
 import com.skillbox.javapro21.service.ProfileService;
+import com.skillbox.javapro21.service.TagService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -29,8 +28,7 @@ import java.security.Principal;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.skillbox.javapro21.domain.enumeration.FriendshipStatusType.*;
@@ -39,9 +37,11 @@ import static com.skillbox.javapro21.domain.enumeration.FriendshipStatusType.*;
 @RequiredArgsConstructor
 public class ProfileServiceImpl implements ProfileService {
     private final UtilsService utilsService;
+    private final PostServiceImpl postService;
+    private final TagService tagService;
     private final PersonRepository personRepository;
     private final PostRepository postRepository;
-    private final PostServiceImpl postService;
+    private final TagRepository tagRepository;
     private final FriendshipRepository friendshipRepository;
     private final FriendshipStatusRepository friendshipStatusRepository;
 
@@ -95,11 +95,14 @@ public class ProfileServiceImpl implements ProfileService {
         Person src = utilsService.findPersonByEmail(principal.getName());
         Person dst = personRepository.findPersonById(id).orElseThrow(() -> new PersonNotFoundException("Пользователя с данным id не существует"));
         Post post;
+        Set<Tag> tags = tagService.addTagsToPost(postRequest.getTags());
+
         if (src.getId().equals(id)) {
             post = new Post()
                     .setTitle(postRequest.getTitle())
                     .setPostText(postRequest.getPostText())
                     .setIsBlocked(0)
+                    .setTags(tags)
                     .setAuthor(dst);
             if (publishDate != -1) {
                 post.setTime(utilsService.getLocalDateTime(publishDate));
@@ -114,6 +117,7 @@ public class ProfileServiceImpl implements ProfileService {
                         .setPostText(postRequest.getPostText())
                         .setTime(LocalDateTime.now(ZoneOffset.UTC))
                         .setIsBlocked(0)
+                        .setTags(tags)
                         .setAuthor(dst);
             } else throw new InterlockedFriendshipStatusException("Один из пользователей заблокирован для другого");
         }
@@ -199,4 +203,5 @@ public class ProfileServiceImpl implements ProfileService {
         personRepository.save(personById);
         return personById;
     }
+
 }

@@ -1,7 +1,6 @@
 package com.skillbox.javapro21.repository;
 
 import com.skillbox.javapro21.domain.Post;
-import com.skillbox.javapro21.domain.enumeration.FriendshipStatusType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,13 +14,14 @@ import java.util.Optional;
 @Repository
 public interface PostRepository extends JpaRepository<Post, Integer> {
     @Query("select p from Post p " +
-            "where p.isBlocked = 0 and p.id = :id")
+            "where p.isBlocked = 0 and p.id = :id ")
     Optional<Post> findPostById(Long id);
 
     @Query("select p from Post p " +
             "join Person ps on ps.id = p.author.id " +
             "join PostToTag pst on pst.postId = p.id " +
-            "where pst.tagId in (:tags) " +
+            "join Tag t on pst.tagId = t.id " +
+            "where t.tag in (:tags) " +
             "and p.isBlocked = 0 " +
             "and ps.isBlocked = 0 " +
             "and (p.time between :dateFrom and :dateTo and p.time < CURRENT_TIMESTAMP) " +
@@ -31,7 +31,7 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
             "order by p.time desc")
     Page<Post> findPostsByTextByAuthorByTagsContainingByDateExcludingBlockers(String text, LocalDateTime dateFrom,
                                                                               LocalDateTime dateTo, String author,
-                                                                              List<Long> tags, Pageable pageable);
+                                                                              String[] tags, Pageable pageable);
 
     @Query("SELECT p FROM Post p " +
             "left join Person ps on ps.id = p.author.id " +
