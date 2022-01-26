@@ -13,18 +13,13 @@ import java.util.List;
 public interface PersonToDialogRepository extends JpaRepository<PersonToDialog, Integer> {
     @Query("select p2d from PersonToDialog p2d " +
             "left join Dialog d on p2d.dialogId = d.id " +
-            "left join Person p on p2d.personId = p.id " +
-            "left join Message m on m.dialog.id = d.id " +
-            "where p.id = :id and d.title like %:query% " +
+            "where p2d.personId = :id and d.title like %:query% " +
             "group by p2d.id " +
             "order by p2d.lastCheck desc")
     Page<PersonToDialog> findDialogsByPersonIdAndQuery(Long id, String query, Pageable pageable);
 
     @Query("select p2d from PersonToDialog p2d " +
-            "left join Dialog d on p2d.dialogId = d.id " +
-            "left join Person p on p2d.personId = p.id " +
-            "left join Message m on m.dialog.id = d.id " +
-            "where p.id = :id " +
+            "where p2d.personId = :id " +
             "group by p2d.id " +
             "order by p2d.lastCheck desc")
     Page<PersonToDialog> findDialogsByPerson(Long id, Pageable pageable);
@@ -37,10 +32,8 @@ public interface PersonToDialogRepository extends JpaRepository<PersonToDialog, 
     List<PersonToDialog> findDialogsByPersonId(Long id);
 
     @Query("select p2d from PersonToDialog p2d " +
-            "left join Person p on p2d.personId = p.id " +
-            "left join Dialog d on p2d.dialogId = d.id " +
-            "where p.id = :personId " +
-            "and d.id = :dialogId ")
+            "where p2d.personId = :personId " +
+            "and p2d.dialogId = :dialogId ")
     PersonToDialog findDialogByPersonIdAndDialogId(Long personId, int dialogId);
 
     @Query("select p2d from PersonToDialog p2d " +

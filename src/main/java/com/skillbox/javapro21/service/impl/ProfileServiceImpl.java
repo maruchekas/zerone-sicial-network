@@ -11,13 +11,12 @@ import com.skillbox.javapro21.api.response.post.PostData;
 import com.skillbox.javapro21.domain.Friendship;
 import com.skillbox.javapro21.domain.Person;
 import com.skillbox.javapro21.domain.Post;
+import com.skillbox.javapro21.domain.Tag;
 import com.skillbox.javapro21.domain.enumeration.FriendshipStatusType;
 import com.skillbox.javapro21.exception.*;
-import com.skillbox.javapro21.repository.FriendshipRepository;
-import com.skillbox.javapro21.repository.FriendshipStatusRepository;
-import com.skillbox.javapro21.repository.PersonRepository;
-import com.skillbox.javapro21.repository.PostRepository;
+import com.skillbox.javapro21.repository.*;
 import com.skillbox.javapro21.service.ProfileService;
+import com.skillbox.javapro21.service.TagService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -26,12 +25,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.security.Principal;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.skillbox.javapro21.domain.enumeration.FriendshipStatusType.*;
@@ -40,9 +37,11 @@ import static com.skillbox.javapro21.domain.enumeration.FriendshipStatusType.*;
 @RequiredArgsConstructor
 public class ProfileServiceImpl implements ProfileService {
     private final UtilsService utilsService;
+    private final PostServiceImpl postService;
+    private final TagService tagService;
     private final PersonRepository personRepository;
     private final PostRepository postRepository;
-    private final PostServiceImpl postService;
+    private final TagRepository tagRepository;
     private final FriendshipRepository friendshipRepository;
     private final FriendshipStatusRepository friendshipStatusRepository;
 
@@ -82,11 +81,11 @@ public class ProfileServiceImpl implements ProfileService {
         Optional<Friendship> optionalFriendship = friendshipRepository.findFriendshipBySrcPersonAndDstPerson(src.getId(), id);
         if (src.getId().equals(id)) {
             Page<Post> posts = postRepository.findPostsByAuthorId(id, pageable);
-            return postService.getPostsResponse(offset, itemPerPage, posts);
+            return postService.getPostsResponse(offset, itemPerPage, posts, src);
         }
         if (utilsService.isBlockedBy(src.getId(), dst.getId(), optionalFriendship)) {
             Page<Post> posts = postRepository.findPostsByPersonId(id, pageable);
-            return postService.getPostsResponse(offset, itemPerPage, posts);
+            return postService.getPostsResponse(offset, itemPerPage, posts, src);
         }
         throw new InterlockedFriendshipStatusException("Пользователь заблокирован и не может смотреть посты");
     }
@@ -96,11 +95,14 @@ public class ProfileServiceImpl implements ProfileService {
         Person src = utilsService.findPersonByEmail(principal.getName());
         Person dst = personRepository.findPersonById(id).orElseThrow(() -> new PersonNotFoundException("Пользователя с данным id не существует"));
         Post post;
+        Set<Tag> tags = tagService.addTagsToPost(postRequest.getTags());
+
         if (src.getId().equals(id)) {
             post = new Post()
                     .setTitle(postRequest.getTitle())
                     .setPostText(postRequest.getPostText())
                     .setIsBlocked(0)
+                    .setTags(tags)
                     .setAuthor(dst);
             if (publishDate != -1) {
                 post.setTime(utilsService.getLocalDateTime(publishDate));
@@ -115,11 +117,12 @@ public class ProfileServiceImpl implements ProfileService {
                         .setPostText(postRequest.getPostText())
                         .setTime(LocalDateTime.now(ZoneOffset.UTC))
                         .setIsBlocked(0)
+                        .setTags(tags)
                         .setAuthor(dst);
             } else throw new InterlockedFriendshipStatusException("Один из пользователей заблокирован для другого");
         }
         postRepository.save(post);
-        return postService.getDataResponse(postService.getPostData(post));
+        return postService.getDataResponse(postService.getPostData(post, src));
 
     }
 
@@ -130,7 +133,7 @@ public class ProfileServiceImpl implements ProfileService {
         if (src.getId().equals(dst.getId()))
             throw new BlockPersonHimselfException("Пользователь пытается заблокировать сам себя");
         Optional<Friendship> optionalFriendship = friendshipRepository.findFriendshipBySrcPersonAndDstPerson(src.getId(), id);
-        Friendship friendship = optionalFriendship.orElseThrow(FriendshipNotFoundException::new);
+        Friendship friendship = optionalFriendship.orElseThrow(() -> new FriendshipNotFoundException("Дружбы с данным id не существует"));
         if (utilsService.isBlockedBy(src.getId(), dst.getId(), optionalFriendship)) {
             if (!friendship.getFriendshipStatus().getFriendshipStatusType().equals(BLOCKED)) {
                 utilsService.createFriendship(src, dst, BLOCKED);
@@ -142,7 +145,7 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     @Override
-    public DataResponse<MessageOkContent> unblockPersonById(Long id, Principal principal) throws PersonNotFoundException, BlockPersonHimselfException, NonBlockedFriendshipException, InterlockedFriendshipStatusException, FriendshipNotFoundException {
+    public DataResponse<MessageOkContent> unblockPersonById(Long id, Principal principal) throws PersonNotFoundException, BlockPersonHimselfException, NonBlockedFriendshipException, FriendshipNotFoundException {
         Person src = utilsService.findPersonByEmail(principal.getName());
         Person dst = personRepository.findPersonById(id).orElseThrow(() -> new PersonNotFoundException("Пользователя с данным id не существует"));
         Optional<Friendship> optionalFriendship = friendshipRepository.findFriendshipBySrcPersonAndDstPerson(src.getId(), id);
@@ -150,7 +153,7 @@ public class ProfileServiceImpl implements ProfileService {
         if (dst.getIsBlocked() == 2) throw new PersonNotFoundException("Попытка работы с удаленным пользователем");
         if (utilsService.isBlockedBy(src.getId(), dst.getId(), optionalFriendship))
             throw new NonBlockedFriendshipException("Пользователь не может разблокировать не заблокированного пользователя");
-        Friendship friendship = optionalFriendship.orElseThrow(FriendshipNotFoundException::new);
+        Friendship friendship = optionalFriendship.orElseThrow(() -> new FriendshipNotFoundException("Дружбы с данным id не существует"));
         if (friendship.getFriendshipStatus().getFriendshipStatusType().equals(BLOCKED)) {
             friendshipStatusRepository.delete(utilsService.getFriendshipStatus(src.getId(), dst.getId()));
             friendshipStatusRepository.delete(utilsService.getFriendshipStatus(dst.getId(), src.getId()));
@@ -173,17 +176,13 @@ public class ProfileServiceImpl implements ProfileService {
 
     private DataResponse<AuthData> getPersonDataResponse(Person person) {
         return new DataResponse<AuthData>()
-                .setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli())
+                .setTimestamp(utilsService.getTimestamp())
                 .setError("string")
                 .setData(utilsService.getAuthData(person, null));
     }
 
     private Person savePersonByRequest(Person person, EditProfileRequest editProfileRequest) {
         Person personById = personRepository.findPersonById(person.getId()).orElseThrow();
-        String[] split = null;
-        if (editProfileRequest.getBirthDate() != null) {
-            split = editProfileRequest.getBirthDate().split("\\+");
-        }
         personById
                 .setFirstName(editProfileRequest.getFirstName() != null
                         ? editProfileRequest.getFirstName() : person.getFirstName())
@@ -199,9 +198,10 @@ public class ProfileServiceImpl implements ProfileService {
                         ? editProfileRequest.getCity() : person.getTown())
                 .setCountry(editProfileRequest.getCountry() != null
                         ? editProfileRequest.getCountry() : person.getCountry())
-                .setBirthDate(editProfileRequest.getBirthDate() != null
-                        ? LocalDateTime.from(LocalDateTime.parse(Arrays.asList(split).get(0)).atZone(ZoneOffset.UTC)) : person.getBirthDate());
+                .setBirthDate(editProfileRequest.getBirthDate() != 0
+                        ? LocalDateTime.ofInstant(Instant.ofEpochMilli(editProfileRequest.getBirthDate()), ZoneOffset.UTC) : person.getBirthDate());
         personRepository.save(personById);
         return personById;
     }
+
 }

@@ -27,6 +27,14 @@ public interface PersonRepository extends JpaRepository<Person, Integer> {
             "and p.isBlocked = 0" )
     List<Long> findAllFriendsAndSubscribersByPersonId(Long id);
 
+    @Query("select p.id from Person p " +
+            "join Friendship f on f.dstPerson.id = p.id " +
+            "join FriendshipStatus fs on fs.id = f.friendshipStatus.id " +
+            "where f.srcPerson.id = :id " +
+            "and fs.friendshipStatusType = 'FRIEND' " +
+            "and p.isBlocked = 0" )
+    List<Long> findAllFriendsByPersonId(Long id);
+
     @Query("select p from Person p where p.id in (:ids) and p.isBlocked = 0")
     List<Person> findAllById(List<Long> ids);
 
@@ -39,12 +47,12 @@ public interface PersonRepository extends JpaRepository<Person, Integer> {
 
     @Query(value =
             "SELECT * FROM persons " +
-            "WHERE id != :currUserId " +
+                    "WHERE id != :currUserId " +
                     "AND id NOT IN (" +
-                        "SELECT dst_person_id FROM friendship f " +
-                        "JOIN friendship_statuses fs ON f.status_id = fs.id " +
-                        "WHERE f.src_person_id = :currUserId " +
-                            "AND fs.name IN ('BLOCKED', 'WASBLOCKED', 'INTERLOCKED')" +
+                    "SELECT dst_person_id FROM friendship f " +
+                    "JOIN friendship_statuses fs ON f.status_id = fs.id " +
+                    "WHERE f.src_person_id = :currUserId " +
+                    "AND fs.name IN ('BLOCKED', 'WASBLOCKED', 'INTERLOCKED')" +
                     ")" +
                     "AND first_name ILIKE CONCAT('%', :firstName, '%') " +
                     "AND last_name ILIKE CONCAT('%', :lastName, '%') " +
@@ -55,6 +63,7 @@ public interface PersonRepository extends JpaRepository<Person, Integer> {
             nativeQuery = true)
     Page<Person> findAllByNameAndAgeAndLocation(Long currUserId, String firstName, String lastName, Integer ageFrom, Integer ageTo, String country, String city, Pageable page);
 
+
     @Query("select p.id from Person p " +
             "join Friendship f on f.dstPerson.id = p.id " +
             "join FriendshipStatus fs on fs.id = f.friendshipStatus.id " +
@@ -62,4 +71,52 @@ public interface PersonRepository extends JpaRepository<Person, Integer> {
             "and ( fs.friendshipStatusType = 'BLOCKED' or fs.friendshipStatusType = 'INTERLOCKED') " +
             "and ( p.isBlocked = 1 or p.isBlocked = 2 ) " )
     List<Long> findAllBlocksPersons(Long id);
+
+    @Query("select p from Person p " +
+            "join Friendship f on f.dstPerson.id = p.id " +
+            "join FriendshipStatus fs on fs.id = f.friendshipStatus.id " +
+            "where f.srcPerson.id = :id " +
+            "and fs.friendshipStatusType = 'FRIEND' " +
+            "and p.isBlocked = 0 " +
+            "order by p.firstName asc")
+    Page<Person> findAllPersonFriends(Long id, Pageable pageable);
+
+    @Query("select p from Person p " +
+            "join Friendship f on f.dstPerson.id = p.id " +
+            "join FriendshipStatus fs on fs.id = f.friendshipStatus.id " +
+            "where f.srcPerson.id = :id " +
+            "and p.firstName = :name " +
+            "and fs.friendshipStatusType = 'FRIEND' " +
+            "and p.isBlocked = 0 " +
+            "order by p.firstName asc")
+    Page<Person> findAllPersonFriendsAndName(Long id, String name, Pageable pageable);
+
+    @Query("select p from Person p " +
+            "join Friendship f on f.dstPerson.id = p.id " +
+            "join FriendshipStatus fs on fs.id = f.friendshipStatus.id " +
+            "where f.srcPerson.id = :id " +
+            "and fs.friendshipStatusType = 'REQUEST' " +
+            "and p.isBlocked = 0 " +
+            "order by p.firstName asc")
+    Page<Person> findAllRequest(Long id, Pageable pageable);
+
+    @Query("select p from Person p " +
+            "join Friendship f on f.dstPerson.id = p.id " +
+            "join FriendshipStatus fs on fs.id = f.friendshipStatus.id " +
+            "where f.srcPerson.id = :id " +
+            "and p.firstName = :name " +
+            "and fs.friendshipStatusType = 'REQUEST' " +
+            "and p.isBlocked = 0 " +
+            "order by p.firstName asc")
+    Page<Person> findAllRequestByName(Long id, String name, Pageable pageable);
+
+    @Query("select p from Person p " +
+            "join Friendship f on f.dstPerson.id = p.id " +
+            "join FriendshipStatus fs on fs.id = f.friendshipStatus.id " +
+            "where f.srcPerson.id in (:idsFriends) " +
+            "and p.id not in (:id) " +
+            "and fs.friendshipStatusType = 'FRIEND' " +
+            "and p.isBlocked = 0 " +
+            "order by p.firstName asc")
+    Page<Person> findRecommendedFriendsByPerson(Long id, List<Long> idsFriends, Pageable pageable);
 }

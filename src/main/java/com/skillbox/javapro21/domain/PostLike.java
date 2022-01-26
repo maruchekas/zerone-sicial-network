@@ -1,6 +1,7 @@
 package com.skillbox.javapro21.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.skillbox.javapro21.domain.marker.HavePerson;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,7 +20,7 @@ import java.util.Objects;
 @Entity
 @Accessors(chain = true)
 @Table(name = "post_likes")
-public class PostLike {
+public class PostLike implements HavePerson {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

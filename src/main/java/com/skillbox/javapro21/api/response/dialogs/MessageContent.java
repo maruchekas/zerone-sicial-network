@@ -16,8 +16,8 @@ public class MessageContent implements Content {
     private long time;
     @JsonProperty(value = "author")
     private AuthData author;
-    @JsonProperty(value = "recipient_id")
-    private AuthData recipientId;
+    @JsonProperty(value = "recipient")
+    private AuthData recipient;
     @JsonProperty(value = "message_text")
     private String messageText;
     @JsonProperty(value = "read_status")

@@ -107,11 +107,11 @@ public class PostCommentControllerTest extends AbstractTest {
         tagRepository.save(tag1);
         tagRepository.save(tag2);
 
-        List<Tag> tags = new ArrayList<>();
+        Set<Tag> tags = new HashSet<>();
         tags.add(tag1);
         tags.add(tag2);
 
-        List<Tag> tag = new ArrayList<>();
+        Set<Tag> tag = new HashSet<>();
         tag.add(tag2);
 
         post1 = new Post()

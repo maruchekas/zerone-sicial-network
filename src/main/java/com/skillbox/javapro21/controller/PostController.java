@@ -48,18 +48,18 @@ public class PostController {
                                                                @RequestParam(name = "offset", defaultValue = "0") int offset,
                                                                @RequestParam(name = "item_per_page", defaultValue = "20") int itemPerPage,
                                                                @RequestParam(name = "author", defaultValue = "") String author,
-                                                               @RequestParam(name = "tag", defaultValue = "") String tag,
+                                                               @RequestParam(name = "tag", defaultValue = "") String[] tags,
                                                                Principal principal) {
-        return new ResponseEntity<>(postService.getPosts(text, dateFrom, dateTo, offset, itemPerPage, author, tag, principal), HttpStatus.OK);
+        return new ResponseEntity<>(postService.getPosts(text, dateFrom, dateTo, offset, itemPerPage, author, tags, principal), HttpStatus.OK);
     }
 
     @Operation(summary = "Поиск публикации по id", security = @SecurityRequirement(name = "jwt"))
     @GetMapping("/post/{id}")
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
-    public ResponseEntity<DataResponse<PostData>> getPostsById(@PathVariable Long id,
+    public ResponseEntity<DataResponse<PostData>> getPostById(@PathVariable Long id,
                                                                Principal principal) throws PostNotFoundException {
-        return new ResponseEntity<>(postService.getPostsById(id, principal), HttpStatus.OK);
+        return new ResponseEntity<>(postService.getPostById(id, principal), HttpStatus.OK);
     }
 
     @Operation(summary = "Изменение публикации по id и отложенная публикация", security = @SecurityRequirement(name = "jwt"))
@@ -77,8 +77,8 @@ public class PostController {
     @DeleteMapping("/post/{id}")
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
-    public ResponseEntity<DataResponse<PostDeleteResponse>> putPostByIdAndMessageInDay(@PathVariable Long id,
-                                                                                       Principal principal) throws PostNotFoundException, AuthorAndUserEqualsException {
+    public ResponseEntity<DataResponse<PostDeleteResponse>> deletePostById(@PathVariable Long id,
+                                                                           Principal principal) throws PostNotFoundException, AuthorAndUserEqualsException {
         return new ResponseEntity<>(postService.deletePostById(id, principal), HttpStatus.OK);
     }
 
@@ -97,8 +97,9 @@ public class PostController {
     @LastActivity
     public ResponseEntity<ListDataResponse<CommentsData>> getComments(@PathVariable Long id,
                                                                       @RequestParam(name = "offset", defaultValue = "0") int offset,
-                                                                      @RequestParam(name = "item_per_page", defaultValue = "5") int itemPerPage) throws PostNotFoundException {
-        return new ResponseEntity<>(postService.getComments(id, offset, itemPerPage), HttpStatus.OK);
+                                                                      @RequestParam(name = "item_per_page", defaultValue = "5") int itemPerPage,
+                                                                      Principal principal) throws PostNotFoundException {
+        return new ResponseEntity<>(postService.getComments(id, offset, itemPerPage, principal), HttpStatus.OK);
     }
 
     @Operation(summary = "Добавление комментариев к посту", security = @SecurityRequirement(name = "jwt"))

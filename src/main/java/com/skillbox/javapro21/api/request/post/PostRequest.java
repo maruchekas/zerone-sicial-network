@@ -12,5 +12,5 @@ public class PostRequest {
     private String title;
     @JsonProperty("post_text")
     private String postText;
-    private List<String> tags;
+    private String[] tags;
 }

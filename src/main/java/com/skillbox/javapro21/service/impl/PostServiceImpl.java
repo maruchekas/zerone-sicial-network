@@ -15,6 +15,7 @@ import com.skillbox.javapro21.domain.*;
 import com.skillbox.javapro21.exception.*;
 import com.skillbox.javapro21.repository.*;
 import com.skillbox.javapro21.service.PostService;
+import com.skillbox.javapro21.service.TagService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,38 +41,42 @@ public class PostServiceImpl implements PostService {
     private String adminEmail;
 
     private final UtilsService utilsService;
+    private final TagService tagService;
     private final PostRepository postRepository;
     private final TagRepository tagRepository;
     private final PostLikeRepository postLikeRepository;
     private final PostCommentRepository postCommentRepository;
     private final PersonRepository personRepository;
+    private final CommentLikeRepository commentLikeRepository;
     private final MailjetSender mailjetSender;
     private final JdbcTemplate jdbcTemplate;
 
     @Override
-    public ListDataResponse<PostData> getPosts(String text, long dateFrom, long dateTo, int offset, int itemPerPage, String author, String tag, Principal principal) {
+    public ListDataResponse<PostData> getPosts(String text, long dateFrom, long dateTo, int offset, int itemPerPage, String author, String[] tags, Principal principal) {
+        Person currentPerson = utilsService.findPersonByEmail(principal.getName());
         LocalDateTime datetimeFrom = (dateFrom != -1) ? utilsService.getLocalDateTime(dateFrom) : LocalDateTime.now().minusYears(1);
         LocalDateTime datetimeTo = (dateTo != -1) ? utilsService.getLocalDateTime(dateTo) : LocalDateTime.now();
         Pageable pageable = PageRequest.of(offset / itemPerPage, itemPerPage);
         Page<Post> pageablePostList;
-        if ((text.matches("\\s*") || text.equals("")) && tag.equals("") && author.equals("")) {
+        if ((text.matches("\\s*") || text.equals("")) && tags.length == 0 && author.equals("")) {
             pageablePostList = postRepository.findAllPosts(datetimeFrom, datetimeTo, pageable);
-        } else if (!text.isEmpty() && !text.matches("\\s*") && tag.equals("") && author.equals("")) {
+        } else if (!text.isEmpty() && !text.matches("\\s*") && tags.length == 0 && author.equals("")) {
             pageablePostList = postRepository.findAllPostsByText(text.toLowerCase(Locale.ROOT), datetimeFrom, datetimeTo, pageable);
-        } else if (!text.trim().isEmpty() && tag.equals("") && !author.isEmpty()) {
+        } else if (!text.trim().isEmpty() && tags.length == 0 && !author.isEmpty()) {
             pageablePostList = postRepository.findPostsByTextByAuthorWithoutTagsContainingByDateExcludingBlockers(text.toLowerCase(Locale.ROOT), datetimeFrom, datetimeTo, author.toLowerCase(Locale.ROOT), pageable);
-        } else if ((text.matches("\\s*") || text.equals("")) && tag.equals("") && !author.isEmpty()) {
+        } else if ((text.matches("\\s*") || text.equals("")) && tags.length == 0 && !author.isEmpty()) {
             pageablePostList = postRepository.findAllPostsByAuthor(author.toLowerCase(Locale.ROOT), datetimeFrom, datetimeTo, pageable);
         } else {
-            List<Long> tags = getTags(tag);
+            List<Long> tagsId = getTags(tags);
             pageablePostList = postRepository.findPostsByTextByAuthorByTagsContainingByDateExcludingBlockers(text.toLowerCase(Locale.ROOT), datetimeFrom, datetimeTo, author.toLowerCase(Locale.ROOT), tags, pageable);
         }
-        return getPostsResponse(offset, itemPerPage, pageablePostList);
+        return getPostsResponse(offset, itemPerPage, pageablePostList, currentPerson);
     }
 
     @Override
-    public DataResponse<PostData> getPostsById(Long id, Principal principal) throws PostNotFoundException {
-        PostData postData = getPostData(postRepository.findPostById(id).orElseThrow(() -> new PostNotFoundException("Поста с таким айди не существует или пост заблокирован модератором")));
+    public DataResponse<PostData> getPostById(Long id, Principal principal) throws PostNotFoundException {
+        Person currentPerson = utilsService.findPersonByEmail(principal.getName());
+        PostData postData = getPostData(postRepository.findPostById(id).orElseThrow(() -> new PostNotFoundException("Поста с таким айди не существует или пост заблокирован модератором")), currentPerson);
         return getDataResponse(postData);
     }
 
@@ -81,11 +86,13 @@ public class PostServiceImpl implements PostService {
         Post post = postRepository.findPostById(id).orElseThrow(() -> new PostNotFoundException("Поста с таким айди не существует или пост заблокирован модератором"));
         if (!person.getId().equals(post.getAuthor().getId()))
             throw new AuthorAndUserEqualsException("Пользователь не может менять данные в этом посте");
+        Set<Tag> tags = tagService.addTagsToPost(postRequest.getTags());
         post.setTitle(postRequest.getTitle())
                 .setPostText(postRequest.getPostText())
+                .setTags(tags)
                 .setTime((publishDate == -1) ? LocalDateTime.now(ZoneOffset.UTC) : utilsService.getLocalDateTime(publishDate));
         post = postRepository.saveAndFlush(post);
-        return getDataResponse(getPostData(post));
+        return getDataResponse(getPostData(post, person));
     }
 
     @Override
@@ -98,7 +105,7 @@ public class PostServiceImpl implements PostService {
         postRepository.save(post);
         return new DataResponse<PostDeleteResponse>()
                 .setError("")
-                .setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli())
+                .setTimestamp(utilsService.getTimestamp())
                 .setData(new PostDeleteResponse()
                         .setId(post.getId()));
     }
@@ -115,14 +122,15 @@ public class PostServiceImpl implements PostService {
             throw new PostRecoveryException("Данный пост заблокирован модератором");
         post.setIsBlocked(0);
         postRepository.save(post);
-        return getDataResponse(getPostData(post));
+        return getDataResponse(getPostData(post, person));
     }
 
     @Override
-    public ListDataResponse<CommentsData> getComments(Long id, int offset, int itemPerPage) throws PostNotFoundException {
+    public ListDataResponse<CommentsData> getComments(Long id, int offset, int itemPerPage, Principal principal) throws PostNotFoundException {
+        Person person = utilsService.findPersonByEmail(principal.getName());
         Post post = postRepository.findPostById(id).orElseThrow(() -> new PostNotFoundException("Поста с данным айди нет"));
         Pageable pageable = PageRequest.of(offset / itemPerPage, itemPerPage);
-        return getListDataResponseWithComments(pageable, post);
+        return getListDataResponseWithComments(pageable, post, person);
     }
 
     @Override
@@ -143,7 +151,7 @@ public class PostServiceImpl implements PostService {
                 .setPost(post)
                 .setTime(LocalDateTime.now(ZoneOffset.UTC));
         postCommentRepository.save(postComment);
-        return getCommentResponse(postComment);
+        return getCommentResponse(postComment, person);
     }
 
     @Override
@@ -163,7 +171,7 @@ public class PostServiceImpl implements PostService {
                 .setCommentText(commentRequest.getCommentText())
                 .setTime(LocalDateTime.now(ZoneOffset.UTC));
         postCommentRepository.save(postComment);
-        return getCommentResponse(postComment);
+        return getCommentResponse(postComment, person);
     }
 
     @Override
@@ -177,7 +185,7 @@ public class PostServiceImpl implements PostService {
         } else throw new CommentNotAuthorException("Удаление пользователю " + person.getEmail() + "недоступно");
         return new DataResponse<CommentDelete>()
                 .setError("")
-                .setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli())
+                .setTimestamp(utilsService.getTimestamp())
                 .setData(new CommentDelete()
                         .setId(postComment.getId()));
     }
@@ -191,7 +199,7 @@ public class PostServiceImpl implements PostService {
             postComment.setIsBlocked(0);
             postCommentRepository.save(postComment);
         } else throw new CommentNotAuthorException("Восстановление пользователю " + person.getEmail() + "недоступно");
-        return getCommentResponse(postComment);
+        return getCommentResponse(postComment, person);
     }
 
     @Override
@@ -272,39 +280,40 @@ public class PostServiceImpl implements PostService {
         mailjetSender.send(adminEmail, message);
     }
 
-    private DataResponse<CommentsData> getCommentResponse(PostComment postComment) {
+    private DataResponse<CommentsData> getCommentResponse(PostComment postComment, Person currentPerson) {
         return new DataResponse<CommentsData>().setError("")
-                .setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli())
-                .setData(getCommentsData(postComment));
+                .setTimestamp(utilsService.getTimestamp())
+                .setData(getCommentsData(postComment, currentPerson));
     }
 
-    private ListDataResponse<CommentsData> getListDataResponseWithComments(Pageable pageable, Post post) {
+    private ListDataResponse<CommentsData> getListDataResponseWithComments(Pageable pageable, Post post, Person currentPerson) {
         Page<PostComment> pageablePostComments = postCommentRepository.findPostCommentsByPostId(post.getId(), pageable);
-        return getPostCommentResponse(pageablePostComments, pageable);
+        return getPostCommentResponse(pageablePostComments, pageable, currentPerson);
     }
 
-    private ListDataResponse<CommentsData> getPostCommentResponse(Page<PostComment> pageablePostComments, Pageable pageable) {
+    private ListDataResponse<CommentsData> getPostCommentResponse(Page<PostComment> pageablePostComments, Pageable pageable, Person currentPerson) {
         ListDataResponse<CommentsData> commentsDataListDataResponse = new ListDataResponse<>();
         commentsDataListDataResponse.setPerPage(pageable.getPageSize())
-                .setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli())
+                .setTimestamp(utilsService.getTimestamp())
                 .setOffset((int) pageable.getOffset())
                 .setTotal(pageablePostComments.getTotalPages())
-                .setData(getCommentDataForResponse(pageablePostComments.toList()));
+                .setData(getCommentDataForResponse(pageablePostComments.toList(), currentPerson));
         return commentsDataListDataResponse;
     }
 
-    private List<CommentsData> getCommentDataForResponse(List<PostComment> comments) {
+    private List<CommentsData> getCommentDataForResponse(List<PostComment> comments, Person currentPerson) {
         List<CommentsData> commentsDataArrayList = new ArrayList<>();
         comments.forEach(postComment -> {
-            CommentsData commentsData = getCommentsData(postComment);
+            CommentsData commentsData = getCommentsData(postComment, currentPerson);
             commentsDataArrayList.add(commentsData);
         });
         return commentsDataArrayList;
     }
 
-    private CommentsData getCommentsData(PostComment postComment) {
+    private CommentsData getCommentsData(PostComment postComment, Person currentPerson) {
         CommentsData commentsData = new CommentsData();
         List<PostComment> postCommentsByParentId = postCommentRepository.findPostCommentsByParentId(postComment.getId());
+        List<CommentLike> likes = commentLikeRepository.findAllByCommentId(postComment.getId());
         commentsData
                 .setCommentText(postComment.getCommentText())
                 .setId(postComment.getId())
@@ -312,15 +321,17 @@ public class PostServiceImpl implements PostService {
                 .setTime(postComment.getTime().toInstant(ZoneOffset.UTC).toEpochMilli())
                 .setAuthor(utilsService.getAuthData(postComment.getPerson(), null))
                 .setBlocked(postComment.getIsBlocked() == 0)
-                .setSubComments(getSubCommentsData(postCommentsByParentId));
+                .setMyLike(likes.stream().map(CommentLike::getPerson).toList().contains(currentPerson))
+                .setLikes(likes.size())
+                .setSubComments(getSubCommentsData(postCommentsByParentId, currentPerson));
         if (postComment.getParent() != null) commentsData.setParentId(postComment.getParent().getId());
         return commentsData;
     }
 
-    private List<CommentsData> getSubCommentsData(List<PostComment> postCommentsByParentId) {
+    private List<CommentsData> getSubCommentsData(List<PostComment> postCommentsByParentId, Person currentPerson) {
         List<CommentsData> commentsDataList = new ArrayList<>();
         postCommentsByParentId.forEach(postComment -> {
-            CommentsData commentsData = getCommentsData(postComment);
+            CommentsData commentsData = getCommentsData(postComment, currentPerson);
             commentsDataList.add(commentsData);
         });
         return commentsDataList;
@@ -329,20 +340,20 @@ public class PostServiceImpl implements PostService {
     protected DataResponse<PostData> getDataResponse(PostData postData) {
         return new DataResponse<PostData>()
                 .setError("")
-                .setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli())
+                .setTimestamp(utilsService.getTimestamp())
                 .setData(postData);
     }
 
-    protected ListDataResponse<PostData> getPostsResponse(int offset, int itemPerPage, Page<Post> pageablePostList) {
+    protected ListDataResponse<PostData> getPostsResponse(int offset, int itemPerPage, Page<Post> pageablePostList, Person currentPerson) {
         return new ListDataResponse<PostData>()
                 .setPerPage(itemPerPage)
-                .setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli())
+                .setTimestamp(utilsService.getTimestamp())
                 .setOffset(offset)
                 .setTotal((int) pageablePostList.getTotalElements())
-                .setData(getPostForResponse(pageablePostList.toList()));
+                .setData(getPostForResponse(pageablePostList.toList(), currentPerson));
     }
 
-    protected ListDataResponse<PostData> getPostsResponse(int offset, int itemPerPage, Page<Post> pageablePostList, Page<Post> bestPosts) {
+    protected ListDataResponse<PostData> getPostsResponse(int offset, int itemPerPage, Page<Post> pageablePostList, Page<Post> bestPosts, Person currentPerson) {
         List<Post> postsForResponse = new ArrayList<>(pageablePostList.toList());
         for (Post p : bestPosts.toList()) {
             if (!postsForResponse.contains(p)) {
@@ -354,15 +365,15 @@ public class PostServiceImpl implements PostService {
                 .setPerPage(itemPerPage)
                 .setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli())
                 .setTotal(postsForResponse.size())
-                .setData(getPostForResponse(postsForResponse));
+                .setData(getPostForResponse(postsForResponse, currentPerson));
     }
 
-    private List<PostData> getPostForResponse(List<Post> listPosts) {
+    private List<PostData> getPostForResponse(List<Post> listPosts, Person person) {
         List<PostData> postsDataList = new ArrayList<>();
         listPosts.forEach(post -> {
             PostData postData = null;
             try {
-                postData = getPostData(post);
+                postData = getPostData(post, person);
             } catch (PostNotFoundException e) {
                 e.printStackTrace();
             }
@@ -371,28 +382,29 @@ public class PostServiceImpl implements PostService {
         return postsDataList;
     }
 
-    protected PostData getPostData(Post posts) throws PostNotFoundException {
-        Set<PostLike> likes = postLikeRepository.findPostLikeByPostId(posts.getId());
+    protected PostData getPostData(Post post, Person currentPerson) throws PostNotFoundException {
+        List<PostLike> likes = postLikeRepository.findPostLikeByPostId(post.getId());
         List<String> collect = null;
-        if (posts.getTags() != null) collect = posts.getTags().stream().map(Tag::getTag).toList();
+        if (post.getTags() != null) collect = post.getTags().stream().map(Tag::getTag).toList();
         return new PostData()
-                .setId(posts.getId())
-                .setAuthor(utilsService.getAuthData(posts.getAuthor(), null))
-                .setTime(posts.getTime().toInstant(ZoneOffset.UTC).toEpochMilli())
-                .setTitle(posts.getTitle())
-                .setPostText(posts.getPostText())
-                .setBlocked(posts.getIsBlocked() != 0)
+                .setId(post.getId())
+                .setAuthor(utilsService.getAuthData(post.getAuthor(), null))
+                .setTime(post.getTime().toInstant(ZoneOffset.UTC).toEpochMilli())
+                .setTitle(post.getTitle())
+                .setPostText(post.getPostText())
+                .setBlocked(post.getIsBlocked() != 0)
+                .setMyLike(likes.stream().map(PostLike::getPerson).toList().contains(currentPerson))
                 .setLikes(likes.size())
-                .setComments(getCommentsDataResponseForPost(posts.getId()))
-                .setType(posts.getTime().isBefore(LocalDateTime.now()) ? "POSTED" : "QUEUED")
+                .setComments(getCommentsDataResponseForPost(post.getId(), currentPerson))
+                .setType(post.getTime().isBefore(LocalDateTime.now()) ? "POSTED" : "QUEUED")
                 .setTags(collect);
     }
 
-    private List<CommentsData> getCommentsDataResponseForPost(Long id) {
+    private List<CommentsData> getCommentsDataResponseForPost(Long id, Person currentPerson) {
         List<PostComment> pageablePostComments = postCommentRepository.findPostCommentsByPostIdList(id);
         List<CommentsData> commentsDataArrayList = new ArrayList<>();
         pageablePostComments.forEach(postComment -> {
-            CommentsData commentsData = getCommentsData(postComment);
+            CommentsData commentsData = getCommentsData(postComment, currentPerson);
             if (commentsData.getParentId() == null) {
                 commentsDataArrayList.add(commentsData);
             }
@@ -400,8 +412,9 @@ public class PostServiceImpl implements PostService {
         return commentsDataArrayList;
     }
 
-    private List<Long> getTags(String tag) {
-        return Arrays.stream(tag.split(";"))
+    private List<Long> getTags(String[] tags) {
+
+        return Arrays.stream(tags)
                 .map(t -> tagRepository.findByTag(t).orElse(null))
                 .filter(Objects::nonNull)
                 .map(Tag::getId)

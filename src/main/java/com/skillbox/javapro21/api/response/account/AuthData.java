@@ -31,7 +31,7 @@ public class AuthData implements Content {
     @JsonProperty("last_online_time")
     private long lastOnlineTime;
     @JsonProperty("is_blocked")
-    private String isBlocked;
+    private boolean isBlocked;
     private String token;
 }
 

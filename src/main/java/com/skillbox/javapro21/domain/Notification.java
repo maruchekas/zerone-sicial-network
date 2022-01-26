@@ -1,6 +1,7 @@
 package com.skillbox.javapro21.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.skillbox.javapro21.domain.marker.HavePerson;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -13,7 +14,7 @@ import java.time.LocalDateTime;
 @Entity
 @Accessors(chain = true)
 @Table(name = "notifications")
-public class Notification {
+public class Notification implements HavePerson {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
