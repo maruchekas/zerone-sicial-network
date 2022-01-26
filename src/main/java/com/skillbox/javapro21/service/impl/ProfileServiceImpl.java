@@ -27,7 +27,6 @@ import org.springframework.stereotype.Component;
 import java.security.Principal;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -82,11 +81,11 @@ public class ProfileServiceImpl implements ProfileService {
         Optional<Friendship> optionalFriendship = friendshipRepository.findFriendshipBySrcPersonAndDstPerson(src.getId(), id);
         if (src.getId().equals(id)) {
             Page<Post> posts = postRepository.findPostsByAuthorId(id, pageable);
-            return postService.getPostsResponse(offset, itemPerPage, posts);
+            return postService.getPostsResponse(offset, itemPerPage, posts, src);
         }
         if (utilsService.isBlockedBy(src.getId(), dst.getId(), optionalFriendship)) {
             Page<Post> posts = postRepository.findPostsByPersonId(id, pageable);
-            return postService.getPostsResponse(offset, itemPerPage, posts);
+            return postService.getPostsResponse(offset, itemPerPage, posts, src);
         }
         throw new InterlockedFriendshipStatusException("Пользователь заблокирован и не может смотреть посты");
     }
@@ -123,7 +122,7 @@ public class ProfileServiceImpl implements ProfileService {
             } else throw new InterlockedFriendshipStatusException("Один из пользователей заблокирован для другого");
         }
         postRepository.save(post);
-        return postService.getDataResponse(postService.getPostData(post));
+        return postService.getDataResponse(postService.getPostData(post, src));
 
     }
 
