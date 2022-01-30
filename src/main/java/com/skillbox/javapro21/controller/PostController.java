@@ -97,7 +97,7 @@ public class PostController {
     @LastActivity
     public ResponseEntity<ListDataResponse<CommentsData>> getComments(@PathVariable Long id,
                                                                       @RequestParam(name = "offset", defaultValue = "0") int offset,
-                                                                      @RequestParam(name = "item_per_page", defaultValue = "5") int itemPerPage,
+                                                                      @RequestParam(name = "item_per_page", defaultValue = "100") int itemPerPage,
                                                                       Principal principal) throws PostNotFoundException {
         return new ResponseEntity<>(postService.getComments(id, offset, itemPerPage, principal), HttpStatus.OK);
     }

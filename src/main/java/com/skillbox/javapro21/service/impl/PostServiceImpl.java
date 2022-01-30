@@ -157,7 +157,7 @@ public class PostServiceImpl implements PostService {
     @Override
     public DataResponse<CommentsData> putComments(Long id, Long commentId, CommentRequest commentRequest, Principal principal) throws PostNotFoundException, CommentNotFoundException, CommentNotAuthorException {
         Person person = utilsService.findPersonByEmail(principal.getName());
-        PostComment postComment = null;
+        PostComment postComment;
         if (commentRequest.getParentId() != null) {
             postComment = postCommentRepository.findPostCommentByIdAndPostId(id, commentId)
                     .orElseThrow(() -> new CommentNotFoundException("Комментария с данным parent_id не существует"));
