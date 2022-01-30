@@ -9,6 +9,7 @@ import com.skillbox.javapro21.api.response.account.NotificationSettingData;
 import com.skillbox.javapro21.exception.TokenConfirmationException;
 import com.skillbox.javapro21.exception.UserExistException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.ModelAndView;
 
 import java.io.IOException;
 import java.security.Principal;
@@ -17,7 +18,7 @@ import java.security.Principal;
 public interface AccountService {
     DataResponse<MessageOkContent> registration(RegisterRequest registerRequest) throws UserExistException, MailjetException, IOException;
 
-    String verifyRegistration(String email, String code) throws TokenConfirmationException;
+    ModelAndView verifyRegistration(String email, String code) throws TokenConfirmationException;
 
     String recoveryPasswordMessage(RecoveryRequest recoveryRequest) throws MailjetException, IOException;
 
