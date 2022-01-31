@@ -176,7 +176,7 @@ public class PostControllerTest extends AbstractTest {
                         .get("/api/v1/post")
                         .principal(() -> "test@test.ru")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("tag", "моржиНавсегда;морскиеКотикиИзже")
+                        .param("tag", "моржиНавсегда,морскиеКотикиИзже")
                         .param("date_from", yearAgo)
                         .param("date_to", now))
                 .andDo(MockMvcResultHandlers.print())
@@ -221,6 +221,7 @@ public class PostControllerTest extends AbstractTest {
     void putPostByIdAndMessageInDay() throws Exception {
         PostRequest postRequest = new PostRequest()
                 .setPostText("how much u want...")
+                .setTags(new String[]{"tag1", "tag2"})
                 .setTitle("wtf");
 
         mockMvc.perform(MockMvcRequestBuilders

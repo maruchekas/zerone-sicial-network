@@ -46,7 +46,6 @@ public class PostServiceImpl implements PostService {
     private final TagRepository tagRepository;
     private final PostLikeRepository postLikeRepository;
     private final PostCommentRepository postCommentRepository;
-    private final PersonRepository personRepository;
     private final CommentLikeRepository commentLikeRepository;
     private final MailjetSender mailjetSender;
     private final JdbcTemplate jdbcTemplate;
@@ -226,51 +225,51 @@ public class PostServiceImpl implements PostService {
 
         String query =
                 "(" +
-                "SELECT p.id FROM posts p " +
-                "JOIN persons ps ON ps.id = p.author_id " +
-                "WHERE ps.id IN (" +
-                                "SELECT p.id FROM persons p " +
-                                "JOIN friendship f on f.dst_person_id = p.id " +
-                                "JOIN friendship_statuses fst on fst.id = f.status_id " +
-                                "WHERE f.src_person_id = (?) " +
-                                    "AND (fst.name = 'FRIEND' OR fst.name = 'SUBSCRIBED')" +
-                                ") " +
-                    "AND p.is_Blocked = 0 " +
-                    "AND ps.is_Blocked = 0 " +
-                    "AND (p.title ILIKE CONCAT('%', (?), '%') OR p.post_text ILIKE CONCAT('%', (?),'%')) " +
-                "ORDER BY p.time DESC" +
-                ") " +
-                "UNION ALL " +
-                "(" +
-                "SELECT p.id FROM posts p " +
-                "JOIN persons ps ON ps.id = p.author_id " +
-                "LEFT JOIN post_likes pl ON pl.post_id = p.id " +
-                "WHERE p.author_id NOT IN (" +
-                                            "(" +
-                                            "SELECT p.id FROM persons p " +
-                                            "JOIN friendship f ON f.dst_person_id = p.id " +
-                                            "JOIN friendship_statuses fst ON fst.id = f.status_id " +
-                                            "WHERE f.src_person_id = (?) " +
-                                                "AND (fst.name = 'FRIEND' OR fst.name = 'SUBSCRIBED')" +
-                                            ") " +
-                                            "UNION ALL " +
-                                            "(" +
-                                            "SELECT p.id FROM persons p " +
-                                            "JOIN friendship f ON f.dst_person_id = p.id " +
-                                            "JOIN friendship_statuses fs ON fs.id = f.status_id " +
-                                            "WHERE f.src_person_id = (?) " +
-                                                "AND (fs.name = 'BLOCKED' OR fs.name = 'INTERLOCKED') " +
-                                                "OR (p.is_blocked != 0) " +
-                                            "GROUP BY p.id" +
-                                            ") " +
-                                        ") " +
-                    "AND p.id != (?) " +
-                    "AND p.is_Blocked = 0 " +
-                    "AND ps.is_Blocked = 0 " +
-                    "AND (p.title ILIKE CONCAT('%', (?),'%') OR p.post_text ILIKE CONCAT('%', (?),'%')) " +
-                "GROUP BY p.id " +
-                "ORDER BY count(pl) DESC, p.time DESC" +
-                ")";
+                        "SELECT p.id FROM posts p " +
+                        "JOIN persons ps ON ps.id = p.author_id " +
+                        "WHERE ps.id IN (" +
+                        "SELECT p.id FROM persons p " +
+                        "JOIN friendship f on f.dst_person_id = p.id " +
+                        "JOIN friendship_statuses fst on fst.id = f.status_id " +
+                        "WHERE f.src_person_id = (?) " +
+                        "AND (fst.name = 'FRIEND' OR fst.name = 'SUBSCRIBED')" +
+                        ") " +
+                        "AND p.is_Blocked = 0 " +
+                        "AND ps.is_Blocked = 0 " +
+                        "AND (p.title ILIKE CONCAT('%', (?), '%') OR p.post_text ILIKE CONCAT('%', (?),'%')) " +
+                        "ORDER BY p.time DESC" +
+                        ") " +
+                        "UNION ALL " +
+                        "(" +
+                        "SELECT p.id FROM posts p " +
+                        "JOIN persons ps ON ps.id = p.author_id " +
+                        "LEFT JOIN post_likes pl ON pl.post_id = p.id " +
+                        "WHERE p.author_id NOT IN (" +
+                        "(" +
+                        "SELECT p.id FROM persons p " +
+                        "JOIN friendship f ON f.dst_person_id = p.id " +
+                        "JOIN friendship_statuses fst ON fst.id = f.status_id " +
+                        "WHERE f.src_person_id = (?) " +
+                        "AND (fst.name = 'FRIEND' OR fst.name = 'SUBSCRIBED')" +
+                        ") " +
+                        "UNION ALL " +
+                        "(" +
+                        "SELECT p.id FROM persons p " +
+                        "JOIN friendship f ON f.dst_person_id = p.id " +
+                        "JOIN friendship_statuses fs ON fs.id = f.status_id " +
+                        "WHERE f.src_person_id = (?) " +
+                        "AND (fs.name = 'BLOCKED' OR fs.name = 'INTERLOCKED') " +
+                        "OR (p.is_blocked != 0) " +
+                        "GROUP BY p.id" +
+                        ") " +
+                        ") " +
+                        "AND p.id != (?) " +
+                        "AND p.is_Blocked = 0 " +
+                        "AND ps.is_Blocked = 0 " +
+                        "AND (p.title ILIKE CONCAT('%', (?),'%') OR p.post_text ILIKE CONCAT('%', (?),'%')) " +
+                        "GROUP BY p.id " +
+                        "ORDER BY count(pl) DESC, p.time DESC" +
+                        ")";
         List<Long> ids = jdbcTemplate.query(
                 query,
                 (ResultSet rs, int rowNum) -> rs.getLong("id"),
