@@ -18,9 +18,9 @@ import java.security.Principal;
 
 @Service
 public interface PostService {
-    ListDataResponse<PostData> getPosts(String text, long dateFrom, long dateTo, int offset, int itemPerPage, String author, String tag, Principal principal);
+    ListDataResponse<PostData> getPosts(String text, long dateFrom, long dateTo, int offset, int itemPerPage, String author, String[] tags, Principal principal);
 
-    DataResponse<PostData> getPostsById(Long id, Principal principal) throws PostNotFoundException;
+    DataResponse<PostData> getPostById(Long id, Principal principal) throws PostNotFoundException;
 
     DataResponse<PostData> putPostByIdAndMessageInDay(Long id, long publishDate, PostRequest postRequest, Principal principal) throws PostNotFoundException, AuthorAndUserEqualsException;
 
@@ -28,7 +28,7 @@ public interface PostService {
 
     DataResponse<PostData> recoverPostById(Long id, Principal principal) throws PostNotFoundException, AuthorAndUserEqualsException, PostRecoveryException;
 
-    ListDataResponse<CommentsData> getComments(Long id, int offset, int itemPerPage) throws PostNotFoundException;
+    ListDataResponse<CommentsData> getComments(Long id, int offset, int itemPerPage, Principal principal) throws PostNotFoundException;
 
     DataResponse<CommentsData> postComments(Long id, CommentRequest commentRequest, Principal principal) throws PostNotFoundException, CommentNotFoundException;
 

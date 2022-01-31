@@ -34,8 +34,8 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
+import java.util.Optional;
 
 import static com.skillbox.javapro21.domain.enumeration.FriendshipStatusType.*;
 
@@ -337,7 +337,10 @@ public class ProfileControllerTest extends AbstractTest {
     @Test
     @WithMockUser(username = "test1@test.ru", authorities = "user:write")
     void postPostOnPersonWallById() throws Exception {
-        PostRequest postRequest = new PostRequest().setPostText("Mu-Mu").setTitle("Pushkin?");
+        PostRequest postRequest = new PostRequest()
+                .setPostText("Mu-Mu")
+                .setTags(new String[0])
+                .setTitle("Pushkin?");
 
         mockMvc.perform(MockMvcRequestBuilders
                         .post("/api/v1/users/{id}/wall", verifyPersonWithPost.getId())
@@ -358,7 +361,10 @@ public class ProfileControllerTest extends AbstractTest {
         friendshipStatusRepository.save(friendshipStatusSrc);
         friendshipSrc.setFriendshipStatus(friendshipStatusSrc);
         friendshipRepository.save(friendshipSrc);
-        PostRequest postRequest = new PostRequest().setPostText("Mu-Mu").setTitle("Pushkin?");
+        PostRequest postRequest = new PostRequest()
+                .setPostText("Mu-Mu")
+                .setTags(new String[0])
+                .setTitle("Pushkin?");
 
         mockMvc.perform(MockMvcRequestBuilders
                         .post("/api/v1/users/{id}/wall", verifyPersonWithPost.getId())

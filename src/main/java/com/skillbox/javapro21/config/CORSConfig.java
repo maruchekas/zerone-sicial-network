@@ -14,6 +14,7 @@ public class CORSConfig implements WebMvcConfigurer {
 
         registry.addMapping("/**")
                 .allowedOrigins("https://zerone-2022-develop.herokuapp.com/")
+                .allowedOrigins("https://zerone-2022.herokuapp.com/")
                 .allowedOrigins("http://localhost:8080")
                 .allowedMethods("HEAD", "GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowCredentials(true)

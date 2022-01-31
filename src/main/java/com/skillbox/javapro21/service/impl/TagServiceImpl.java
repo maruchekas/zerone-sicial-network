@@ -4,6 +4,7 @@ import com.skillbox.javapro21.api.response.DataResponse;
 import com.skillbox.javapro21.api.response.ListDataResponse;
 import com.skillbox.javapro21.api.response.tag.TagData;
 import com.skillbox.javapro21.domain.Tag;
+import com.skillbox.javapro21.exception.BadArgumentException;
 import com.skillbox.javapro21.repository.TagRepository;
 import com.skillbox.javapro21.service.TagService;
 import lombok.RequiredArgsConstructor;
@@ -33,17 +34,18 @@ public class TagServiceImpl implements TagService {
         return getTagResponse(pageableTagList, offset, itemPerPage);
     }
 
-    public DataResponse<TagData> addTag(String name){
+    public DataResponse<TagData> addTag(String name) {
         DataResponse<TagData> dataResponse = new DataResponse<>();
         TagData tagData = new TagData();
         Tag tag = tagRepository.findByName(name);
-        if (tag == null){
+        if (tag == null) {
             tag = new Tag();
             tag.setTag(name);
             dataResponse.setError("ok");
             dataResponse.setTimestamp(utilsService.getTimestampFromLocalDateTime(LocalDateTime.now()));
             dataResponse.setData(tagData);
             tagRepository.save(tag);
+            tagData.setId(tag.getId());
             tagData.setTag(name);
             return dataResponse;
         }
@@ -61,7 +63,7 @@ public class TagServiceImpl implements TagService {
         DataResponse<TagData> dataResponse = new DataResponse<>();
         Tag tag = getTagById(id);
 
-        if (tag == null){
+        if (tag == null) {
             dataResponse.setError("invalid_request");
             dataResponse.setTimestamp(utilsService.getTimestampFromLocalDateTime(LocalDateTime.now()));
             return dataResponse;
@@ -78,11 +80,11 @@ public class TagServiceImpl implements TagService {
         return dataResponse;
     }
 
-    private Tag getTagById(long id){
+    private Tag getTagById(long id) {
         return tagRepository.findById(id).orElse(null);
     }
 
-    private ListDataResponse<TagData> getTagResponse(Page<Tag> tags, int offset, int itemPerPage){
+    private ListDataResponse<TagData> getTagResponse(Page<Tag> tags, int offset, int itemPerPage) {
         ListDataResponse<TagData> listDataResponse = new ListDataResponse<>();
         listDataResponse.setError("ok");
         listDataResponse.setTimestamp(utilsService.getTimestampFromLocalDateTime(LocalDateTime.now()));
@@ -94,10 +96,10 @@ public class TagServiceImpl implements TagService {
         return listDataResponse;
     }
 
-    private List<TagData> getTagDataList(List<Tag> tags){
+    private List<TagData> getTagDataList(List<Tag> tags) {
         List<TagData> tagDataList = new ArrayList<>();
         tags.forEach(language ->
-            tagDataList.add(getTagData(language))
+                tagDataList.add(getTagData(language))
         );
 
         return tagDataList;
@@ -113,18 +115,16 @@ public class TagServiceImpl implements TagService {
         Set<Tag> tags = new HashSet<>();
         for (String tagFromNewPost : tagsString
         ) {
-            Tag tag = tagRepository.findByName(tagFromNewPost);
-            if (tag != null) {
+            Tag tag = tagRepository.findByTag(tagFromNewPost).orElseGet(() -> createNewTag(tagFromNewPost));
                 tags.add(tag);
-            } else {
-                Tag newTag = new Tag();
-                newTag.setTag(tagFromNewPost);
-                tagRepository.save(newTag);
-                tags.add(newTag);
-            }
         }
-
         return tags;
+    }
+
+    private Tag createNewTag(String tagName) {
+        Tag newTag = new Tag().setTag(tagName);
+        tagRepository.save(newTag);
+        return newTag;
     }
 
 }
