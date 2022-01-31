@@ -104,7 +104,7 @@ public class AccountControllerTest extends AbstractTest {
                         .param("email", "test1@test.ru")
                         .param("code", "123"))
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.status().isOk());
+                .andExpect(MockMvcResultMatchers.status().is3xxRedirection());
     }
 
     @Test

@@ -22,9 +22,11 @@ import com.skillbox.javapro21.service.AccountService;
 import com.skillbox.javapro21.service.ResourceService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.web.servlet.ModelAndView;
 
 import java.io.IOException;
 import java.security.Principal;
@@ -37,8 +39,6 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class AccountServiceImpl implements AccountService {
-    private static int countRegisterPost = 0;
-
     private final UtilsService utilsService;
     private final PersonRepository personRepository;
     private final MailjetSender mailMessage;
@@ -46,6 +46,10 @@ public class AccountServiceImpl implements AccountService {
     private final JwtGenerator jwtGenerator;
     private final NotificationTypeRepository notificationTypeRepository;
     private final ResourceService resourceService;
+
+    private static int countRegisterPost = 0;
+    @Value(value = "${base_url}")
+    private static String baseUrl;
 
     @Override
     public DataResponse<MessageOkContent> registration(RegisterRequest registerRequest) throws UserExistException, MailjetException, IOException {
@@ -66,7 +70,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public String verifyRegistration(String email, String code) throws TokenConfirmationException {
+    public ModelAndView verifyRegistration(String email, String code) throws TokenConfirmationException {
         Person person = utilsService.findPersonByEmail(email);
         if (person.getConfirmationCode().equals(code)) {
             person
@@ -76,7 +80,7 @@ public class AccountServiceImpl implements AccountService {
                     .setConfirmationCode("");
             personRepository.save(person);
         } else throw new TokenConfirmationException("Не верный confirmation code");
-        return "Пользователь подтвержден";
+        return new ModelAndView("redirect:" + baseUrl);
     }
 
     @Override

@@ -19,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
 
 import java.io.IOException;
 import java.security.Principal;
@@ -40,9 +41,9 @@ public class AccountController {
 
     @Operation(summary = "Подтверждение регистрации")
     @GetMapping("/register/complete")
-    public ResponseEntity<String> verifyRegistration(@RequestParam String email,
-                                                     @RequestParam String code) throws TokenConfirmationException {
-        return new ResponseEntity<>(accountService.verifyRegistration(email, code), HttpStatus.OK);
+    public ModelAndView verifyRegistration(@RequestParam String email,
+                                          @RequestParam String code) throws TokenConfirmationException {
+        return accountService.verifyRegistration(email, code);
     }
 
     @Operation(summary = "Отправка ссылки на почту для восстановления пароля")
