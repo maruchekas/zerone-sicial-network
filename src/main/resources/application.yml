@@ -19,11 +19,6 @@ spring:
       ddl-auto: none
       dialect: org.hibernate.dialect.PostgreSQLDialect
 
-
-  boot:
-    admin:
-      client:
-        url: http://localhost:8080
 mailjet:
   mail:
     from: ${MAIlJET_MAIL_FROM}
