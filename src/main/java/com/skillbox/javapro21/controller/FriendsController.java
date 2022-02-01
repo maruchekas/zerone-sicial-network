@@ -78,4 +78,14 @@ public class FriendsController {
                                                                 Principal principal) {
         return new ResponseEntity<>(friendsService.isFriend(users, principal), HttpStatus.OK);
     }
+
+    @Operation(summary = "Получить список заблокированных пользователей")
+    @GetMapping("/friends/blocked")
+    @LastActivity
+    public ResponseEntity<ListDataResponse<AuthData>> blockedPersons(@RequestParam(name = "name", defaultValue = "") String name,
+                                                                     @RequestParam(name = "offset", defaultValue = "0") int offset,
+                                                                     @RequestParam(name = "item_per_page", defaultValue = "20") int itemPerPage,
+                                                                     Principal principal) {
+        return new ResponseEntity<>(friendsService.blockedFriends(name, offset, itemPerPage, principal), HttpStatus.OK);
+    }
 }

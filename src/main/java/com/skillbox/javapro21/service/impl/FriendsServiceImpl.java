@@ -46,7 +46,7 @@ public class FriendsServiceImpl implements FriendsService {
     public DataResponse<MessageOkContent> deleteFriend(Long id, Principal principal) {
         Person src = utilsService.findPersonByEmail(principal.getName());
         Person dst = personRepository.findPersonById(id).orElseThrow();
-        utilsService.createFriendship(src, dst, FriendshipStatusType.DECLINED);
+        utilsService.createFriendship(dst, src, FriendshipStatusType.DECLINED);
         return utilsService.getMessageOkResponse();
     }
 
@@ -54,9 +54,8 @@ public class FriendsServiceImpl implements FriendsService {
     public DataResponse<MessageOkContent> editFriend(Long id, Principal principal) {
         Person src = utilsService.findPersonByEmail(principal.getName());
         Person dst = personRepository.findPersonById(id).orElseThrow();
-        FriendshipStatus friendshipStatusDst = utilsService.getFriendshipStatus(dst.getId(), src.getId());
-        FriendshipStatus friendshipStatusSrc = utilsService.getFriendshipStatus(src.getId(), dst.getId());
-        if (friendshipStatusDst != null && (friendshipStatusSrc.getFriendshipStatusType().equals(REQUEST)
+        FriendshipStatus friendshipStatusDst = utilsService.getFriendshipStatus(src.getId(), dst.getId());
+        if (friendshipStatusDst != null && (friendshipStatusDst.getFriendshipStatusType().equals(REQUEST)
                 || friendshipStatusDst.getFriendshipStatusType().equals(SUBSCRIBED)) ) {
             utilsService.createFriendship(src, dst, FRIEND);
         } else {
@@ -103,6 +102,19 @@ public class FriendsServiceImpl implements FriendsService {
                 .setError("")
                 .setTimestamp(utilsService.getTimestamp())
                 .setData(new StatusContent().setUserId(person.getId()).setStatus("NO FRIEND"));
+    }
+
+    @Override
+    public ListDataResponse<AuthData> blockedFriends(String name, int offset, int itemPerPage, Principal principal) {
+        Person person = utilsService.findPersonByEmail(principal.getName());
+        Pageable pageable = PageRequest.of(offset, itemPerPage);
+        Page<Person> personPage;
+        if (name.equals("")) {
+            personPage = personRepository.findAllBlockedPersons(person.getId(), pageable);
+        } else {
+            personPage = personRepository.findAllBlockedPersonsByName(person.getId(), name, pageable);
+        }
+        return getListDataResponse(personPage, pageable);
     }
 
     private ListDataResponse<AuthData> getListDataResponse(Page<Person> personsPage, Pageable pageable) {
