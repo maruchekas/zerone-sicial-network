@@ -34,6 +34,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 @Slf4j
 @Component
@@ -53,9 +54,9 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public DataResponse<MessageOkContent> registration(RegisterRequest registerRequest) throws UserExistException, MailjetException, IOException {
-        if (personRepository.findByEmail(registerRequest.getEmail()).isPresent()) {
+        if (personRepository.findByEmail(registerRequest.getEmail().toLowerCase(Locale.ROOT)).isPresent()) {
             countRegisterPost = countRegisterPost + 1;
-            Person personInBD = personRepository.findByEmail(registerRequest.getEmail()).orElseThrow();
+            Person personInBD = personRepository.findByEmail(registerRequest.getEmail().toLowerCase(Locale.ROOT)).orElseThrow();
             if (countRegisterPost < 3 && personInBD.getIsApproved() == 0) {
                 updateNewPerson(personInBD, registerRequest);
                 mailMessageForRegistration(registerRequest);
@@ -125,7 +126,7 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public DataResponse<MessageOkContent> changeEmail(ChangeEmailRequest changeEmailRequest, Principal principal) {
         Person person = utilsService.findPersonByEmail(principal.getName());
-        person.setEmail(changeEmailRequest.getEmail());
+        person.setEmail(changeEmailRequest.getEmail().toLowerCase(Locale.ROOT));
         return utilsService.getMessageOkResponse();
     }
 
@@ -207,7 +208,7 @@ public class AccountServiceImpl implements AccountService {
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
 
         Person person = new Person()
-                .setEmail(registerRequest.getEmail())
+                .setEmail(registerRequest.getEmail().toLowerCase(Locale.ROOT))
                 .setFirstName(registerRequest.getFirstName())
                 .setLastName(registerRequest.getLastName())
                 .setConfirmationCode(registerRequest.getCode())
@@ -228,7 +229,7 @@ public class AccountServiceImpl implements AccountService {
     private void updateNewPerson(Person person, RegisterRequest registerRequest) {
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
         person
-                .setEmail(registerRequest.getEmail())
+                .setEmail(registerRequest.getEmail().toLowerCase(Locale.ROOT))
                 .setFirstName(registerRequest.getFirstName())
                 .setLastName(registerRequest.getLastName())
                 .setConfirmationCode(registerRequest.getCode())

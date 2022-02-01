@@ -4,7 +4,6 @@ import com.skillbox.javapro21.api.response.DataResponse;
 import com.skillbox.javapro21.api.response.ListDataResponse;
 import com.skillbox.javapro21.api.response.tag.TagData;
 import com.skillbox.javapro21.domain.Tag;
-import com.skillbox.javapro21.exception.BadArgumentException;
 import com.skillbox.javapro21.repository.TagRepository;
 import com.skillbox.javapro21.service.TagService;
 import lombok.RequiredArgsConstructor;
@@ -64,20 +63,21 @@ public class TagServiceImpl implements TagService {
         Tag tag = getTagById(id);
 
         if (tag == null) {
-            dataResponse.setError("invalid_request");
-            dataResponse.setTimestamp(utilsService.getTimestampFromLocalDateTime(LocalDateTime.now()));
-            return dataResponse;
+            return dataResponse
+                    .setError("invalid_request")
+                    .setTimestamp(utilsService.getTimestampFromLocalDateTime(LocalDateTime.now()));
+
         }
         TagData tagData = new TagData()
                 .setId(tag.getId())
                 .setTag(tag.getTag());
         tagRepository.delete(tag);
 
-        dataResponse.setError("ok");
-        dataResponse.setTimestamp(utilsService.getTimestampFromLocalDateTime(LocalDateTime.now()));
-        dataResponse.setData(tagData);
+        return dataResponse
+                .setError("ok")
+                .setTimestamp(utilsService.getTimestampFromLocalDateTime(LocalDateTime.now()))
+                .setData(tagData);
 
-        return dataResponse;
     }
 
     private Tag getTagById(long id) {
@@ -116,7 +116,7 @@ public class TagServiceImpl implements TagService {
         for (String tagFromNewPost : tagsString
         ) {
             Tag tag = tagRepository.findByTag(tagFromNewPost).orElseGet(() -> createNewTag(tagFromNewPost));
-                tags.add(tag);
+            tags.add(tag);
         }
         return tags;
     }

@@ -16,6 +16,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.util.Locale;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -25,14 +27,15 @@ public class AuthServiceImpl implements AuthService {
     private final JwtGenerator jwtGenerator;
 
     public DataResponse<AuthData> login(AuthRequest authRequest) throws NotSuchUserOrWrongPasswordException, UserLegalException {
-        Person person = utilsService.findPersonByEmail(authRequest.getEmail());
-        if (!isPersonLegal(person)) throw new UserLegalException("User with email: " + authRequest.getEmail() + " is blocked.");
+        Person person = utilsService.findPersonByEmail(authRequest.getEmail().toLowerCase(Locale.ROOT));
+        if (!isPersonLegal(person))
+            throw new UserLegalException("Пользователь с почтовым ящиком " + authRequest.getEmail() + " заблокирован.");
 
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
         if (!passwordEncoder.matches(authRequest.getPassword(), person.getPassword()))
             throw new NotSuchUserOrWrongPasswordException("Неверный логин или пароль");
 
-        String token = jwtGenerator.generateToken(authRequest.getEmail());
+        String token = jwtGenerator.generateToken(authRequest.getEmail().toLowerCase(Locale.ROOT));
         return getSuccessAuthResponse(person, token);
     }
 
