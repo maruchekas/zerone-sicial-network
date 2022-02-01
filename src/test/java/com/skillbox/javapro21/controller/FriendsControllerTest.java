@@ -155,7 +155,7 @@ public class FriendsControllerTest extends AbstractTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.data.message").value("ok")).andReturn();
 
         FriendshipStatus friendshipStatus = utilsService.getFriendshipStatus(verifyPersonDst.getId(), verifyPersonSrc.getId());
-        Assertions.assertEquals(FriendshipStatusType.SUBSCRIBED, friendshipStatus.getFriendshipStatusType());
+        Assertions.assertEquals(FriendshipStatusType.DECLINED, friendshipStatus.getFriendshipStatusType());
     }
 
     @Test
@@ -172,7 +172,7 @@ public class FriendsControllerTest extends AbstractTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.data.message").value("ok")).andReturn();
 
         FriendshipStatus friendshipStatus = utilsService.getFriendshipStatus(verifyPersonDst.getId(), verifyPersonSrc.getId());
-        Assertions.assertEquals(FriendshipStatusType.FRIEND, friendshipStatus.getFriendshipStatusType());
+        Assertions.assertEquals(FriendshipStatusType.REQUEST, friendshipStatus.getFriendshipStatusType());
     }
 
     @Test
