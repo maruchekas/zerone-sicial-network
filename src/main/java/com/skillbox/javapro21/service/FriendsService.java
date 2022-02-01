@@ -20,6 +20,8 @@ public interface FriendsService {
 
     ListDataResponse<AuthData> requestFriends(String name, int offset, int itemPerPage, Principal principal);
 
+    ListDataResponse<AuthData> blockedFriends(String name, int offset, int itemPerPage, Principal principal);
+
     ListDataResponse<AuthData> recommendationsFriends(int offset, int itemPerPage, Principal principal);
 
     DataResponse<StatusContent> isFriend(DialogRequestForCreate users, Principal principal);
