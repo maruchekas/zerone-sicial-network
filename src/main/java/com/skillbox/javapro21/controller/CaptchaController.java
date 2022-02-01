@@ -1,7 +1,7 @@
 package com.skillbox.javapro21.controller;
 
 import com.skillbox.javapro21.api.response.captcha.CaptchaResponse;
-import com.skillbox.javapro21.service.impl.CaptchaServiceImpl;
+import com.skillbox.javapro21.service.CaptchaService;
 import lombok.Data;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,12 +11,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Data
 @RestController
-@RequestMapping("/api/auth")
-public class ApiAuthController {
-    private final CaptchaServiceImpl captchaService;
+@RequestMapping("/api/v1/auth")
+public class CaptchaController {
+
+    private final CaptchaService captchaService;
 
     @GetMapping("/captcha")
     private ResponseEntity<CaptchaResponse> getCaptcha() {
         return new ResponseEntity<>(captchaService.getNewCaptcha(), HttpStatus.OK);
     }
+
 }

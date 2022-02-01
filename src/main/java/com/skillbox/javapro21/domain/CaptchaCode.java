@@ -15,7 +15,7 @@ import java.sql.Timestamp;
 @Table(name = "captcha_codes")
 public class CaptchaCode {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     @Column(columnDefinition = "TIMESTAMP", nullable = false)
