@@ -111,7 +111,7 @@ public interface PersonRepository extends JpaRepository<Person, Integer> {
     Page<Person> findAllIncomingRequestsByName(Long id, String name, Pageable pageable);
 
     @Query("select p from Person p " +
-            "join Friendship f on f.dstPerson.id = p.id " +
+            "join Friendship f on f.srcPerson.id = p.id " +
             "join FriendshipStatus fs on fs.id = f.friendshipStatus.id " +
             "where f.dstPerson.id = :id " +
             "and fs.friendshipStatusType = 'REQUEST' " +
@@ -120,7 +120,7 @@ public interface PersonRepository extends JpaRepository<Person, Integer> {
     Page<Person> findAllOutgoingRequests(Long id, Pageable pageable);
 
     @Query("select p from Person p " +
-            "join Friendship f on f.dstPerson.id = p.id " +
+            "join Friendship f on f.srcPerson.id = p.id " +
             "join FriendshipStatus fs on fs.id = f.friendshipStatus.id " +
             "where f.dstPerson.id = :id " +
             "and p.firstName = :name " +
