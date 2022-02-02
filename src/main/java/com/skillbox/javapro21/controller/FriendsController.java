@@ -42,15 +42,6 @@ public class FriendsController {
         return new ResponseEntity<>(friendsService.editFriend(id, principal), HttpStatus.OK);
     }
 
-    @Operation(summary = "Получить список рекомендаций")
-    @GetMapping("/friends/recommendations")
-    @LastActivity
-    public ResponseEntity<ListDataResponse<AuthData>> recommendationsFriends(@RequestParam(name = "offset", defaultValue = "0") int offset,
-                                                                             @RequestParam(name = "item_per_page", defaultValue = "20") int itemPerPage,
-                                                                             Principal principal) {
-        return new ResponseEntity<>(friendsService.recommendationsFriends(offset, itemPerPage, principal), HttpStatus.OK);
-    }
-
     @Operation(summary = "Получить информацию является ли пользователь другом указанных пользователей")
     @PostMapping("/is/friends")
     @LastActivity
@@ -117,5 +108,14 @@ public class FriendsController {
                                                                      @RequestParam(name = "item_per_page", defaultValue = "20") int itemPerPage,
                                                                      Principal principal) {
         return new ResponseEntity<>(friendsService.getSubscriptions(name, offset, itemPerPage, principal), HttpStatus.OK);
+    }
+
+    @Operation(summary = "Получить список рекомендаций")
+    @GetMapping("/friends/recommendations")
+    @LastActivity
+    public ResponseEntity<ListDataResponse<AuthData>> recommendationsFriends(@RequestParam(name = "offset", defaultValue = "0") int offset,
+                                                                             @RequestParam(name = "item_per_page", defaultValue = "20") int itemPerPage,
+                                                                             Principal principal) {
+        return new ResponseEntity<>(friendsService.recommendationsFriends(offset, itemPerPage, principal), HttpStatus.OK);
     }
 }
