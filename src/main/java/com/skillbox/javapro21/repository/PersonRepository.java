@@ -76,24 +76,6 @@ public interface PersonRepository extends JpaRepository<Person, Integer> {
             "join Friendship f on f.dstPerson.id = p.id " +
             "join FriendshipStatus fs on fs.id = f.friendshipStatus.id " +
             "where f.srcPerson.id = :id " +
-            "and (fs.friendshipStatusType = 'BLOCKED' or fs.friendshipStatusType = 'INTERLOCKED') " +
-            "and p.isBlocked = 0 ")
-    Page<Person> findAllBlockedPersons(Long id, Pageable pageable);
-
-    @Query("select p from Person p " +
-            "join Friendship f on f.dstPerson.id = p.id " +
-            "join FriendshipStatus fs on fs.id = f.friendshipStatus.id " +
-            "where f.srcPerson.id = :id " +
-            "and p.firstName = :name " +
-            "and (fs.friendshipStatusType = 'BLOCKED' or fs.friendshipStatusType = 'INTERLOCKED')" +
-            "and p.isBlocked = 0 " +
-            "order by p.firstName asc")
-    Page<Person> findAllBlockedPersonsByName(Long id, String name, Pageable pageable);
-
-    @Query("select p from Person p " +
-            "join Friendship f on f.dstPerson.id = p.id " +
-            "join FriendshipStatus fs on fs.id = f.friendshipStatus.id " +
-            "where f.srcPerson.id = :id " +
             "and fs.friendshipStatusType = 'FRIEND' " +
             "and p.isBlocked = 0 " +
             "order by p.firstName asc")
@@ -116,7 +98,7 @@ public interface PersonRepository extends JpaRepository<Person, Integer> {
             "and fs.friendshipStatusType = 'REQUEST' " +
             "and p.isBlocked = 0 " +
             "order by p.firstName asc")
-    Page<Person> findAllRequest(Long id, Pageable pageable);
+    Page<Person> findAllIncomingRequests(Long id, Pageable pageable);
 
     @Query("select p from Person p " +
             "join Friendship f on f.dstPerson.id = p.id " +
@@ -126,7 +108,80 @@ public interface PersonRepository extends JpaRepository<Person, Integer> {
             "and fs.friendshipStatusType = 'REQUEST' " +
             "and p.isBlocked = 0 " +
             "order by p.firstName asc")
-    Page<Person> findAllRequestByName(Long id, String name, Pageable pageable);
+    Page<Person> findAllIncomingRequestsByName(Long id, String name, Pageable pageable);
+
+    @Query("select p from Person p " +
+            "join Friendship f on f.dstPerson.id = p.id " +
+            "join FriendshipStatus fs on fs.id = f.friendshipStatus.id " +
+            "where f.dstPerson.id = :id " +
+            "and fs.friendshipStatusType = 'REQUEST' " +
+            "and p.isBlocked = 0 " +
+            "order by p.firstName asc")
+    Page<Person> findAllOutgoingRequests(Long id, Pageable pageable);
+
+    @Query("select p from Person p " +
+            "join Friendship f on f.dstPerson.id = p.id " +
+            "join FriendshipStatus fs on fs.id = f.friendshipStatus.id " +
+            "where f.dstPerson.id = :id " +
+            "and p.firstName = :name " +
+            "and fs.friendshipStatusType = 'REQUEST' " +
+            "and p.isBlocked = 0 " +
+            "order by p.firstName asc")
+    Page<Person> findAllOutgoingRequestsByName(Long id, String name, Pageable pageable);
+
+    @Query("select p from Person p " +
+            "join Friendship f on f.dstPerson.id = p.id " +
+            "join FriendshipStatus fs on fs.id = f.friendshipStatus.id " +
+            "where f.srcPerson.id = :id " +
+            "and (fs.friendshipStatusType = 'BLOCKED' or fs.friendshipStatusType = 'INTERLOCKED') " +
+            "and p.isBlocked = 0 ")
+    Page<Person> findAllBlockedPersons(Long id, Pageable pageable);
+
+    @Query("select p from Person p " +
+            "join Friendship f on f.dstPerson.id = p.id " +
+            "join FriendshipStatus fs on fs.id = f.friendshipStatus.id " +
+            "where f.srcPerson.id = :id " +
+            "and p.firstName = :name " +
+            "and (fs.friendshipStatusType = 'BLOCKED' or fs.friendshipStatusType = 'INTERLOCKED')" +
+            "and p.isBlocked = 0 " +
+            "order by p.firstName asc")
+    Page<Person> findAllBlockedPersonsByName(Long id, String name, Pageable pageable);
+
+    @Query("select p from Person p " +
+            "join Friendship f on f.dstPerson.id = p.id " +
+            "join FriendshipStatus fs on fs.id = f.friendshipStatus.id " +
+            "where f.srcPerson.id = :id " +
+            "and fs.friendshipStatusType = 'SUBSCRIBED' " +
+            "and p.isBlocked = 0 ")
+    Page<Person> findAllSubscribers(Long id, Pageable pageable);
+
+    @Query("select p from Person p " +
+            "join Friendship f on f.dstPerson.id = p.id " +
+            "join FriendshipStatus fs on fs.id = f.friendshipStatus.id " +
+            "where f.srcPerson.id = :id " +
+            "and p.firstName = :name " +
+            "and fs.friendshipStatusType = 'SUBSCRIBED' " +
+            "and p.isBlocked = 0 " +
+            "order by p.firstName asc")
+    Page<Person> findAllSubscribersByName(Long id, String name, Pageable pageable);
+
+    @Query("select p from Person p " +
+            "join Friendship f on f.dstPerson.id = p.id " +
+            "join FriendshipStatus fs on fs.id = f.friendshipStatus.id " +
+            "where f.srcPerson.id = :id " +
+            "and fs.friendshipStatusType = 'DECLINED' " +
+            "and p.isBlocked = 0 ")
+    Page<Person> findAllSubscriptions(Long id, Pageable pageable);
+
+    @Query("select p from Person p " +
+            "join Friendship f on f.dstPerson.id = p.id " +
+            "join FriendshipStatus fs on fs.id = f.friendshipStatus.id " +
+            "where f.srcPerson.id = :id " +
+            "and p.firstName = :name " +
+            "and fs.friendshipStatusType = 'DECLINED' " +
+            "and p.isBlocked = 0 " +
+            "order by p.firstName asc")
+    Page<Person> findAllSubscriptionsByName(Long id, String name, Pageable pageable);
 
     @Query("select p from Person p " +
             "join Friendship f on f.dstPerson.id = p.id " +

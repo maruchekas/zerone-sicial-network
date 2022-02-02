@@ -18,9 +18,15 @@ public interface FriendsService {
 
     DataResponse<MessageOkContent> editFriend(Long id, Principal principal);
 
-    ListDataResponse<AuthData> requestFriends(String name, int offset, int itemPerPage, Principal principal);
+    ListDataResponse<AuthData> getIncomingRequests(String name, int offset, int itemPerPage, Principal principal);
 
-    ListDataResponse<AuthData> blockedFriends(String name, int offset, int itemPerPage, Principal principal);
+    ListDataResponse<AuthData> getBlockedUsers(String name, int offset, int itemPerPage, Principal principal);
+
+    ListDataResponse<AuthData> getSubscribers(String name, int offset, int itemPerPage, Principal principal);
+
+    ListDataResponse<AuthData> getSubscriptions(String name, int offset, int itemPerPage, Principal principal);
+
+    ListDataResponse<AuthData> getOutgoingRequests(String name, int offset, int itemPerPage, Principal principal);
 
     ListDataResponse<AuthData> recommendationsFriends(int offset, int itemPerPage, Principal principal);
 
