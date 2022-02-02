@@ -14,7 +14,7 @@ spring:
     username: ${JDBC_DATABASE_USERNAME}
     password: ${JDBC_DATABASE_PASSWORD}
   jpa:
-    show-sql: false
+    show-sql: true
     hibernate:
       ddl-auto: none
       dialect: org.hibernate.dialect.PostgreSQLDialect
