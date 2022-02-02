@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="windows-1251" ?>
+<rocid>
+    <!-- таблица  city -->
+    <city>
+        <city_id>4400</city_id>
+        <country_id>3159</country_id>
+        <region_id>4312</region_id>
+        <name>Москва</name>
+    </city>
+    <city>
+        <city_id>4313</city_id>
+        <country_id>3159</country_id>
+        <region_id>4312</region_id>
+        <name>Абрамцево</name>
+    </city>
+    <city>
+        <city_id>4314</city_id>
+        <country_id>3159</country_id>
+        <region_id>4312</region_id>
+        <name>Алабино</name>
+    </city>
+    <city>
+        <city_id>4315</city_id>
+        <country_id>3159</country_id>
+        <region_id>4312</region_id>
+        <name>Апрелевка</name>
+    </city>
+    <city>
+        <city_id>4316</city_id>
+        <country_id>3159</country_id>
+        <region_id>4312</region_id>
+        <name>Архангельское</name>
+    </city>
+
+    <city>
+        <city_id>45</city_id>
+        <country_id>4</country_id>
+        <region_id>35</region_id>
+        <name>Куэнбиан</name>
+    </city>
+    <city>
+        <city_id>46</city_id>
+        <country_id>4</country_id>
+        <region_id>35</region_id>
+        <name>Лисмор</name>
+    </city>
+    <city>
+        <city_id>47</city_id>
+        <country_id>4</country_id>
+        <region_id>35</region_id>
+        <name>Ньюкастл</name>
+    </city>
+
+    <!-- таблица  country -->
+    <country>
+        <country_id>3159</country_id>
+        <city_id>0</city_id>
+        <name>Россия</name>
+    </country>
+    <country>
+        <country_id>4</country_id>
+        <city_id>0</city_id>
+        <name>Австралия</name>
+    </country>
+
+</rocid>

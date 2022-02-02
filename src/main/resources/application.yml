@@ -53,3 +53,5 @@ html:
   file:
     register: ./src/main/resources/messages/register.html
     recovery: ./src/main/resources/messages/recovery.html
+
+location: src/main/resources/location/locations.xml

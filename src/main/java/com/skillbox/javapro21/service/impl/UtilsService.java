@@ -1,9 +1,6 @@
 package com.skillbox.javapro21.service.impl;
 
-import com.skillbox.javapro21.api.response.Content;
-import com.skillbox.javapro21.api.response.DataResponse;
-import com.skillbox.javapro21.api.response.ListDataResponse;
-import com.skillbox.javapro21.api.response.MessageOkContent;
+import com.skillbox.javapro21.api.response.*;
 import com.skillbox.javapro21.api.response.account.AuthData;
 import com.skillbox.javapro21.domain.Friendship;
 import com.skillbox.javapro21.domain.FriendshipStatus;
@@ -78,11 +75,21 @@ public class UtilsService {
     public ListDataResponse<Content> getListDataResponse(int total, int offset, int limit, List<Content> data) {
         return new ListDataResponse<>()
                 .setError("ok")
-                .setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli())
+                .setTimestamp(getTimestamp())
                 .setTotal(total)
                 .setOffset(offset)
                 .setPerPage(limit)
                 .setData(data);
+    }
+
+    /**
+     * Шаблон для StringListDataResponse
+     * */
+    public StringListDataResponse getStringListDataResponse(List<String> dataList) {
+        return new StringListDataResponse()
+                .setError("ok")
+                .setTimestamp(getTimestamp())
+                .setData(dataList);
     }
 
     /**
