@@ -55,7 +55,7 @@ public class FriendsController {
     @LastActivity
     public ResponseEntity<ListDataResponse<AuthData>> getFriends(@RequestParam(name = "name", defaultValue = "") String name,
                                                                  @RequestParam(name = "offset", defaultValue = "0") int offset,
-                                                                 @RequestParam(name = "item_per_page", defaultValue = "20") int itemPerPage,
+                                                                 @RequestParam(name = "item_per_page", defaultValue = "5") int itemPerPage,
                                                                  Principal principal) {
         return new ResponseEntity<>(friendsService.getFriends(name, offset, itemPerPage, principal), HttpStatus.OK);
     }
@@ -65,7 +65,7 @@ public class FriendsController {
     @LastActivity
     public ResponseEntity<ListDataResponse<AuthData>> getIncomingRequests(@RequestParam(name = "name", defaultValue = "") String name,
                                                                           @RequestParam(name = "offset", defaultValue = "0") int offset,
-                                                                          @RequestParam(name = "item_per_page", defaultValue = "20") int itemPerPage,
+                                                                          @RequestParam(name = "item_per_page", defaultValue = "5") int itemPerPage,
                                                                           Principal principal) {
         return new ResponseEntity<>(friendsService.getIncomingRequests(name, offset, itemPerPage, principal), HttpStatus.OK);
     }
@@ -75,7 +75,7 @@ public class FriendsController {
     @LastActivity
     public ResponseEntity<ListDataResponse<AuthData>> getOutgoingRequests(@RequestParam(name = "name", defaultValue = "") String name,
                                                                           @RequestParam(name = "offset", defaultValue = "0") int offset,
-                                                                          @RequestParam(name = "item_per_page", defaultValue = "20") int itemPerPage,
+                                                                          @RequestParam(name = "item_per_page", defaultValue = "5") int itemPerPage,
                                                                           Principal principal) {
         return new ResponseEntity<>(friendsService.getOutgoingRequests(name, offset, itemPerPage, principal), HttpStatus.OK);
     }
@@ -85,7 +85,7 @@ public class FriendsController {
     @LastActivity
     public ResponseEntity<ListDataResponse<AuthData>> getBlockedPersons(@RequestParam(name = "name", defaultValue = "") String name,
                                                                         @RequestParam(name = "offset", defaultValue = "0") int offset,
-                                                                        @RequestParam(name = "item_per_page", defaultValue = "20") int itemPerPage,
+                                                                        @RequestParam(name = "item_per_page", defaultValue = "5") int itemPerPage,
                                                                         Principal principal) {
         return new ResponseEntity<>(friendsService.getBlockedUsers(name, offset, itemPerPage, principal), HttpStatus.OK);
     }
@@ -95,7 +95,7 @@ public class FriendsController {
     @LastActivity
     public ResponseEntity<ListDataResponse<AuthData>> getSubscribers(@RequestParam(name = "name", defaultValue = "") String name,
                                                                         @RequestParam(name = "offset", defaultValue = "0") int offset,
-                                                                        @RequestParam(name = "item_per_page", defaultValue = "20") int itemPerPage,
+                                                                        @RequestParam(name = "item_per_page", defaultValue = "5") int itemPerPage,
                                                                         Principal principal) {
         return new ResponseEntity<>(friendsService.getSubscribers(name, offset, itemPerPage, principal), HttpStatus.OK);
     }
@@ -105,7 +105,7 @@ public class FriendsController {
     @LastActivity
     public ResponseEntity<ListDataResponse<AuthData>> getSubscriptions(@RequestParam(name = "name", defaultValue = "") String name,
                                                                      @RequestParam(name = "offset", defaultValue = "0") int offset,
-                                                                     @RequestParam(name = "item_per_page", defaultValue = "20") int itemPerPage,
+                                                                     @RequestParam(name = "item_per_page", defaultValue = "5") int itemPerPage,
                                                                      Principal principal) {
         return new ResponseEntity<>(friendsService.getSubscriptions(name, offset, itemPerPage, principal), HttpStatus.OK);
     }

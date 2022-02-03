@@ -81,6 +81,8 @@ public class FriendsServiceImpl implements FriendsService {
     @Override
     public ListDataResponse<AuthData> getFriends(String name, int offset, int itemPerPage, Principal principal) {
         Person person = utilsService.findPersonByEmail(principal.getName());
+        if (offset == 0 && itemPerPage == -1) itemPerPage = Integer.MAX_VALUE;
+
         Pageable pageable = PageRequest.of(offset, itemPerPage);
         Page<Person> personsPage;
         if (name.trim().equals("")) {
@@ -94,6 +96,8 @@ public class FriendsServiceImpl implements FriendsService {
     @Override
     public ListDataResponse<AuthData> getIncomingRequests(String name, int offset, int itemPerPage, Principal principal) {
         Person person = utilsService.findPersonByEmail(principal.getName());
+        if (offset == 0 && itemPerPage == -1) itemPerPage = Integer.MAX_VALUE;
+
         Pageable pageable = PageRequest.of(offset, itemPerPage);
         Page<Person> personsPage;
         if (name.equals("")) {
@@ -107,6 +111,8 @@ public class FriendsServiceImpl implements FriendsService {
     @Override
     public ListDataResponse<AuthData> getOutgoingRequests(String name, int offset, int itemPerPage, Principal principal) {
         Person person = utilsService.findPersonByEmail(principal.getName());
+        if (offset == 0 && itemPerPage == -1) itemPerPage = Integer.MAX_VALUE;
+
         Pageable pageable = PageRequest.of(offset, itemPerPage);
         Page<Person> personsPage;
         if (name.equals("")) {
@@ -120,6 +126,8 @@ public class FriendsServiceImpl implements FriendsService {
     @Override
     public ListDataResponse<AuthData> getBlockedUsers(String name, int offset, int itemPerPage, Principal principal) {
         Person person = utilsService.findPersonByEmail(principal.getName());
+        if (offset == 0 && itemPerPage == -1) itemPerPage = Integer.MAX_VALUE;
+
         Pageable pageable = PageRequest.of(offset, itemPerPage);
         Page<Person> personsPage;
         if (name.equals("")) {
@@ -133,6 +141,8 @@ public class FriendsServiceImpl implements FriendsService {
     @Override
     public ListDataResponse<AuthData> getSubscribers(String name, int offset, int itemPerPage, Principal principal) {
         Person person = utilsService.findPersonByEmail(principal.getName());
+        if (offset == 0 && itemPerPage == -1) itemPerPage = Integer.MAX_VALUE;
+
         Pageable pageable = PageRequest.of(offset, itemPerPage);
         Page<Person> personsPage;
         if (name.equals("")) {
@@ -146,6 +156,8 @@ public class FriendsServiceImpl implements FriendsService {
     @Override
     public ListDataResponse<AuthData> getSubscriptions(String name, int offset, int itemPerPage, Principal principal) {
         Person person = utilsService.findPersonByEmail(principal.getName());
+        if (offset == 0 && itemPerPage == -1) itemPerPage = Integer.MAX_VALUE;
+
         Pageable pageable = PageRequest.of(offset, itemPerPage);
         Page<Person> personsPage;
         if (name.equals("")) {
