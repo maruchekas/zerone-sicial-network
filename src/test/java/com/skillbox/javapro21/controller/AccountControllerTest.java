@@ -3,9 +3,11 @@ package com.skillbox.javapro21.controller;
 import com.skillbox.javapro21.AbstractTest;
 import com.skillbox.javapro21.api.request.account.*;
 import com.skillbox.javapro21.config.security.JwtGenerator;
+import com.skillbox.javapro21.domain.CaptchaCode;
 import com.skillbox.javapro21.domain.Person;
 import com.skillbox.javapro21.domain.enumeration.MessagesPermission;
 import com.skillbox.javapro21.domain.enumeration.NotificationTypeStatus;
+import com.skillbox.javapro21.repository.CaptchaRepository;
 import com.skillbox.javapro21.repository.PersonRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,6 +25,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 @SpringBootTest
@@ -34,10 +37,13 @@ public class AccountControllerTest extends AbstractTest {
     @Autowired
     private PersonRepository personRepository;
     @Autowired
+    private CaptchaRepository captchaRepository;
+    @Autowired
     private JwtGenerator jwtGenerator;
 
     private Person person;
     private Person verifyPerson;
+    private CaptchaCode captcha;
 
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
 
@@ -70,6 +76,12 @@ public class AccountControllerTest extends AbstractTest {
                 .setIsApproved(1)
                 .setLastOnlineTime(LocalDateTime.now());
         personRepository.save(verifyPerson);
+
+        captcha = new CaptchaCode()
+                .setCode("123")
+                .setSecretCode("123")
+                .setTime(Timestamp.valueOf(LocalDateTime.now()));
+        captchaRepository.save(captcha);
     }
 
     @AfterEach
@@ -85,7 +97,7 @@ public class AccountControllerTest extends AbstractTest {
         registerRequest.setEmail(person.getEmail());
         registerRequest.setPasswd1(person.getPassword());
         registerRequest.setPasswd2(person.getPassword());
-        registerRequest.setCode(person.getPassword());
+        registerRequest.setCaptchaSecret(person.getConfirmationCode());
 
         mockMvc.perform(MockMvcRequestBuilders
                         .post("/api/v1/account/register")

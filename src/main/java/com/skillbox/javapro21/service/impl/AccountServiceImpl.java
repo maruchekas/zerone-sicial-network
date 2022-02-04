@@ -3,6 +3,7 @@ package com.skillbox.javapro21.service.impl;
 import com.mailjet.client.errors.MailjetException;
 import com.skillbox.javapro21.api.request.account.*;
 import com.skillbox.javapro21.api.response.DataResponse;
+import com.skillbox.javapro21.api.response.FailDataResponse;
 import com.skillbox.javapro21.api.response.ListDataResponse;
 import com.skillbox.javapro21.api.response.MessageOkContent;
 import com.skillbox.javapro21.api.response.account.NotificationSettingData;
@@ -14,8 +15,10 @@ import com.skillbox.javapro21.domain.Person;
 import com.skillbox.javapro21.domain.enumeration.MessagesPermission;
 import com.skillbox.javapro21.domain.enumeration.NotificationTypeStatus;
 import com.skillbox.javapro21.domain.enumeration.UserType;
+import com.skillbox.javapro21.exception.CaptchaCodeException;
 import com.skillbox.javapro21.exception.TokenConfirmationException;
 import com.skillbox.javapro21.exception.UserExistException;
+import com.skillbox.javapro21.repository.CaptchaRepository;
 import com.skillbox.javapro21.repository.NotificationTypeRepository;
 import com.skillbox.javapro21.repository.PersonRepository;
 import com.skillbox.javapro21.service.AccountService;
@@ -23,11 +26,14 @@ import com.skillbox.javapro21.service.ResourceService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.security.Principal;
 import java.time.LocalDateTime;
@@ -42,6 +48,7 @@ import java.util.Locale;
 public class AccountServiceImpl implements AccountService {
     private final UtilsService utilsService;
     private final PersonRepository personRepository;
+    private final CaptchaRepository captchaRepository;
     private final MailjetSender mailMessage;
     private final ConfirmationUrl confirmationUrl;
     private final JwtGenerator jwtGenerator;
@@ -53,7 +60,15 @@ public class AccountServiceImpl implements AccountService {
     private static String baseUrl;
 
     @Override
-    public DataResponse<MessageOkContent> registration(RegisterRequest registerRequest) throws UserExistException, MailjetException, IOException {
+    public ResponseEntity<?> registration(RegisterRequest registerRequest)
+            throws UserExistException, MailjetException, IOException, CaptchaCodeException {
+        String captcha = registerRequest.getCaptcha();
+        if (!captcha.equals(captchaRepository.findBySecretCode(registerRequest.getCaptchaSecret()).getCode())) {
+            return ResponseEntity.badRequest()
+                    .header("error", "captcha")
+                    .header("error_description", "Неверный код с картинки")
+                    .build();
+        }
         if (personRepository.findByEmail(registerRequest.getEmail().toLowerCase(Locale.ROOT)).isPresent()) {
             countRegisterPost = countRegisterPost + 1;
             Person personInBD = personRepository.findByEmail(registerRequest.getEmail().toLowerCase(Locale.ROOT)).orElseThrow();
@@ -61,13 +76,14 @@ public class AccountServiceImpl implements AccountService {
                 updateNewPerson(personInBD, registerRequest);
                 mailMessageForRegistration(registerRequest);
             } else {
-                throw new UserExistException("Пользователь с данным email уже подтвержден или слишком много попыток пройти регистрацию по одному email");
+                throw new UserExistException("Пользователь с данным email уже подтвержден " +
+                        "или слишком много попыток пройти регистрацию по одному email");
             }
         } else {
             createNewPerson(registerRequest);
             mailMessageForRegistration(registerRequest);
         }
-        return utilsService.getMessageOkResponse();
+        return new ResponseEntity<>(utilsService.getMessageOkResponse(), HttpStatus.OK);
     }
 
     @Override
@@ -93,7 +109,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     private void mailMessageForRegistration(RegisterRequest registerRequest) throws MailjetException, IOException {
-        String token = utilsService.getToken();
+        String token = registerRequest.getCaptchaSecret();
         String text = confirmationUrl.getBaseUrl() + "/api/v1/account/register/complete?email=" + registerRequest.getEmail() + "&code=" + token;
         confirmPersonAndSendEmail(registerRequest.getEmail(), text, token);
     }
@@ -211,14 +227,21 @@ public class AccountServiceImpl implements AccountService {
                 .setEmail(registerRequest.getEmail().toLowerCase(Locale.ROOT))
                 .setFirstName(registerRequest.getFirstName())
                 .setLastName(registerRequest.getLastName())
-                .setConfirmationCode(registerRequest.getCode())
+                .setConfirmationCode(registerRequest.getCaptchaSecret())
                 .setIsApproved(0)
                 .setPassword(passwordEncoder.encode(registerRequest.getPasswd1()))
                 .setRegDate(LocalDateTime.now(ZoneOffset.UTC))
                 .setLastOnlineTime(LocalDateTime.now(ZoneOffset.UTC))
                 .setIsBlocked(0)
-                .setPhoto(resourceService.setDefaultAvatarToUser(registerRequest.getEmail()))
                 .setMessagesPermission(MessagesPermission.NOBODY);
+
+        try {
+            person.setPhoto(resourceService.setDefaultAvatarToUser(registerRequest.getEmail()));
+        } catch (IOException e) {
+            person.setPhoto(null);
+            e.printStackTrace();
+        }
+
         personRepository.save(person);
         globalNotificationsSettings(person);
     }
@@ -232,7 +255,7 @@ public class AccountServiceImpl implements AccountService {
                 .setEmail(registerRequest.getEmail().toLowerCase(Locale.ROOT))
                 .setFirstName(registerRequest.getFirstName())
                 .setLastName(registerRequest.getLastName())
-                .setConfirmationCode(registerRequest.getCode())
+                .setConfirmationCode(registerRequest.getCaptchaSecret())
                 .setIsApproved(0)
                 .setPassword(passwordEncoder.encode(registerRequest.getPasswd1()))
                 .setRegDate(LocalDateTime.now(ZoneOffset.UTC))
