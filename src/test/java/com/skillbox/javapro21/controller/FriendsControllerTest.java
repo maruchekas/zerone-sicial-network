@@ -161,6 +161,38 @@ public class FriendsControllerTest extends AbstractTest {
 
     @Test
     @WithMockUser(username = "test99@test.ru", authorities = "user:write")
+    void revokeRequest() throws Exception {
+        utilsService.createFriendship(verifyPersonDst, verifyPersonSrc, FriendshipStatusType.REQUEST);
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .delete("/api/v1/friends/requests/{id}", verifyPersonDst.getId())
+                .principal(() -> "test99@test.ru")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.message").value("ok")).andReturn();
+
+        Assertions.assertNull(utilsService.getFriendshipStatus(verifyPersonDst.getId(), verifyPersonSrc.getId()));
+    }
+
+    @Test
+    @WithMockUser(username = "test99@test.ru", authorities = "user:write")
+    void deleteSubscriptionTest() throws Exception {
+        utilsService.createFriendship(verifyPersonSrc, verifyPersonDst, FriendshipStatusType.DECLINED);
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .delete("/api/v1/friends/subscriptions/{id}", verifyPersonDst.getId())
+                        .principal(() -> "test99@test.ru")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.message").value("ok")).andReturn();
+
+        Assertions.assertNull(utilsService.getFriendshipStatus(verifyPersonDst.getId(), verifyPersonSrc.getId()));
+    }
+
+    @Test
+    @WithMockUser(username = "test99@test.ru", authorities = "user:write")
     void editFriendDeclined() throws Exception {
         utilsService.createFriendship(verifyPersonSrc, verifyPersonDst, FriendshipStatusType.DECLINED);
 

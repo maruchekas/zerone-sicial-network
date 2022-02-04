@@ -254,10 +254,6 @@ public class ProfileControllerTest extends AbstractTest {
                 .andExpect(MockMvcResultMatchers.status().isOk());
 
         Assertions.assertNotEquals("Пользователь не удален", verifyPerson.getEmail(), "test@test.ru");
-
-        //TODO: Ремонт сравнения даты. У меня с 00:00 до 3:00 тест провален.
-//        Assertions.assertEquals(LocalDateTime.now().getDayOfMonth(),
-//                personRepository.findByEmail(verifyPerson.getEmail()).get().getLastOnlineTime().getDayOfMonth());
     }
 
     @Test
@@ -406,8 +402,9 @@ public class ProfileControllerTest extends AbstractTest {
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.data.message").value("ok"));
-        Assertions.assertEquals(null, utilsService.getFriendshipStatus(verifyPerson.getId(), verifyPersonWithPost.getId()));
-        Assertions.assertEquals(null, utilsService.getFriendshipStatus(verifyPersonWithPost.getId(), verifyPerson.getId()));
+
+        Assertions.assertEquals(REQUEST, utilsService.getFriendshipStatus(verifyPerson.getId(), verifyPersonWithPost.getId()).getFriendshipStatusType());
+        Assertions.assertNull(utilsService.getFriendshipStatus(verifyPersonWithPost.getId(), verifyPerson.getId()));
     }
 
 //    @Test

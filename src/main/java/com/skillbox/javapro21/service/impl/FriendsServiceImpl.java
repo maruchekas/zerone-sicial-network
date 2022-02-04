@@ -9,6 +9,8 @@ import com.skillbox.javapro21.api.response.friends.StatusContent;
 import com.skillbox.javapro21.domain.FriendshipStatus;
 import com.skillbox.javapro21.domain.Person;
 import com.skillbox.javapro21.domain.enumeration.FriendshipStatusType;
+import com.skillbox.javapro21.exception.FriendshipNotFoundException;
+import com.skillbox.javapro21.repository.FriendshipStatusRepository;
 import com.skillbox.javapro21.repository.PersonRepository;
 import com.skillbox.javapro21.service.FriendsService;
 import lombok.RequiredArgsConstructor;
@@ -28,12 +30,45 @@ import static com.skillbox.javapro21.domain.enumeration.FriendshipStatusType.*;
 public class FriendsServiceImpl implements FriendsService {
     private final PersonRepository personRepository;
     private final UtilsService utilsService;
+    private final FriendshipStatusRepository friendshipStatusRepository;
 
     @Override
     public DataResponse<MessageOkContent> deleteFriend(Long id, Principal principal) {
         Person src = utilsService.findPersonByEmail(principal.getName());
         Person dst = personRepository.findPersonById(id).orElseThrow();
         utilsService.createFriendship(dst, src, FriendshipStatusType.DECLINED);
+        return utilsService.getMessageOkResponse();
+    }
+
+    @Override
+    public DataResponse<MessageOkContent> revokeRequest(Long id, Principal principal) {
+        Person srcPerson = utilsService.findPersonByEmail(principal.getName());
+        Person dstPerson = personRepository.findPersonById(id).orElseThrow();
+        FriendshipStatus outgoingFriendshipStatus = utilsService.getFriendshipStatus(dstPerson.getId(), srcPerson.getId());
+        FriendshipStatus incomingFriendshipStatus = utilsService.getFriendshipStatus(srcPerson.getId(), dstPerson.getId());
+
+        if (outgoingFriendshipStatus != null) {
+            friendshipStatusRepository.delete(outgoingFriendshipStatus);
+        } else if (incomingFriendshipStatus != null) {
+            utilsService.createFriendship(dstPerson, srcPerson, FriendshipStatusType.DECLINED);
+        }
+        return utilsService.getMessageOkResponse();
+    }
+
+    @Override
+    public DataResponse<MessageOkContent> deleteSubscription(Long id, Principal principal) throws FriendshipNotFoundException {
+        Person srcPerson = utilsService.findPersonByEmail(principal.getName());
+        Person dstPerson = personRepository.findPersonById(id).orElseThrow();
+
+        FriendshipStatus outgoingFriendshipStatus = utilsService.getFriendshipStatus(dstPerson.getId(), srcPerson.getId());
+        FriendshipStatus incomingFriendshipStatus = utilsService.getFriendshipStatus(srcPerson.getId(), dstPerson.getId());
+
+        if (outgoingFriendshipStatus != null && incomingFriendshipStatus != null) {
+            friendshipStatusRepository.delete(outgoingFriendshipStatus);
+            friendshipStatusRepository.delete(incomingFriendshipStatus);
+        } else {
+            throw new FriendshipNotFoundException("Не найдена связь между пользователями.");
+        }
         return utilsService.getMessageOkResponse();
     }
 

@@ -7,6 +7,7 @@ import com.skillbox.javapro21.api.response.ListDataResponse;
 import com.skillbox.javapro21.api.response.MessageOkContent;
 import com.skillbox.javapro21.api.response.account.AuthData;
 import com.skillbox.javapro21.api.response.friends.StatusContent;
+import com.skillbox.javapro21.exception.FriendshipNotFoundException;
 import com.skillbox.javapro21.service.FriendsService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -32,6 +33,22 @@ public class FriendsController {
     public ResponseEntity<DataResponse<MessageOkContent>> deleteFriend(@PathVariable Long id,
                                                                        Principal principal) {
         return new ResponseEntity<>(friendsService.deleteFriend(id, principal), HttpStatus.OK);
+    }
+
+    @Operation(summary = "Отозвать исходящий/отклонить входящий запрос в друзья")
+    @DeleteMapping("/friends/requests/{id}")
+    @LastActivity
+    public ResponseEntity<DataResponse<MessageOkContent>> revokeRequest(@PathVariable Long id,
+                                                                          Principal principal) {
+        return new ResponseEntity<>(friendsService.revokeRequest(id, principal), HttpStatus.OK);
+    }
+
+    @Operation(summary = "Удалить подписку на пользователя")
+    @DeleteMapping("/friends/subscriptions/{id}")
+    @LastActivity
+    public ResponseEntity<DataResponse<MessageOkContent>> deleteSubscription(@PathVariable Long id,
+                                                                        Principal principal) throws FriendshipNotFoundException {
+        return new ResponseEntity<>(friendsService.deleteSubscription(id, principal), HttpStatus.OK);
     }
 
     @Operation(summary = "Принять/Добавить пользователя в друзья")
