@@ -164,10 +164,19 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     @Override
-    public ListDataResponse<Content> searchByPerson(String firstName, String lastName, Integer ageFrom, Integer ageTo, String country, String city, Integer offset, Integer limit, Principal principal) {
+    public ListDataResponse<Content> searchByPerson(String firstName, String lastName, Integer ageFrom, Integer ageTo,
+                                                    String country, String city,
+                                                    Integer offset, Integer limit, Principal principal) {
         Person currentUser = utilsService.findPersonByEmail(principal.getName());
         Pageable nextPage = PageRequest.of(offset, limit);
-        Page<Person> personPage = personRepository.findAllByNameAndAgeAndLocation(currentUser.getId(), firstName, lastName, ageFrom, ageTo, country, city, nextPage);
+        Page<Person> personPage = personRepository.findAllByNameAndAgeAndLocation(currentUser.getId(), firstName,
+                lastName, ageFrom, ageTo, country, city, nextPage);
+        if(personPage.getTotalElements() == 0){
+            firstName = utilsService.convertKbLayer(firstName);
+            lastName = utilsService.convertKbLayer(lastName);
+            personPage = personRepository.findAllByNameAndAgeAndLocation(currentUser.getId(), firstName,
+                    lastName, ageFrom, ageTo, country, city, nextPage);
+        }
         List<Content> data = personPage.getContent().stream()
                 .map(p -> utilsService.getAuthData(p, null))
                 .collect(Collectors.toList());
