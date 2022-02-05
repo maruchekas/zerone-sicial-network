@@ -177,4 +177,12 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
     Page<Post> getEndlessFeedsForPerson(Long id, String text, Pageable pageable);
 
     Page<Post> findAllByIdIn(List<Long> ids, Pageable pageable);
+
+    @Query("select count(p) from Post p " +
+            "where p.isBlocked = 0")
+    Long findCountPosts();
+
+    @Query("select p from Post p " +
+            "where p.isBlocked = 0")
+    List<Post> allPosts();
 }
