@@ -43,7 +43,7 @@ public class AccountController {
     @Operation(summary = "Подтверждение регистрации")
     @GetMapping("/register/complete")
     public ModelAndView verifyRegistration(@RequestParam String email,
-                                          @RequestParam String code) throws TokenConfirmationException {
+                                           @RequestParam String code) throws TokenConfirmationException {
         return accountService.verifyRegistration(email, code);
     }
 

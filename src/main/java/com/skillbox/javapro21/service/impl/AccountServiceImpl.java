@@ -3,7 +3,6 @@ package com.skillbox.javapro21.service.impl;
 import com.mailjet.client.errors.MailjetException;
 import com.skillbox.javapro21.api.request.account.*;
 import com.skillbox.javapro21.api.response.DataResponse;
-import com.skillbox.javapro21.api.response.FailDataResponse;
 import com.skillbox.javapro21.api.response.ListDataResponse;
 import com.skillbox.javapro21.api.response.MessageOkContent;
 import com.skillbox.javapro21.api.response.account.NotificationSettingData;
@@ -33,7 +32,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.ModelAndView;
 
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.security.Principal;
 import java.time.LocalDateTime;
@@ -41,6 +39,8 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+
+import static com.skillbox.javapro21.config.Constants.*;
 
 @Slf4j
 @Component
@@ -64,10 +64,7 @@ public class AccountServiceImpl implements AccountService {
             throws UserExistException, MailjetException, IOException, CaptchaCodeException {
         String captcha = registerRequest.getCaptcha();
         if (!captcha.equals(captchaRepository.findBySecretCode(registerRequest.getCaptchaSecret()).getCode())) {
-            return ResponseEntity.badRequest()
-                    .header("error", "captcha")
-                    .header("error_description", "Неверный код с картинки")
-                    .build();
+            throw new CaptchaCodeException(CAPTCHA_CODE_ERR);
         }
         if (personRepository.findByEmail(registerRequest.getEmail().toLowerCase(Locale.ROOT)).isPresent()) {
             countRegisterPost = countRegisterPost + 1;
@@ -76,8 +73,7 @@ public class AccountServiceImpl implements AccountService {
                 updateNewPerson(personInBD, registerRequest);
                 mailMessageForRegistration(registerRequest);
             } else {
-                throw new UserExistException("Пользователь с данным email уже подтвержден " +
-                        "или слишком много попыток пройти регистрацию по одному email");
+                throw new UserExistException(USER_EXISTS_ERR);
             }
         } else {
             createNewPerson(registerRequest);
@@ -96,21 +92,21 @@ public class AccountServiceImpl implements AccountService {
                     .setMessagesPermission(MessagesPermission.ALL)
                     .setConfirmationCode("");
             personRepository.save(person);
-        } else throw new TokenConfirmationException("Не верный confirmation code");
+        } else throw new TokenConfirmationException(CONFIRMATION_CODE_ERR);
         return new ModelAndView("redirect:" + baseUrl);
     }
 
     @Override
     public String recoveryPasswordMessage(RecoveryRequest recoveryRequest) throws MailjetException, IOException {
         String token = utilsService.getToken();
-        String text = confirmationUrl.getBaseUrl() + "/api/v1/account/password/send_recovery_massage?email=" + recoveryRequest.getEmail() + "&code=" + token;
+        String text = confirmationUrl.getBaseUrl() + RECOVERY_PASSWORD_URL + recoveryRequest.getEmail() + "&code=" + token;
         confirmPersonAndSendEmail(recoveryRequest.getEmail(), text, token);
-        return "Ссылка отправлена на почту";
+        return MESSAGE_SENT_SUCCESS;
     }
 
     private void mailMessageForRegistration(RegisterRequest registerRequest) throws MailjetException, IOException {
         String token = registerRequest.getCaptchaSecret();
-        String text = confirmationUrl.getBaseUrl() + "/api/v1/account/register/complete?email=" + registerRequest.getEmail() + "&code=" + token;
+        String text = confirmationUrl.getBaseUrl() + COMPLETE_REGISTER_URL + registerRequest.getEmail() + "&code=" + token;
         confirmPersonAndSendEmail(registerRequest.getEmail(), text, token);
     }
 
@@ -118,8 +114,8 @@ public class AccountServiceImpl implements AccountService {
     public String verifyRecovery(String email, String code) throws TokenConfirmationException {
         Person person = utilsService.findPersonByEmail(email);
         if (person.getConfirmationCode().equals(code)) {
-            return "Пользователь может приступить к изменению пароля";
-        } else throw new TokenConfirmationException("Не верный confirmation code");
+            return PASSWORD_CHANGE_ALLOW;
+        } else throw new TokenConfirmationException(CONFIRMATION_CODE_ERR);
     }
 
     @Override
@@ -127,7 +123,7 @@ public class AccountServiceImpl implements AccountService {
         Person person = utilsService.findPersonByEmail(email);
         person.setPassword(password);
         personRepository.save(person);
-        return "Пароль успешно изменен";
+        return PASSWORD_CHANGE_SUCCESS;
     }
 
     @Override

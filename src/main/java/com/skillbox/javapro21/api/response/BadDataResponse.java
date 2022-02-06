@@ -6,7 +6,7 @@ import lombok.experimental.Accessors;
 
 @Data
 @Accessors(chain = true)
-public class FailDataResponse implements Content{
+public class BadDataResponse implements Content{
 
     private String error;
     @JsonProperty("error_description")

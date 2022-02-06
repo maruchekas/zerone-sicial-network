@@ -25,7 +25,6 @@ import java.util.Locale;
 @RequiredArgsConstructor
 public class CaptchaServiceImpl implements CaptchaService {
     private final CaptchaRepository captchaRepository;
-    private final UtilsService utilsService;
 
     public CaptchaResponse getNewCaptcha() {
         Timestamp timeThreshold = Timestamp.valueOf(LocalDateTime.now()

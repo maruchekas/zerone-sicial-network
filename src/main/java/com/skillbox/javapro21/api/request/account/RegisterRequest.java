@@ -14,11 +14,3 @@ public class RegisterRequest {
     @JsonProperty("captcha_secret")
     private String captchaSecret;
 }
-
-//        captcha: "vujomiyod"
-//        captcha_secret: "QYYSrQFsqWAC"
-//        email: "captchatest@mail.net"
-//        firstName: "Ираклий"
-//        lastName: "Мясков"
-//        passwd1: "111111111"
-//        passwd2: "111111111"

@@ -12,8 +12,6 @@ import org.springframework.http.HttpStatus;
 public class DataResponse<T extends Content> {
     private String error;
     private Long timestamp;
-    @JsonProperty("error_description")
-    private String description;
     private HttpStatus httpStatus;
     private T data;
 }
