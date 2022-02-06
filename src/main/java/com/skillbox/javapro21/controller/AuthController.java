@@ -42,7 +42,6 @@ public class AuthController {
     @PostMapping("/logout")
     @LastActivity
     public ResponseEntity<DataResponse<MessageOkContent>> logOut(Principal principal) {
-
         String userEmail = principal != null ? principal.getName() : "";
         log.info("Пользователь {} вышел из приложения", userEmail);
         return new ResponseEntity<>(authService.logout(), HttpStatus.OK);

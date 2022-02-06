@@ -91,6 +91,14 @@ public class AccountServiceImpl implements AccountService {
                     .setUserType(UserType.USER)
                     .setMessagesPermission(MessagesPermission.ALL)
                     .setConfirmationCode("");
+
+            try {
+                person.setPhoto(resourceService.setDefaultAvatarToUser(email));
+            } catch (IOException e) {
+                person.setPhoto(null);
+                e.printStackTrace();
+            }
+
             personRepository.save(person);
         } else throw new TokenConfirmationException(CONFIRMATION_CODE_ERR);
         return new ModelAndView("redirect:" + baseUrl);
@@ -216,7 +224,7 @@ public class AccountServiceImpl implements AccountService {
     /**
      * Создание пользователя без верификации
      */
-    private void createNewPerson(RegisterRequest registerRequest) throws IOException {
+    private void createNewPerson(RegisterRequest registerRequest) {
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
 
         Person person = new Person()
@@ -230,13 +238,6 @@ public class AccountServiceImpl implements AccountService {
                 .setLastOnlineTime(LocalDateTime.now(ZoneOffset.UTC))
                 .setIsBlocked(0)
                 .setMessagesPermission(MessagesPermission.NOBODY);
-
-        try {
-            person.setPhoto(resourceService.setDefaultAvatarToUser(registerRequest.getEmail()));
-        } catch (IOException e) {
-            person.setPhoto(null);
-            e.printStackTrace();
-        }
 
         personRepository.save(person);
         globalNotificationsSettings(person);

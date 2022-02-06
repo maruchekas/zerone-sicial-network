@@ -1,6 +1,7 @@
 package com.skillbox.javapro21.controller;
 
 import com.skillbox.javapro21.AbstractTest;
+import com.skillbox.javapro21.api.request.dialogs.DialogRequestForCreate;
 import com.skillbox.javapro21.domain.FriendshipStatus;
 import com.skillbox.javapro21.domain.Person;
 import com.skillbox.javapro21.domain.enumeration.FriendshipStatusType;
@@ -25,6 +26,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -140,7 +142,6 @@ public class FriendsControllerTest extends AbstractTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.total").value(1)).andReturn();
     }
 
-
     @Test
     @WithMockUser(username = "test99@test.ru", authorities = "user:write")
     void deleteFriend() throws Exception {
@@ -155,7 +156,39 @@ public class FriendsControllerTest extends AbstractTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.data.message").value("ok")).andReturn();
 
         FriendshipStatus friendshipStatus = utilsService.getFriendshipStatus(verifyPersonDst.getId(), verifyPersonSrc.getId());
-        Assertions.assertEquals(FriendshipStatusType.SUBSCRIBED, friendshipStatus.getFriendshipStatusType());
+        Assertions.assertEquals(FriendshipStatusType.DECLINED, friendshipStatus.getFriendshipStatusType());
+    }
+
+    @Test
+    @WithMockUser(username = "test99@test.ru", authorities = "user:write")
+    void revokeRequest() throws Exception {
+        utilsService.createFriendship(verifyPersonDst, verifyPersonSrc, FriendshipStatusType.REQUEST);
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .delete("/api/v1/friends/requests/{id}", verifyPersonDst.getId())
+                .principal(() -> "test99@test.ru")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.message").value("ok")).andReturn();
+
+        Assertions.assertNull(utilsService.getFriendshipStatus(verifyPersonDst.getId(), verifyPersonSrc.getId()));
+    }
+
+    @Test
+    @WithMockUser(username = "test99@test.ru", authorities = "user:write")
+    void deleteSubscriptionTest() throws Exception {
+        utilsService.createFriendship(verifyPersonSrc, verifyPersonDst, FriendshipStatusType.DECLINED);
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .delete("/api/v1/friends/subscriptions/{id}", verifyPersonDst.getId())
+                        .principal(() -> "test99@test.ru")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.message").value("ok")).andReturn();
+
+        Assertions.assertNull(utilsService.getFriendshipStatus(verifyPersonDst.getId(), verifyPersonSrc.getId()));
     }
 
     @Test
@@ -172,7 +205,25 @@ public class FriendsControllerTest extends AbstractTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.data.message").value("ok")).andReturn();
 
         FriendshipStatus friendshipStatus = utilsService.getFriendshipStatus(verifyPersonDst.getId(), verifyPersonSrc.getId());
-        Assertions.assertEquals(FriendshipStatusType.FRIEND, friendshipStatus.getFriendshipStatusType());
+        Assertions.assertEquals(FriendshipStatusType.REQUEST, friendshipStatus.getFriendshipStatusType());
+    }
+
+    @Test
+    @WithMockUser(username = "test99@test.ru", authorities = "user:write")
+    void isFriendTest() throws Exception {
+        utilsService.createFriendship(verifyPersonSrc, verifyPersonDst, FriendshipStatusType.FRIEND);
+        DialogRequestForCreate dialogRequestForCreate = new DialogRequestForCreate();
+        dialogRequestForCreate.setUsersIds(new ArrayList<>() {{ add(verifyPersonDst.getId()); }});
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .post("/api/v1/is/friends")
+                        .principal(() -> "test99@test.ru")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(dialogRequestForCreate))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.status").value("FRIEND")).andReturn();
     }
 
     @Test
@@ -192,11 +243,11 @@ public class FriendsControllerTest extends AbstractTest {
 
     @Test
     @WithMockUser(username = "test99@test.ru", authorities = "user:write")
-    void requestFriends() throws Exception {
+    void incomingRequestsTest() throws Exception {
         utilsService.createFriendship(verifyPersonSrc, verifyPersonDst, FriendshipStatusType.DECLINED);
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .get("/api/v1/friends/request")
+                        .get("/api/v1/friends/requests/in")
                         .principal(() -> "test99@test.ru")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultHandlers.print())
@@ -209,7 +260,76 @@ public class FriendsControllerTest extends AbstractTest {
         utilsService.createFriendship(verifyPersonSrc, verifyPersonDst, FriendshipStatusType.REQUEST);
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .get("/api/v1/friends/request")
+                        .get("/api/v1/friends/requests/in")
+                        .principal(() -> "test99@test.ru")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.total").value(1)).andReturn();
+    }
+
+    @Test
+    @WithMockUser(username = "test99@test.rub", authorities = "user:write")
+    void outgoingRequestsTest() throws Exception {
+        utilsService.createFriendship(verifyPersonSrc, verifyPersonDst, FriendshipStatusType.DECLINED);
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/api/v1/friends/requests/out")
+                        .principal(() -> "test99@test.rub")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.total").value(0)).andReturn();
+
+        FriendshipStatus friendshipStatus = utilsService.getFriendshipStatus(verifyPersonSrc.getId(), verifyPersonDst.getId());
+        Assertions.assertEquals(FriendshipStatusType.DECLINED, friendshipStatus.getFriendshipStatusType());
+
+        utilsService.createFriendship(verifyPersonSrc, verifyPersonDst, FriendshipStatusType.REQUEST);
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/api/v1/friends/requests/out")
+                        .principal(() -> "test99@test.rub")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.total").value(1)).andReturn();
+    }
+
+    @Test
+    @WithMockUser(username = "test99@test.ru", authorities = "user:write")
+    void getBlockedUsersTest() throws Exception {
+        utilsService.createFriendship(verifyPersonSrc, verifyPersonDst, FriendshipStatusType.BLOCKED);
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/api/v1/friends/blocked")
+                        .principal(() -> "test99@test.ru")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.total").value(1)).andReturn();
+    }
+
+    @Test
+    @WithMockUser(username = "test99@test.ru", authorities = "user:write")
+    void getSubscribersTest() throws Exception {
+        utilsService.createFriendship(verifyPersonDst, verifyPersonSrc, FriendshipStatusType.DECLINED);
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/api/v1/friends/subscribers")
+                        .principal(() -> "test99@test.ru")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.total").value(1)).andReturn();
+    }
+
+    @Test
+    @WithMockUser(username = "test99@test.ru", authorities = "user:write")
+    void getSubscriptions() throws Exception {
+        utilsService.createFriendship(verifyPersonSrc, verifyPersonDst, FriendshipStatusType.DECLINED);
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/api/v1/friends/subscriptions")
                         .principal(() -> "test99@test.ru")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultHandlers.print())
@@ -236,7 +356,7 @@ public class FriendsControllerTest extends AbstractTest {
         utilsService.createFriendship(verifyPersonSrc, verifyPersonDst, FriendshipStatusType.DECLINED);
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .get("/api/v1/friends/request")
+                        .get("/api/v1/friends/requests/in")
                         .principal(() -> "test99@test.ru")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultHandlers.print())
