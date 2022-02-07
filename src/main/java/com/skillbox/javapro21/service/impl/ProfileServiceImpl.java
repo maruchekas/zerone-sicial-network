@@ -21,10 +21,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.security.Principal;
+import java.sql.ResultSet;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -44,6 +46,7 @@ public class ProfileServiceImpl implements ProfileService {
     private final PersonRepository personRepository;
     private final PostRepository postRepository;
     private final TagRepository tagRepository;
+    private final JdbcTemplate jdbcTemplate;
     private final FriendshipRepository friendshipRepository;
     private final FriendshipStatusRepository friendshipStatusRepository;
 
@@ -170,13 +173,58 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     @Override
-    public ListDataResponse<Content> searchByPerson(String firstName, String lastName, Integer ageFrom, Integer ageTo, String country, String city, Integer offset, Integer limit, Principal principal) {
+    public ListDataResponse<Content> searchByPerson(String firstName, String lastName, Integer ageFrom, Integer ageTo,
+                                                    String country, String city,
+                                                    Integer offset, Integer limit, Principal principal) {
         Person currentUser = utilsService.findPersonByEmail(principal.getName());
         Pageable nextPage = PageRequest.of(offset, limit);
-        Page<Person> personPage = personRepository.findAllByNameAndAgeAndLocation(currentUser.getId(), firstName, lastName, ageFrom, ageTo, country, city, nextPage);
+
+        String selectAge = (ageFrom == 0 || ageTo == 150)
+                ? "AND (DATE_PART('year', AGE(birth_date)) BETWEEN (?) AND (?) OR birth_date IS NULL) "
+                : "AND DATE_PART('year', AGE(birth_date)) BETWEEN (?) AND (?) ";
+
+        String selectCountry = country.isBlank()
+                ? "AND (country ILIKE CONCAT('%', (?), '%') OR country IS NULL) "
+                : "AND country ILIKE CONCAT('%', (?), '%') ";
+
+        String selectCity = city.isBlank()
+                ? "AND (town ILIKE CONCAT('%', (?), '%') OR town IS NULL) "
+                : "AND town ILIKE CONCAT('%', (?), '%') ";
+
+        String query = "(" +
+                "SELECT id FROM persons " +
+                "WHERE id != (?) " +
+                "AND id NOT IN (" +
+                "SELECT dst_person_id FROM friendship f " +
+                "JOIN friendship_statuses fs ON f.status_id = fs.id " +
+                "WHERE f.src_person_id = (?) " +
+                "AND fs.name IN ('BLOCKED', 'WASBLOCKED', 'INTERLOCKED')" +
+                ")" +
+                "AND first_name ILIKE CONCAT('%', (?), '%') " +
+                "AND last_name ILIKE CONCAT('%', (?), '%') " +
+                selectAge +
+                selectCountry +
+                selectCity +
+                "AND is_blocked = 0" +
+                ")";
+
+        List<Long> ids = jdbcTemplate.query(query,
+                (ResultSet rs, int rowNum) -> rs.getLong("id"),
+                currentUser.getId(), currentUser.getId(), firstName, lastName, ageFrom, ageTo, country, city);
+        if (ids.isEmpty()) {
+            firstName = utilsService.convertKbLayer(firstName);
+            lastName = utilsService.convertKbLayer(lastName);
+            ids = jdbcTemplate.query(query,
+                    (ResultSet rs, int rowNum) -> rs.getLong("id"),
+                    currentUser.getId(), currentUser.getId(), firstName, lastName, ageFrom, ageTo, country, city);
+        }
+
+        Page<Person> personPage = personRepository.findAllValidById(ids, nextPage);
+
         List<Content> data = personPage.getContent().stream()
                 .map(p -> utilsService.getAuthData(p, null))
                 .collect(Collectors.toList());
+
         return utilsService.getListDataResponse((int) personPage.getTotalElements(), offset, limit, data);
     }
 

@@ -32,7 +32,6 @@ public class PlatformController {
     private final LocationService locationService;
 
 
-    @PreAuthorize("hasAuthority('user:write')")
     @GetMapping("/languages")
     ResponseEntity<ListDataResponse<LanguageData>> getLanguage(
             @RequestParam(name = "language", defaultValue = "Русский") String language,

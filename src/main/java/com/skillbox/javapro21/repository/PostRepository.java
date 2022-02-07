@@ -123,7 +123,7 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
             "where p.author.id not in (:ids) " +
             "and p.isBlocked = 0 " +
             "and ps.isBlocked = 0 " +
-            "order by p.likes.size desc")
+            "order by size(p.likes) desc")
     Page<Post> findBestPostsByPerson(List<Long> ids, Pageable pageable);
 
     @Query(value =
