@@ -16,9 +16,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -45,25 +43,8 @@ public class StatisticsServiceImpl implements StatisticsService {
     public PostStatResponse getPostsStatistic() {
         Long countPosts = postRepository.findCountPosts();
         List<Post> postList = postRepository.allPosts();
-        Map<YearMonth, Long> posts = new TreeMap<>();
-        Map<Integer, Long> postsByHour = new TreeMap<>();
-        for (int i = 0; i < 13; i++) {
-            LocalDateTime localDateTime = LocalDateTime.now().minusMonths(12 - i);
-            YearMonth month = YearMonth.of(localDateTime.getYear(), localDateTime.getMonth());
-            long count = postList.stream()
-                    .filter(p -> p.getTime().getMonth().equals(localDateTime.getMonth()))
-                    .count();
-            posts.put(month, count);
-        }
-        for (int i = 0; i < 25; i++) {
-            LocalDateTime localDateTime = LocalDateTime.now().minusHours(24 - i);
-            Integer time = localDateTime.toLocalTime().getHour();
-            long count = postList.stream()
-                    .filter(p -> p.getTime().getDayOfMonth() == LocalDateTime.now().getDayOfMonth())
-                    .filter(p -> p.getTime().getHour() == (localDateTime.getHour()))
-                    .count();
-            postsByHour.put(time, count);
-        }
+        Map<YearMonth, Long> posts = getMapForAllStat(postList);
+        Map<Integer, Long> postsByHour = getMapForHourStat(postList);
         return new PostStatResponse()
                 .setCountPosts(countPosts)
                 .setPosts(posts)
@@ -151,6 +132,33 @@ public class StatisticsServiceImpl implements StatisticsService {
                 .setLikesCount(countLikes)
                 .setLikes(likes)
                 .setLikesByHour(likesByHour);
+    }
+
+    private Map<Integer, Long> getMapForHourStat(List<Post> list) {
+        Map<Integer, Long> allHourStat = new TreeMap<>();
+        for (int i = 0; i < 25; i++) {
+            LocalDateTime localDateTime = LocalDateTime.now().minusHours(24 - i);
+            Integer time = localDateTime.toLocalTime().getHour();
+            long count = list.stream()
+                    .filter(p -> p.getTime().getDayOfMonth() == LocalDateTime.now().getDayOfMonth())
+                    .filter(p -> p.getTime().getHour() == (localDateTime.getHour()))
+                    .count();
+            allHourStat.put(time, count);
+        }
+        return allHourStat;
+    }
+
+    private Map<YearMonth, Long> getMapForAllStat(List<Post> list) {
+        Map<YearMonth, Long> allStat = new TreeMap<>();
+        for (int i = 0; i < 13; i++) {
+            LocalDateTime localDateTime = LocalDateTime.now().minusMonths(12 - i);
+            YearMonth month = YearMonth.of(localDateTime.getYear(), localDateTime.getMonth());
+            long count = list.stream()
+                    .filter(a -> a.getTime().getMonth().equals(localDateTime.getMonth()))
+                    .count();
+            allStat.put(month, count);
+        }
+        return allStat;
     }
 
     private String getPercentPersonsByYearsOld(List<Person> personList, int from, int before) {
