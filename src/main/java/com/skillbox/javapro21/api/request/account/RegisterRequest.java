@@ -10,7 +10,6 @@ public class RegisterRequest {
     private String passwd2;
     private String firstName;
     private String lastName;
-    private String code;
     private String captcha;
     @JsonProperty("captcha_secret")
     private String captchaSecret;

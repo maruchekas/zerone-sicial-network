@@ -45,8 +45,7 @@ public interface PersonRepository extends JpaRepository<Person, Integer> {
             "group by p.id ")
     List<Person> findAllByDialogId(int id);
 
-    @Query(value =
-            "SELECT * FROM persons " +
+    @Query(value = "SELECT * FROM persons " +
                     "WHERE id != :currUserId " +
                     "AND id NOT IN (" +
                     "SELECT dst_person_id FROM friendship f " +
@@ -59,8 +58,7 @@ public interface PersonRepository extends JpaRepository<Person, Integer> {
                     "AND DATE_PART('year', AGE(birth_date)) BETWEEN :ageFrom AND :ageTo " +
                     "AND country ILIKE CONCAT('%', :country, '%') " +
                     "AND town ILIKE CONCAT('%', :city, '%')" +
-                    "AND is_blocked = 0",
-            nativeQuery = true)
+                    "AND is_blocked = 0", nativeQuery = true)
     Page<Person> findAllByNameAndAgeAndLocation(Long currUserId, String firstName, String lastName, Integer ageFrom, Integer ageTo, String country, String city, Pageable page);
 
 
