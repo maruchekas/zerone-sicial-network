@@ -11,7 +11,7 @@ import com.skillbox.javapro21.repository.PostLikeRepository;
 import com.skillbox.javapro21.repository.PostRepository;
 import com.skillbox.javapro21.service.StatisticsService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-@Component
+@Service
 @RequiredArgsConstructor
 public class StatisticsServiceImpl implements StatisticsService {
     private final PersonRepository personRepository;

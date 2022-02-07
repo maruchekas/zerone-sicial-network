@@ -15,14 +15,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @Tag(name = "Контроллер для работы со статистикой")
-@RequestMapping("/api/v1/statistics")
+@RequestMapping("/api/v1/stat")
 @RequiredArgsConstructor
 public class StatisticsController {
     private final StatisticsService statisticsService;
 
     @Operation(summary = "Общая статистика", security = @SecurityRequirement(name = "jwt"))
     @GetMapping("/all")
-//    @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
     public ResponseEntity<StatisticsResponse> getAllStatistic() {
         return new ResponseEntity<>(statisticsService.getAllStatistic(), HttpStatus.OK);
@@ -30,7 +29,6 @@ public class StatisticsController {
 
     @Operation(summary = "Статистика по постам", security = @SecurityRequirement(name = "jwt"))
     @GetMapping("/posts")
-//    @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
     public ResponseEntity<PostStatResponse> getPostsStatistic() {
         return new ResponseEntity<>(statisticsService.getPostsStatistic(), HttpStatus.OK);
@@ -38,7 +36,6 @@ public class StatisticsController {
 
     @Operation(summary = "Статистика по пользователям", security = @SecurityRequirement(name = "jwt"))
     @GetMapping("/users")
-//    @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
     public ResponseEntity<UsersStatResponse> getUsersStatistic() {
         return new ResponseEntity<>(statisticsService.getUsersStatistic(), HttpStatus.OK);
@@ -46,7 +43,6 @@ public class StatisticsController {
 
     @Operation(summary = "Статистика по комментариям", security = @SecurityRequirement(name = "jwt"))
     @GetMapping("/comments")
-//    @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
     public ResponseEntity<CommentsStatResponse> getCommentsStatistic() {
         return new ResponseEntity<>(statisticsService.getCommentsStatistic(), HttpStatus.OK);
@@ -54,7 +50,6 @@ public class StatisticsController {
 
     @Operation(summary = "Статистика по лайкам", security = @SecurityRequirement(name = "jwt"))
     @GetMapping("/likes")
-//    @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
     public ResponseEntity<LikesStatResponse> getLikesStatistic() {
         return new ResponseEntity<>(statisticsService.getLikesStatistic(), HttpStatus.OK);
