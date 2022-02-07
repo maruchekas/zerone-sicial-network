@@ -211,7 +211,6 @@ public class ProfileServiceImpl implements ProfileService {
         List<Long> ids = jdbcTemplate.query(query,
                 (ResultSet rs, int rowNum) -> rs.getLong("id"),
                 currentUser.getId(), currentUser.getId(), firstName, lastName, ageFrom, ageTo, country, city);
-        ids.forEach(System.out::println);
         if (ids.isEmpty()) {
             firstName = utilsService.convertKbLayer(firstName);
             lastName = utilsService.convertKbLayer(lastName);
@@ -219,7 +218,6 @@ public class ProfileServiceImpl implements ProfileService {
                     (ResultSet rs, int rowNum) -> rs.getLong("id"),
                     currentUser.getId(), currentUser.getId(), firstName, lastName, ageFrom, ageTo, country, city);
         }
-        ids.forEach(System.out::println);
 
         Page<Person> personPage = personRepository.findAllValidById(ids, nextPage);
 
