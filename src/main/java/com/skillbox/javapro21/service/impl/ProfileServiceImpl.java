@@ -28,7 +28,9 @@ import java.security.Principal;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.skillbox.javapro21.domain.enumeration.FriendshipStatusType.*;
@@ -123,23 +125,26 @@ public class ProfileServiceImpl implements ProfileService {
         }
         postRepository.save(post);
         return postService.getDataResponse(postService.getPostData(post, src));
-
     }
 
     @Override
     public DataResponse<MessageOkContent> blockPersonById(Long id, Principal principal) throws BlockPersonHimselfException, InterlockedFriendshipStatusException, PersonNotFoundException, FriendshipNotFoundException {
         Person src = utilsService.findPersonByEmail(principal.getName());
         Person dst = personRepository.findPersonById(id).orElseThrow(() -> new PersonNotFoundException("Пользователя с данным id не существует"));
-        if (src.getId().equals(dst.getId()))
-            throw new BlockPersonHimselfException("Пользователь пытается заблокировать сам себя");
+        if (src.getId().equals(dst.getId())) throw new BlockPersonHimselfException("Пользователь пытается заблокировать сам себя");
+
         Optional<Friendship> optionalFriendship = friendshipRepository.findFriendshipBySrcPersonAndDstPerson(src.getId(), id);
-        Friendship friendship = optionalFriendship.orElseThrow(() -> new FriendshipNotFoundException("Дружбы с данным id не существует"));
-        if (utilsService.isBlockedBy(src.getId(), dst.getId(), optionalFriendship)) {
-            if (!friendship.getFriendshipStatus().getFriendshipStatusType().equals(BLOCKED)) {
-                utilsService.createFriendship(src, dst, BLOCKED);
-            } else if (friendship.getFriendshipStatus().getFriendshipStatusType().equals(WASBLOCKED)) {
-                utilsService.createFriendship(src, dst, FriendshipStatusType.WASBLOCKED);
-            } else throw new InterlockedFriendshipStatusException("Уже взаимно заблокированы");
+        if (optionalFriendship.isEmpty()) {
+            utilsService.createFriendship(src, dst, BLOCKED);
+        } else {
+            Friendship friendship = optionalFriendship.get();
+            if (utilsService.isBlockedBy(src.getId(), dst.getId(), optionalFriendship)) {
+                if (!friendship.getFriendshipStatus().getFriendshipStatusType().equals(BLOCKED)) {
+                    utilsService.createFriendship(src, dst, BLOCKED);
+                } else if (friendship.getFriendshipStatus().getFriendshipStatusType().equals(WASBLOCKED)) {
+                    utilsService.createFriendship(src, dst, FriendshipStatusType.WASBLOCKED);
+                } else throw new InterlockedFriendshipStatusException("Уже взаимно заблокированы");
+            }
         }
         return utilsService.getMessageOkResponse();
     }
@@ -155,10 +160,11 @@ public class ProfileServiceImpl implements ProfileService {
             throw new NonBlockedFriendshipException("Пользователь не может разблокировать не заблокированного пользователя");
         Friendship friendship = optionalFriendship.orElseThrow(() -> new FriendshipNotFoundException("Дружбы с данным id не существует"));
         if (friendship.getFriendshipStatus().getFriendshipStatusType().equals(BLOCKED)) {
-            friendshipStatusRepository.delete(utilsService.getFriendshipStatus(src.getId(), dst.getId()));
+            utilsService.createFriendship(src, dst, REQUEST);
             friendshipStatusRepository.delete(utilsService.getFriendshipStatus(dst.getId(), src.getId()));
         } else if (friendship.getFriendshipStatus().getFriendshipStatusType().equals(INTERLOCKED)) {
-            utilsService.createFriendship(src, dst, INTERLOCKED);
+            utilsService.createFriendship(src, dst, BLOCKED);
+            utilsService.createFriendship(dst, src, WASBLOCKED);
         }
         return utilsService.getMessageOkResponse();
     }

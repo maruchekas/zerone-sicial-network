@@ -6,6 +6,7 @@ import com.skillbox.javapro21.api.response.ListDataResponse;
 import com.skillbox.javapro21.api.response.MessageOkContent;
 import com.skillbox.javapro21.api.response.account.AuthData;
 import com.skillbox.javapro21.api.response.friends.StatusContent;
+import com.skillbox.javapro21.exception.FriendshipNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
@@ -15,6 +16,10 @@ public interface FriendsService {
     ListDataResponse<AuthData> getFriends(String name, int offset, int itemPerPage, Principal principal);
 
     DataResponse<MessageOkContent> deleteFriend(Long id, Principal principal);
+
+    DataResponse<MessageOkContent> revokeRequest(Long id, Principal principal);
+
+    DataResponse<MessageOkContent> deleteSubscription(Long id, Principal principal) throws FriendshipNotFoundException;
 
     DataResponse<MessageOkContent> editFriend(Long id, Principal principal);
 
