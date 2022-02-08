@@ -30,7 +30,7 @@ public interface AccountService {
 
     DataResponse<MessageOkContent> changePassword(ChangePasswordRequest changePasswordRequest);
 
-    DataResponse<MessageOkContent> changeEmail(ChangeEmailRequest changeEmailRequest, Principal principal);
+    DataResponse<MessageOkContent> changeEmail(ChangeEmailRequest changeEmailRequest, Principal principal) throws UserExistException;
 
     DataResponse<MessageOkContent> changeNotifications(ChangeNotificationsRequest changeNotificationsRequest, Principal principal);
 

@@ -142,7 +142,6 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    //:TODO добавить имя и фамилию в ответ на комментарий (parent_id)
     public DataResponse<CommentsData> postComments(Long id, CommentRequest commentRequest, Principal principal) throws PostNotFoundException, CommentNotFoundException {
         Person person = utilsService.findPersonByEmail(principal.getName());
         Post post = postRepository.findPostById(id).orElseThrow(() -> new PostNotFoundException("Поста с id " + id + "не существует"));

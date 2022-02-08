@@ -80,7 +80,7 @@ public class AccountController {
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
     public ResponseEntity<DataResponse<MessageOkContent>> changeEmail(@RequestBody ChangeEmailRequest changeEmailRequest,
-                                                                      Principal principal) {
+                                                                      Principal principal) throws UserExistException {
         return new ResponseEntity<>(accountService.changeEmail(changeEmailRequest, principal), HttpStatus.OK);
     }
 
