@@ -7,6 +7,7 @@ import com.skillbox.javapro21.api.response.ListDataResponse;
 import com.skillbox.javapro21.api.response.MessageOkContent;
 import com.skillbox.javapro21.api.response.account.NotificationSettingData;
 import com.skillbox.javapro21.exception.CaptchaCodeException;
+import com.skillbox.javapro21.exception.NotFoundException;
 import com.skillbox.javapro21.exception.TokenConfirmationException;
 import com.skillbox.javapro21.exception.UserExistException;
 import org.springframework.http.ResponseEntity;
@@ -32,7 +33,7 @@ public interface AccountService {
 
     DataResponse<MessageOkContent> changeEmail(ChangeEmailRequest changeEmailRequest, Principal principal) throws UserExistException;
 
-    DataResponse<MessageOkContent> changeNotifications(ChangeNotificationsRequest changeNotificationsRequest, Principal principal);
+    DataResponse<MessageOkContent> changeNotifications(ChangeNotificationsRequest changeNotificationsRequest, Principal principal) throws NotFoundException;
 
     ListDataResponse<NotificationSettingData> getNotifications(Principal principal);
 }

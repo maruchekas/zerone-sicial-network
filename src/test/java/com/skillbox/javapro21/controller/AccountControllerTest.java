@@ -6,7 +6,6 @@ import com.skillbox.javapro21.config.security.JwtGenerator;
 import com.skillbox.javapro21.domain.CaptchaCode;
 import com.skillbox.javapro21.domain.Person;
 import com.skillbox.javapro21.domain.enumeration.MessagesPermission;
-import com.skillbox.javapro21.domain.enumeration.NotificationTypeStatus;
 import com.skillbox.javapro21.repository.CaptchaRepository;
 import com.skillbox.javapro21.repository.PersonRepository;
 import org.junit.jupiter.api.AfterEach;
@@ -27,6 +26,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+
+import static com.skillbox.javapro21.domain.enumeration.NotificationTypeStatus.MESSAGE;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -208,14 +209,14 @@ public class AccountControllerTest extends AbstractTest {
                         .content(mapper.writeValueAsString(changeEmailRequest))
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.status().isOk());
+                .andExpect(MockMvcResultMatchers.status().is4xxClientError());
     }
 
     @Test
     @WithMockUser(username = "test1@test.ru", authorities = "user:write")
     void changeNotifications() throws Exception {
         ChangeNotificationsRequest changeNotificationsRequest = new ChangeNotificationsRequest();
-        changeNotificationsRequest.setNotificationTypeStatus(NotificationTypeStatus.MESSAGE);
+        changeNotificationsRequest.setNotificationTypeStatus(MESSAGE);
         changeNotificationsRequest.setEnable(true);
 
         mockMvc.perform(MockMvcRequestBuilders
@@ -225,7 +226,7 @@ public class AccountControllerTest extends AbstractTest {
                         .content(mapper.writeValueAsString(changeNotificationsRequest))
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.status().isOk());
+                .andExpect(MockMvcResultMatchers.status().isNotFound());
     }
 
     @Test
