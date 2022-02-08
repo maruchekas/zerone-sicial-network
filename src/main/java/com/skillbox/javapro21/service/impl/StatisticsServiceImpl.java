@@ -5,6 +5,7 @@ import com.skillbox.javapro21.domain.Person;
 import com.skillbox.javapro21.domain.Post;
 import com.skillbox.javapro21.domain.PostComment;
 import com.skillbox.javapro21.domain.PostLike;
+import com.skillbox.javapro21.domain.marker.ForStream;
 import com.skillbox.javapro21.repository.PersonRepository;
 import com.skillbox.javapro21.repository.PostCommentRepository;
 import com.skillbox.javapro21.repository.PostLikeRepository;
@@ -25,6 +26,9 @@ public class StatisticsServiceImpl implements StatisticsService {
     private final PostLikeRepository postLikeRepository;
     private final PostRepository postRepository;
     private final PostCommentRepository postCommentRepository;
+
+    private final static int MONTH = 12;
+    private final static int HOURS = 12;
 
     @Override
     public StatisticsResponse getAllStatistic() {
@@ -80,25 +84,8 @@ public class StatisticsServiceImpl implements StatisticsService {
     public CommentsStatResponse getCommentsStatistic() {
         Long countComments = postCommentRepository.findCountComments();
         List<PostComment> commentsList = postCommentRepository.allComments();
-        Map<YearMonth, Long> comments = new TreeMap<>();
-        Map<Integer, Long> commentsByHour = new TreeMap<>();
-        for (int i = 0; i < 13; i++) {
-            LocalDateTime localDateTime = LocalDateTime.now().minusMonths(12 - i);
-            YearMonth month = YearMonth.of(localDateTime.getYear(), localDateTime.getMonth());
-            long count = commentsList.stream()
-                    .filter(c -> c.getTime().getMonth().equals(localDateTime.getMonth()))
-                    .count();
-            comments.put(month, count);
-        }
-        for (int i = 0; i < 25; i++) {
-            LocalDateTime localDateTime = LocalDateTime.now().minusHours(24 - i);
-            Integer time = localDateTime.toLocalTime().getHour();
-            long count = commentsList.stream()
-                    .filter(c -> c.getTime().getDayOfMonth() == LocalDateTime.now().getDayOfMonth())
-                    .filter(c -> c.getTime().getHour() == (localDateTime.getHour()))
-                    .count();
-            commentsByHour.put(time, count);
-        }
+        Map<YearMonth, Long> comments = getMapForAllStat(commentsList);
+        Map<Integer, Long> commentsByHour = getMapForHourStat(commentsList);
         return new CommentsStatResponse()
                 .setCommentsCount(countComments)
                 .setComments(comments)
@@ -109,35 +96,31 @@ public class StatisticsServiceImpl implements StatisticsService {
     public LikesStatResponse getLikesStatistic() {
         Long countLikes = postLikeRepository.findCountLikes();
         List<PostLike> likesList = postLikeRepository.findAll();
-        Map<YearMonth, Long> likes = new TreeMap<>();
-        Map<Integer, Long> likesByHour = new TreeMap<>();
-        for (int i = 0; i < 13; i++) {
-            LocalDateTime localDateTime = LocalDateTime.now().minusMonths(12 - i);
-            YearMonth month = YearMonth.of(localDateTime.getYear(), localDateTime.getMonth());
-            long count = likesList.stream()
-                    .filter(c -> c.getTime().getMonth().equals(localDateTime.getMonth()))
-                    .count();
-            likes.put(month, count);
-        }
-        for (int i = 0; i < 25; i++) {
-            LocalDateTime localDateTime = LocalDateTime.now().minusHours(24 - i);
-            Integer time = localDateTime.toLocalTime().getHour();
-            long count = likesList.stream()
-                    .filter(c -> c.getTime().getDayOfMonth() == LocalDateTime.now().getDayOfMonth())
-                    .filter(c -> c.getTime().getHour() == (localDateTime.getHour()))
-                    .count();
-            likesByHour.put(time, count);
-        }
+        Map<YearMonth, Long> likes = getMapForAllStat(likesList);
+        Map<Integer, Long> likesByHour = getMapForHourStat(likesList);
         return new LikesStatResponse()
                 .setLikesCount(countLikes)
                 .setLikes(likes)
                 .setLikesByHour(likesByHour);
     }
 
-    private Map<Integer, Long> getMapForHourStat(List<Post> list) {
+    private Map<YearMonth, Long> getMapForAllStat(List<? extends ForStream> list) {
+        Map<YearMonth, Long> allStat = new TreeMap<>();
+        for (int i = 0; i <= MONTH; i++) {
+            LocalDateTime localDateTime = LocalDateTime.now().minusMonths(MONTH - i);
+            YearMonth month = YearMonth.of(localDateTime.getYear(), localDateTime.getMonth());
+            long count = list.stream()
+                    .filter(a -> a.getTime().getMonth().equals(localDateTime.getMonth()))
+                    .count();
+            allStat.put(month, count);
+        }
+        return allStat;
+    }
+
+    private Map<Integer, Long> getMapForHourStat(List<? extends ForStream> list) {
         Map<Integer, Long> allHourStat = new TreeMap<>();
-        for (int i = 0; i < 25; i++) {
-            LocalDateTime localDateTime = LocalDateTime.now().minusHours(24 - i);
+        for (int i = 0; i <= HOURS; i++) {
+            LocalDateTime localDateTime = LocalDateTime.now().minusHours(HOURS - i);
             Integer time = localDateTime.toLocalTime().getHour();
             long count = list.stream()
                     .filter(p -> p.getTime().getDayOfMonth() == LocalDateTime.now().getDayOfMonth())
@@ -146,19 +129,6 @@ public class StatisticsServiceImpl implements StatisticsService {
             allHourStat.put(time, count);
         }
         return allHourStat;
-    }
-
-    private Map<YearMonth, Long> getMapForAllStat(List<Post> list) {
-        Map<YearMonth, Long> allStat = new TreeMap<>();
-        for (int i = 0; i < 13; i++) {
-            LocalDateTime localDateTime = LocalDateTime.now().minusMonths(12 - i);
-            YearMonth month = YearMonth.of(localDateTime.getYear(), localDateTime.getMonth());
-            long count = list.stream()
-                    .filter(a -> a.getTime().getMonth().equals(localDateTime.getMonth()))
-                    .count();
-            allStat.put(month, count);
-        }
-        return allStat;
     }
 
     private String getPercentPersonsByYearsOld(List<Person> personList, int from, int before) {
