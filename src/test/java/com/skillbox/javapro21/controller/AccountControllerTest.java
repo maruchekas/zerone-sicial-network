@@ -6,7 +6,7 @@ import com.skillbox.javapro21.config.security.JwtGenerator;
 import com.skillbox.javapro21.domain.CaptchaCode;
 import com.skillbox.javapro21.domain.Person;
 import com.skillbox.javapro21.domain.enumeration.MessagesPermission;
-import com.skillbox.javapro21.domain.enumeration.NotificationTypeStatus;
+import com.skillbox.javapro21.domain.enumeration.NotificationType;
 import com.skillbox.javapro21.repository.CaptchaRepository;
 import com.skillbox.javapro21.repository.PersonRepository;
 import org.junit.jupiter.api.AfterEach;
@@ -215,7 +215,7 @@ public class AccountControllerTest extends AbstractTest {
     @WithMockUser(username = "test1@test.ru", authorities = "user:write")
     void changeNotifications() throws Exception {
         ChangeNotificationsRequest changeNotificationsRequest = new ChangeNotificationsRequest();
-        changeNotificationsRequest.setNotificationTypeStatus(NotificationTypeStatus.MESSAGE);
+        changeNotificationsRequest.setNotificationType(NotificationType.MESSAGE);
         changeNotificationsRequest.setEnable(true);
 
         mockMvc.perform(MockMvcRequestBuilders

@@ -136,10 +136,10 @@ public class Person implements UserDetails {
 //    @ToString.Exclude
 //    private Set<PostComment> comments = new HashSet<>();
 //
-//    @OneToMany(mappedBy = "person")
-//    @JsonIgnoreProperties(value = {"type", "person"}, allowSetters = true)
-//    @ToString.Exclude
-//    private Set<Notification> notifications = new HashSet<>();
+    @OneToMany(mappedBy = "person")
+    @JsonIgnoreProperties(value = {"type", "person"}, allowSetters = true)
+    @ToString.Exclude
+    private Set<Notification> notifications = new HashSet<>();
 
     @Override
     public boolean equals(Object o) {

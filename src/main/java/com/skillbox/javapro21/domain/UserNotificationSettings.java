@@ -10,9 +10,9 @@ import javax.persistence.*;
 @Setter
 @Getter
 @Entity
-@Table(name = "notification_type")
+@Table(name = "user_notification_settings")
 @Accessors(chain = true)
-public class NotificationType implements HavePerson {
+public class UserNotificationSettings implements HavePerson {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
