@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -176,4 +177,22 @@ public interface PersonRepository extends JpaRepository<Person, Integer> {
             "and p.isBlocked = 0 " +
             "order by p.firstName asc")
     Page<Person> findRecommendedFriendsByPerson(Long id, List<Long> idsFriends, Pageable pageable);
+
+    @Query("select count(p) from Person p " +
+            "where p.isBlocked = 0")
+    Long findCountPerson();
+
+    @Query("select p from Person p " +
+            "where p.isBlocked = 0")
+    List<Person> findAllPersons();
+
+    @Query("select p from Person p " +
+            "where p.birthDate between :from and :before " +
+            "and p.isBlocked = 0")
+    List<Person> findAllPersonsByYearsOld(LocalDateTime from, LocalDateTime before);
+
+    @Query("select p from Person p " +
+            "where p.isBlocked = 0 " +
+            "and p.birthDate is not null")
+    List<Person> findAllPersonsWithBirthday();
 }

@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -29,6 +30,7 @@ public class FriendsController {
 
     @Operation(summary = "Удаление пользователя из друзей")
     @DeleteMapping("/friends/{id}")
+    @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
     public ResponseEntity<DataResponse<MessageOkContent>> deleteFriend(@PathVariable Long id,
                                                                        Principal principal) {
@@ -53,6 +55,7 @@ public class FriendsController {
 
     @Operation(summary = "Принять/Добавить пользователя в друзья")
     @PostMapping("/friends/{id}")
+    @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
     public ResponseEntity<DataResponse<MessageOkContent>> editFriend(@PathVariable Long id,
                                                                      Principal principal) {
@@ -61,6 +64,7 @@ public class FriendsController {
 
     @Operation(summary = "Получить информацию является ли пользователь другом указанных пользователей")
     @PostMapping("/is/friends")
+    @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
     public ResponseEntity<DataResponse<StatusContent>> isFriend(@RequestBody DialogRequestForCreate users,
                                                                 Principal principal) {
@@ -69,6 +73,7 @@ public class FriendsController {
 
     @Operation(summary = "Получить список друзей")
     @GetMapping("/friends")
+    @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
     public ResponseEntity<ListDataResponse<AuthData>> getFriends(@RequestParam(name = "name", defaultValue = "") String name,
                                                                  @RequestParam(name = "offset", defaultValue = "0") int offset,
@@ -79,6 +84,7 @@ public class FriendsController {
 
     @Operation(summary = "Получить список входящик заявок на добавление в друзья")
     @GetMapping("/friends/requests/in")
+    @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
     public ResponseEntity<ListDataResponse<AuthData>> getIncomingRequests(@RequestParam(name = "name", defaultValue = "") String name,
                                                                           @RequestParam(name = "offset", defaultValue = "0") int offset,
@@ -89,6 +95,7 @@ public class FriendsController {
 
     @Operation(summary = "Получить список исходящих заявок на добавление в друзья")
     @GetMapping("/friends/requests/out")
+    @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
     public ResponseEntity<ListDataResponse<AuthData>> getOutgoingRequests(@RequestParam(name = "name", defaultValue = "") String name,
                                                                           @RequestParam(name = "offset", defaultValue = "0") int offset,
@@ -99,6 +106,7 @@ public class FriendsController {
 
     @Operation(summary = "Получить список заблокированных пользователей")
     @GetMapping("/friends/blocked")
+    @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
     public ResponseEntity<ListDataResponse<AuthData>> getBlockedPersons(@RequestParam(name = "name", defaultValue = "") String name,
                                                                         @RequestParam(name = "offset", defaultValue = "0") int offset,
@@ -109,6 +117,7 @@ public class FriendsController {
 
     @Operation(summary = "Получить список подписчиков")
     @GetMapping("/friends/subscribers")
+    @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
     public ResponseEntity<ListDataResponse<AuthData>> getSubscribers(@RequestParam(name = "name", defaultValue = "") String name,
                                                                         @RequestParam(name = "offset", defaultValue = "0") int offset,
@@ -119,6 +128,7 @@ public class FriendsController {
 
     @Operation(summary = "Получить список подписок")
     @GetMapping("/friends/subscriptions")
+    @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
     public ResponseEntity<ListDataResponse<AuthData>> getSubscriptions(@RequestParam(name = "name", defaultValue = "") String name,
                                                                      @RequestParam(name = "offset", defaultValue = "0") int offset,
@@ -129,6 +139,7 @@ public class FriendsController {
 
     @Operation(summary = "Получить список рекомендаций")
     @GetMapping("/friends/recommendations")
+    @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
     public ResponseEntity<ListDataResponse<AuthData>> recommendationsFriends(@RequestParam(name = "offset", defaultValue = "0") int offset,
                                                                              @RequestParam(name = "item_per_page", defaultValue = "20") int itemPerPage,

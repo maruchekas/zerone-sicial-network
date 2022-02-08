@@ -47,4 +47,12 @@ public interface PostCommentRepository extends JpaRepository<PostComment, Intege
             "group by pc.id " +
             "order by pc.time asc")
     List<PostComment> findPostCommentsByParentId(Long id);
+
+    @Query("select count(c) from PostComment c " +
+            "where c.isBlocked = 0")
+    Long findCountComments();
+
+    @Query("select pc from PostComment pc " +
+            "where pc.isBlocked = 0")
+    List<PostComment> allComments();
 }

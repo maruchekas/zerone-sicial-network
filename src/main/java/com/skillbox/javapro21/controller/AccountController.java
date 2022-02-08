@@ -8,6 +8,7 @@ import com.skillbox.javapro21.api.response.ListDataResponse;
 import com.skillbox.javapro21.api.response.MessageOkContent;
 import com.skillbox.javapro21.api.response.account.NotificationSettingData;
 import com.skillbox.javapro21.exception.CaptchaCodeException;
+import com.skillbox.javapro21.exception.NotFoundException;
 import com.skillbox.javapro21.exception.TokenConfirmationException;
 import com.skillbox.javapro21.exception.UserExistException;
 import com.skillbox.javapro21.service.AccountService;
@@ -80,7 +81,7 @@ public class AccountController {
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
     public ResponseEntity<DataResponse<MessageOkContent>> changeEmail(@RequestBody ChangeEmailRequest changeEmailRequest,
-                                                                      Principal principal) {
+                                                                      Principal principal) throws UserExistException {
         return new ResponseEntity<>(accountService.changeEmail(changeEmailRequest, principal), HttpStatus.OK);
     }
 
@@ -89,7 +90,7 @@ public class AccountController {
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
     public ResponseEntity<DataResponse<MessageOkContent>> changeNotifications(@RequestBody ChangeNotificationsRequest changeNotificationsRequest,
-                                                                              Principal principal) {
+                                                                              Principal principal) throws NotFoundException {
         return new ResponseEntity<>(accountService.changeNotifications(changeNotificationsRequest, principal), HttpStatus.OK);
     }
 

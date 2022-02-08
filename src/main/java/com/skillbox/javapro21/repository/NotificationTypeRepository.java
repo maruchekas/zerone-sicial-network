@@ -8,5 +8,5 @@ import java.util.Optional;
 
 @Repository
 public interface NotificationTypeRepository extends JpaRepository<NotificationType, Integer> {
-    Optional<NotificationType> findNotificationTypeByPersonId(Long person_id);
+    Optional<NotificationType> findNotificationTypeByPersonId(Long id);
 }

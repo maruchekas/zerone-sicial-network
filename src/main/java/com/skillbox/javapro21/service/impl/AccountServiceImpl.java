@@ -15,6 +15,7 @@ import com.skillbox.javapro21.domain.enumeration.MessagesPermission;
 import com.skillbox.javapro21.domain.enumeration.NotificationTypeStatus;
 import com.skillbox.javapro21.domain.enumeration.UserType;
 import com.skillbox.javapro21.exception.CaptchaCodeException;
+import com.skillbox.javapro21.exception.NotFoundException;
 import com.skillbox.javapro21.exception.TokenConfirmationException;
 import com.skillbox.javapro21.exception.UserExistException;
 import com.skillbox.javapro21.repository.CaptchaRepository;
@@ -39,6 +40,7 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 
 import static com.skillbox.javapro21.config.Constants.*;
 
@@ -112,12 +114,6 @@ public class AccountServiceImpl implements AccountService {
         return MESSAGE_SENT_SUCCESS;
     }
 
-    private void mailMessageForRegistration(RegisterRequest registerRequest) throws MailjetException, IOException {
-        String token = registerRequest.getCaptchaSecret();
-        String text = confirmationUrl.getBaseUrl() + COMPLETE_REGISTER_URL + registerRequest.getEmail() + "&code=" + token;
-        confirmPersonAndSendEmail(registerRequest.getEmail(), text, token);
-    }
-
     @Override
     public String verifyRecovery(String email, String code) throws TokenConfirmationException {
         Person person = utilsService.findPersonByEmail(email);
@@ -144,23 +140,23 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public DataResponse<MessageOkContent> changeEmail(ChangeEmailRequest changeEmailRequest, Principal principal) {
-        Person person = utilsService.findPersonByEmail(principal.getName());
-        person.setEmail(changeEmailRequest.getEmail().toLowerCase(Locale.ROOT));
-        return utilsService.getMessageOkResponse();
+    public DataResponse<MessageOkContent> changeEmail(ChangeEmailRequest changeEmailRequest, Principal principal) throws UserExistException {
+        Optional<Person> byEmail = personRepository.findByEmail(changeEmailRequest.getEmail());
+        if (byEmail.isEmpty()) {
+            Person person = utilsService.findPersonByEmail(principal.getName());
+            person.setEmail(changeEmailRequest.getEmail().toLowerCase(Locale.ROOT));
+            personRepository.save(person);
+            return utilsService.getMessageOkResponse();
+        } else {
+            throw new UserExistException("Пользователь с данным email уже существует");
+        }
     }
 
     @Override
-    public DataResponse<MessageOkContent> changeNotifications(ChangeNotificationsRequest changeNotificationsRequest, Principal principal) {
+    public DataResponse<MessageOkContent> changeNotifications(ChangeNotificationsRequest changeNotificationsRequest, Principal principal) throws NotFoundException {
         Person person = utilsService.findPersonByEmail(principal.getName());
         NotificationType notificationType = notificationTypeRepository.findNotificationTypeByPersonId(person.getId())
-                .orElse(new NotificationType()
-                        .setPost(false)
-                        .setPostComment(false)
-                        .setCommentComment(false)
-                        .setFriendsRequest(false)
-                        .setMessage(false)
-                        .setFriendsBirthday(false));
+                .orElseThrow(NotFoundException::new);
         switch (changeNotificationsRequest.getNotificationTypeStatus()) {
             case POST -> notificationType.setPost(changeNotificationsRequest.isEnable());
             case POST_COMMENT -> notificationType.setPostComment(changeNotificationsRequest.isEnable());
@@ -178,16 +174,18 @@ public class AccountServiceImpl implements AccountService {
         Person person = utilsService.findPersonByEmail(principal.getName());
         NotificationType notificationType = notificationTypeRepository.findNotificationTypeByPersonId(person.getId())
                 .orElse(new NotificationType()
-                        .setPost(true)
-                        .setPostComment(true)
-                        .setCommentComment(true)
-                        .setFriendsRequest(true)
-                        .setMessage(true)
-                        .setFriendsBirthday(true));
+                        .setPost(false)
+                        .setPostComment(false)
+                        .setCommentComment(false)
+                        .setFriendsRequest(false)
+                        .setMessage(false)
+                        .setFriendsBirthday(false)
+                        .setPerson(person));
+        NotificationType save = notificationTypeRepository.save(notificationType);
         ListDataResponse<NotificationSettingData> dataResponse = new ListDataResponse<>();
         dataResponse.setTimestamp(utilsService.getTimestamp());
-        dataListNotification(notificationType);
-        dataResponse.setData(dataListNotification(notificationType));
+        dataListNotification(save);
+        dataResponse.setData(dataListNotification(save));
         return dataResponse;
     }
 
@@ -209,6 +207,12 @@ public class AccountServiceImpl implements AccountService {
         list.add(new NotificationSettingData().setNotificationTypeStatus(NotificationTypeStatus.FRIEND_BIRTHDAY)
                 .setEnable(notificationType.isFriendsBirthday()));
         return list;
+    }
+
+    private void mailMessageForRegistration(RegisterRequest registerRequest) throws MailjetException, IOException {
+        String token = registerRequest.getCaptchaSecret();
+        String text = confirmationUrl.getBaseUrl() + COMPLETE_REGISTER_URL + registerRequest.getEmail() + "&code=" + token;
+        confirmPersonAndSendEmail(registerRequest.getEmail(), text, token);
     }
 
     /**
