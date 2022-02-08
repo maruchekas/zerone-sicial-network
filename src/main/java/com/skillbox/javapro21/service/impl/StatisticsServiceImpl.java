@@ -27,6 +27,9 @@ public class StatisticsServiceImpl implements StatisticsService {
     private final PostRepository postRepository;
     private final PostCommentRepository postCommentRepository;
 
+    private final static int MONTH = 12;
+    private final static int HOURS = 12;
+
     @Override
     public StatisticsResponse getAllStatistic() {
         Long countPersons = personRepository.findCountPerson();
@@ -103,8 +106,8 @@ public class StatisticsServiceImpl implements StatisticsService {
 
     private Map<YearMonth, Long> getMapForAllStat(List<? extends ForStream> list) {
         Map<YearMonth, Long> allStat = new TreeMap<>();
-        for (int i = 0; i < 13; i++) {
-            LocalDateTime localDateTime = LocalDateTime.now().minusMonths(12 - i);
+        for (int i = 0; i <= MONTH; i++) {
+            LocalDateTime localDateTime = LocalDateTime.now().minusMonths(MONTH - i);
             YearMonth month = YearMonth.of(localDateTime.getYear(), localDateTime.getMonth());
             long count = list.stream()
                     .filter(a -> a.getTime().getMonth().equals(localDateTime.getMonth()))
@@ -116,8 +119,8 @@ public class StatisticsServiceImpl implements StatisticsService {
 
     private Map<Integer, Long> getMapForHourStat(List<? extends ForStream> list) {
         Map<Integer, Long> allHourStat = new TreeMap<>();
-        for (int i = 0; i < 25; i++) {
-            LocalDateTime localDateTime = LocalDateTime.now().minusHours(24 - i);
+        for (int i = 0; i <= HOURS; i++) {
+            LocalDateTime localDateTime = LocalDateTime.now().minusHours(HOURS - i);
             Integer time = localDateTime.toLocalTime().getHour();
             long count = list.stream()
                     .filter(p -> p.getTime().getDayOfMonth() == LocalDateTime.now().getDayOfMonth())
