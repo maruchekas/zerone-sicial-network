@@ -15,6 +15,7 @@ import com.skillbox.javapro21.domain.enumeration.MessagesPermission;
 import com.skillbox.javapro21.domain.enumeration.NotificationTypeStatus;
 import com.skillbox.javapro21.domain.enumeration.UserType;
 import com.skillbox.javapro21.exception.CaptchaCodeException;
+import com.skillbox.javapro21.exception.NotFoundException;
 import com.skillbox.javapro21.exception.TokenConfirmationException;
 import com.skillbox.javapro21.exception.UserExistException;
 import com.skillbox.javapro21.repository.CaptchaRepository;
@@ -152,10 +153,10 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public DataResponse<MessageOkContent> changeNotifications(ChangeNotificationsRequest changeNotificationsRequest, Principal principal) {
+    public DataResponse<MessageOkContent> changeNotifications(ChangeNotificationsRequest changeNotificationsRequest, Principal principal) throws NotFoundException {
         Person person = utilsService.findPersonByEmail(principal.getName());
         NotificationType notificationType = notificationTypeRepository.findNotificationTypeByPersonId(person.getId())
-                .orElseThrow();
+                .orElseThrow(NotFoundException::new);
         switch (changeNotificationsRequest.getNotificationTypeStatus()) {
             case POST -> notificationType.setPost(changeNotificationsRequest.isEnable());
             case POST_COMMENT -> notificationType.setPostComment(changeNotificationsRequest.isEnable());
