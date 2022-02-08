@@ -38,5 +38,4 @@ public class NotificationsController {
 //        log.info("Can`t verify user with email {}", principal.getName());
         return new ResponseEntity<>("уведомления отмечены прочтенными", HttpStatus.OK);
     }
-
 }
