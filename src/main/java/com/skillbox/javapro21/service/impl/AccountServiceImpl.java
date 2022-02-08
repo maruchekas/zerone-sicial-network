@@ -184,10 +184,11 @@ public class AccountServiceImpl implements AccountService {
                         .setFriendsRequest(true)
                         .setMessage(true)
                         .setFriendsBirthday(true));
+        NotificationType save = notificationTypeRepository.save(notificationType);
         ListDataResponse<NotificationSettingData> dataResponse = new ListDataResponse<>();
         dataResponse.setTimestamp(utilsService.getTimestamp());
-        dataListNotification(notificationType);
-        dataResponse.setData(dataListNotification(notificationType));
+        dataListNotification(save);
+        dataResponse.setData(dataListNotification(save));
         return dataResponse;
     }
 
