@@ -1,13 +1,20 @@
 package com.skillbox.javapro21.service.impl;
 
+import com.skillbox.javapro21.api.response.Content;
 import com.skillbox.javapro21.api.response.ListDataResponse;
+import com.skillbox.javapro21.api.response.notification.NotificationData;
+import com.skillbox.javapro21.domain.Notification;
 import com.skillbox.javapro21.domain.Person;
 import com.skillbox.javapro21.repository.NotificationRepository;
 import com.skillbox.javapro21.service.NotificationService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import java.security.Principal;
+import java.util.List;
 
 
 @Component
@@ -25,10 +32,17 @@ public class NotificationServiceImpl implements NotificationService {
 
 
     @Override
-    public ListDataResponse<?> getNotifications(int offset, int itemPerPage, Principal principal) {
+    public ListDataResponse<Content> getNotifications(int offset, int itemPerPage, Principal principal) {
         Person person = utilsService.findPersonByEmail(principal.getName());
-//        NotificationType notificationType = notificationTypeRepository.findNotificationTypeByPersonId(person.getId())
-//                .orElse(new NotificationType()
+        List<Notification> list = notificationRepository.findAllByPerson_Id(person.getId());
+
+//        List<NotificationData>
+        return null;
+    }
+
+
+    private NotificationData convertNotificationToNotificationData() {
+
         return null;
     }
 
