@@ -1,12 +1,10 @@
 package com.skillbox.javapro21.controller;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.skillbox.javapro21.aop.LastActivity;
 import com.skillbox.javapro21.api.request.post.PostRequest;
 import com.skillbox.javapro21.api.request.profile.EditProfileRequest;
-import com.skillbox.javapro21.api.response.Content;
-import com.skillbox.javapro21.api.response.DataResponse;
-import com.skillbox.javapro21.api.response.ListDataResponse;
-import com.skillbox.javapro21.api.response.MessageOkContent;
+import com.skillbox.javapro21.api.response.*;
 import com.skillbox.javapro21.api.response.account.AuthData;
 import com.skillbox.javapro21.api.response.post.PostData;
 import com.skillbox.javapro21.exception.*;
@@ -37,6 +35,7 @@ public class ProfileController {
     }
 
     @Operation(summary = "Получить текущего пользователя", security = @SecurityRequirement(name = "jwt"))
+    @JsonView(View.Me.class)
     @GetMapping("/me")
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
@@ -70,6 +69,7 @@ public class ProfileController {
     }
 
     @Operation(summary = "Получить публикации пользователя на стене", security = @SecurityRequirement(name = "jwt"))
+    @JsonView(View.Wall.class)
     @GetMapping("/{id}/wall")
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity

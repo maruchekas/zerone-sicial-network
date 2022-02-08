@@ -1,5 +1,6 @@
 package com.skillbox.javapro21.controller;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.skillbox.javapro21.aop.LastActivity;
 import com.skillbox.javapro21.api.request.dialogs.DialogRequestForCreate;
 import com.skillbox.javapro21.api.request.dialogs.LincRequest;
@@ -7,6 +8,7 @@ import com.skillbox.javapro21.api.request.dialogs.MessageTextRequest;
 import com.skillbox.javapro21.api.response.DataResponse;
 import com.skillbox.javapro21.api.response.ListDataResponse;
 import com.skillbox.javapro21.api.response.MessageOkContent;
+import com.skillbox.javapro21.api.response.View;
 import com.skillbox.javapro21.api.response.dialogs.*;
 import com.skillbox.javapro21.exception.MessageNotFoundException;
 import com.skillbox.javapro21.exception.PersonNotFoundException;
@@ -32,6 +34,7 @@ import java.security.Principal;
 public class DialogsController {
     private final DialogsService dialogsService;
 
+    @JsonView(View.Dialogs.class)
     @GetMapping("")
     @Operation(summary = "Получение диалогов", security = @SecurityRequirement(name = "jwt"))
     @PreAuthorize("hasAuthority('user:write')")
