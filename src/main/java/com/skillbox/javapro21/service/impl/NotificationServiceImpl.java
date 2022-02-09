@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -82,6 +83,12 @@ public class NotificationServiceImpl implements NotificationService {
         }
         return result;
     }
+    private NotificationData convertNotificationToNotificationData(Notification notification) {
+        NotificationData notificationData = new NotificationData();
+        notification.setNotificationType(notification.getNotificationType());
+        notification.setSentTime(notification.getSentTime());
+        return notificationData;
+    }
 
     private List<Notification> getFriendsBirthdayNotifications(Person person) {
         List<Person> friends = personRepository.findAllPersonFriends(person.getId(), PageRequest.of(0, Integer.MAX_VALUE)).getContent();
@@ -98,7 +105,12 @@ public class NotificationServiceImpl implements NotificationService {
                             .setContact("Contact"))
                 .toList();
         return friendsWithBirthday;
+    private List<NotificationData> convertAll(List<Notification> notifications) {
+        List<NotificationData> notificationDataList = new ArrayList<>();
+        for(Notification notification : notifications){
+            notification.setNotificationType(notification.getNotificationType());
+            notification.setSentTime(notification.getSentTime());
+        } return notificationDataList;
     }
-
 }
 
