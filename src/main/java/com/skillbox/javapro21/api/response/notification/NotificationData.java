@@ -2,7 +2,6 @@ package com.skillbox.javapro21.api.response.notification;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.skillbox.javapro21.api.response.Content;
-import com.skillbox.javapro21.domain.enumeration.NotificationType;
 import lombok.Data;
 import lombok.experimental.Accessors;
 

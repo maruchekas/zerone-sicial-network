@@ -11,14 +11,12 @@ import com.skillbox.javapro21.repository.NotificationRepository;
 import com.skillbox.javapro21.repository.PersonRepository;
 import com.skillbox.javapro21.repository.UserNotificationSettingsRepository;
 import com.skillbox.javapro21.service.NotificationService;
-import io.swagger.models.auth.In;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -54,12 +52,18 @@ public class NotificationServiceImpl implements NotificationService {
         return utilsService.getListDataResponse(notifications.size(), 0, 20, convertNotificationsToNotificationData(notifications));
     }
 
+    private NotificationData convertNotificationToNotificationData(Notification notification) {
+        NotificationData notificationData = new NotificationData();
+        notification.setNotificationType(notification.getNotificationType());
+        notification.setSentTime(notification.getSentTime());
+        return notificationData;
+    }
 
     private List<Content> convertNotificationsToNotificationData(List<Notification> notifications) {
         return notifications.stream()
                 .map(n -> new NotificationData()
-                            .setSentTime(utilsService.getTimestampFromLocalDateTime(n.getSentTime()))
-                            .setType(n.getNotificationType()))
+                        .setSentTime(utilsService.getTimestampFromLocalDateTime(n.getSentTime()))
+                        .setType(String.valueOf(n.getNotificationType())))
                 .collect(Collectors.toList());
     }
 
@@ -83,12 +87,6 @@ public class NotificationServiceImpl implements NotificationService {
         }
         return result;
     }
-    private NotificationData convertNotificationToNotificationData(Notification notification) {
-        NotificationData notificationData = new NotificationData();
-        notification.setNotificationType(notification.getNotificationType());
-        notification.setSentTime(notification.getSentTime());
-        return notificationData;
-    }
 
     private List<Notification> getFriendsBirthdayNotifications(Person person) {
         List<Person> friends = personRepository.findAllPersonFriends(person.getId(), PageRequest.of(0, Integer.MAX_VALUE)).getContent();
@@ -96,21 +94,15 @@ public class NotificationServiceImpl implements NotificationService {
                 .filter(f -> {
                     LocalDateTime now = utilsService.getLocalDateTimeZoneOffsetUtc();
                     LocalDateTime birthDay = f.getBirthDate();
-                    return (now.getMonth().equals(birthDay.getMonth()) && now.getDayOfMonth() == birthDay.getDayOfMonth());})
+                    return (now.getMonth().equals(birthDay.getMonth()) && now.getDayOfMonth() == birthDay.getDayOfMonth());
+                })
                 .map(f -> new Notification()
-                            .setSentTime(utilsService.getLocalDateTimeZoneOffsetUtc())
-                            .setNotificationType(NotificationType.FRIEND_BIRTHDAY)
-                            .setPerson(person)
-                            .setEntityId(f.getId())
-                            .setContact("Contact"))
+                        .setSentTime(utilsService.getLocalDateTimeZoneOffsetUtc())
+                        .setNotificationType(NotificationType.FRIEND_BIRTHDAY)
+                        .setPerson(person)
+                        .setEntityId(f.getId())
+                        .setContact("Contact"))
                 .toList();
         return friendsWithBirthday;
-    private List<NotificationData> convertAll(List<Notification> notifications) {
-        List<NotificationData> notificationDataList = new ArrayList<>();
-        for(Notification notification : notifications){
-            notification.setNotificationType(notification.getNotificationType());
-            notification.setSentTime(notification.getSentTime());
-        } return notificationDataList;
     }
 }
-
