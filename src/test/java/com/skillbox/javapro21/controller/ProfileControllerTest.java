@@ -9,6 +9,7 @@ import com.skillbox.javapro21.domain.enumeration.MessagesPermission;
 import com.skillbox.javapro21.repository.*;
 import com.skillbox.javapro21.service.ProfileService;
 import com.skillbox.javapro21.service.impl.UtilsService;
+import com.sun.security.auth.UserPrincipal;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,6 +27,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import java.security.Principal;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.HashSet;
@@ -407,22 +409,26 @@ public class ProfileControllerTest extends AbstractTest {
         Assertions.assertNull(utilsService.getFriendshipStatus(verifyPersonWithPost.getId(), verifyPerson.getId()));
     }
 
-//    @Test
-//    @WithMockUser(username = "test1@test.ru", authorities = "user:write")
-//    void searchByPerson() throws Exception {
-//        mockMvc.perform(MockMvcRequestBuilders
-//                        .get("/api/v1/users/search", "Arcadiy")
-//                        .principal(() -> "test1@test.ru")
-//                        .accept(MediaType.APPLICATION_JSON))
-//                .andDo(MockMvcResultHandlers.print())
-//                .andExpect(MockMvcResultMatchers.status().isOk());
-//        Principal principal = new UserPrincipal("test1@test.ru");
-//        Assertions.assertEquals(2, profileService.searchByPerson("", "", 0, 150, "", "", 0, 20, principal).getTotal());
-//        Assertions.assertEquals(2, profileService.searchByPerson("Arcadiy", "", 0, 150, "", "", 0, 20, principal).getTotal());
-//        Assertions.assertEquals(2, profileService.searchByPerson("", "ovoz", 0, 150, "", "", 0, 20, principal).getTotal());
-//        Assertions.assertEquals(1, profileService.searchByPerson("diy", "ovoz", 18, 30, "", "", 0, 20, principal).getTotal());
-//        Assertions.assertEquals(2, profileService.searchByPerson("diy", "ovoz", 0, 30, "", "", 0, 20, principal).getTotal());
-//        Assertions.assertEquals(2, profileService.searchByPerson("diy", "ovoz", 0, 30, "Россия", "", 0, 20, principal).getTotal());
-//        Assertions.assertEquals(1, profileService.searchByPerson("diy", "ovoz", 0, 30, "Россия", "Москва", 0, 20, principal).getTotal());
-//    }
+    @Test
+    @WithMockUser(username = "test1@test.ru", authorities = "user:write")
+    void searchByPerson() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/api/v1/users/search", "Arcadiy")
+                        .principal(() -> "test1@test.ru")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk());
+        Principal principal = new UserPrincipal("test1@test.ru");
+        Assertions.assertEquals(2, profileService.searchByPerson("", "", 0, 150, "", "", 0, 20, principal).getTotal());
+        Assertions.assertEquals(2, profileService.searchByPerson("Arcadiy", "", 0, 150, "", "", 0, 20, principal).getTotal());
+        Assertions.assertEquals(2, profileService.searchByPerson("", "ovoz", 0, 150, "", "", 0, 20, principal).getTotal());
+        Assertions.assertEquals(1, profileService.searchByPerson("diy", "ovoz", 18, 30, "", "", 0, 20, principal).getTotal());
+        Assertions.assertEquals(2, profileService.searchByPerson("diy", "ovoz", 0, 30, "", "", 0, 20, principal).getTotal());
+        Assertions.assertEquals(2, profileService.searchByPerson("diy", "ovoz", 0, 30, "Россия", "", 0, 20, principal).getTotal());
+        Assertions.assertEquals(1, profileService.searchByPerson("diy", "ovoz", 0, 30, "Россия", "Москва", 0, 20, principal).getTotal());
+        Assertions.assertEquals(1, profileService.searchByPerson("Фксфвшн", "", 0, 30, "Россия", "Москва", 0, 20, principal).getTotal());
+        Assertions.assertEquals(1, profileService.searchByPerson("", "Зфкщмщя", 0, 30, "Россия", "Москва", 0, 20, principal).getTotal());
+    }
+
+
 }

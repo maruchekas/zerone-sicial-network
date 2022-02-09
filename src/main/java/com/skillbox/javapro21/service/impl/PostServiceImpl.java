@@ -51,7 +51,8 @@ public class PostServiceImpl implements PostService {
     private final JdbcTemplate jdbcTemplate;
 
     @Override
-    public ListDataResponse<PostData> getPosts(String text, long dateFrom, long dateTo, int offset, int itemPerPage, String author, String[] tags, Principal principal) {
+    public ListDataResponse<PostData> getPosts(String text, long dateFrom, long dateTo, int offset, int itemPerPage,
+                                               String author, String[] tags, Principal principal) {
         Person currentPerson = utilsService.findPersonByEmail(principal.getName());
         LocalDateTime datetimeFrom = (dateFrom != -1) ? utilsService.getLocalDateTime(dateFrom) : LocalDateTime.now().minusYears(1);
         LocalDateTime datetimeTo = (dateTo != -1) ? utilsService.getLocalDateTime(dateTo) : LocalDateTime.now();
@@ -61,8 +62,16 @@ public class PostServiceImpl implements PostService {
             pageablePostList = postRepository.findAllPosts(datetimeFrom, datetimeTo, pageable);
         } else if (!text.isEmpty() && !text.matches("\\s*") && tags.length == 0 && author.equals("")) {
             pageablePostList = postRepository.findAllPostsByText(text.toLowerCase(Locale.ROOT), datetimeFrom, datetimeTo, pageable);
+            if (pageablePostList.getTotalElements() == 0){
+                text = utilsService.convertKbLayer(text);
+                pageablePostList = postRepository.findAllPostsByText(text.toLowerCase(Locale.ROOT), datetimeFrom, datetimeTo, pageable);
+            }
         } else if (!text.trim().isEmpty() && tags.length == 0 && !author.isEmpty()) {
             pageablePostList = postRepository.findPostsByTextByAuthorWithoutTagsContainingByDateExcludingBlockers(text.toLowerCase(Locale.ROOT), datetimeFrom, datetimeTo, author.toLowerCase(Locale.ROOT), pageable);
+            if (pageablePostList.getTotalElements() == 0){
+                text = utilsService.convertKbLayer(text);
+                pageablePostList = postRepository.findPostsByTextByAuthorWithoutTagsContainingByDateExcludingBlockers(text.toLowerCase(Locale.ROOT), datetimeFrom, datetimeTo, author.toLowerCase(Locale.ROOT), pageable);
+            }
         } else if ((text.matches("\\s*") || text.equals("")) && tags.length == 0 && !author.isEmpty()) {
             pageablePostList = postRepository.findAllPostsByAuthor(author.toLowerCase(Locale.ROOT), datetimeFrom, datetimeTo, pageable);
         } else {
@@ -133,7 +142,6 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    //:TODO добавить имя и фамилию в ответ на комментарий (parent_id)
     public DataResponse<CommentsData> postComments(Long id, CommentRequest commentRequest, Principal principal) throws PostNotFoundException, CommentNotFoundException {
         Person person = utilsService.findPersonByEmail(principal.getName());
         Post post = postRepository.findPostById(id).orElseThrow(() -> new PostNotFoundException("Поста с id " + id + "не существует"));

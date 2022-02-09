@@ -50,7 +50,7 @@ public class FriendsServiceImpl implements FriendsService {
         if (outgoingFriendshipStatus != null) {
             friendshipStatusRepository.delete(outgoingFriendshipStatus);
         } else if (incomingFriendshipStatus != null) {
-            utilsService.createFriendship(dstPerson, srcPerson, FriendshipStatusType.DECLINED);
+            utilsService.createFriendship(srcPerson, dstPerson, FriendshipStatusType.DECLINED);
         }
         return utilsService.getMessageOkResponse();
     }
@@ -63,8 +63,9 @@ public class FriendsServiceImpl implements FriendsService {
         FriendshipStatus outgoingFriendshipStatus = utilsService.getFriendshipStatus(dstPerson.getId(), srcPerson.getId());
         FriendshipStatus incomingFriendshipStatus = utilsService.getFriendshipStatus(srcPerson.getId(), dstPerson.getId());
 
-        if (outgoingFriendshipStatus != null && incomingFriendshipStatus != null) {
+        if (outgoingFriendshipStatus != null) {
             friendshipStatusRepository.delete(outgoingFriendshipStatus);
+        } else if (incomingFriendshipStatus != null) {
             friendshipStatusRepository.delete(incomingFriendshipStatus);
         } else {
             throw new FriendshipNotFoundException("Не найдена связь между пользователями.");

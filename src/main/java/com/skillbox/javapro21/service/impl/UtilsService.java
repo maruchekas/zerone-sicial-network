@@ -9,6 +9,7 @@ import com.skillbox.javapro21.domain.enumeration.FriendshipStatusType;
 import com.skillbox.javapro21.repository.FriendshipRepository;
 import com.skillbox.javapro21.repository.FriendshipStatusRepository;
 import com.skillbox.javapro21.repository.PersonRepository;
+import com.skillbox.javapro21.service.kbLayearConverter.KbLayerConverter;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -241,5 +242,15 @@ public class UtilsService {
         friendship.setDstPerson(dst);
         friendship.setFriendshipStatus(friendshipStatusSrcAfterSave);
         friendshipRepository.save(friendship);
+    }
+
+    /**
+     * метод конвертации текста введенного в неверной раскладке клавиатуры
+     * example: Ghbdtn vbh! -> Привет мир!
+     */
+
+    public String convertKbLayer(String input){
+        KbLayerConverter kbLayerConverter = new KbLayerConverter();
+        return kbLayerConverter.convertString(input);
     }
 }

@@ -6,8 +6,11 @@ import com.skillbox.javapro21.api.response.DataResponse;
 import com.skillbox.javapro21.api.response.ListDataResponse;
 import com.skillbox.javapro21.api.response.MessageOkContent;
 import com.skillbox.javapro21.api.response.account.NotificationSettingData;
+import com.skillbox.javapro21.exception.CaptchaCodeException;
+import com.skillbox.javapro21.exception.NotFoundException;
 import com.skillbox.javapro21.exception.TokenConfirmationException;
 import com.skillbox.javapro21.exception.UserExistException;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -16,7 +19,7 @@ import java.security.Principal;
 
 @Service
 public interface AccountService {
-    DataResponse<MessageOkContent> registration(RegisterRequest registerRequest) throws UserExistException, MailjetException, IOException;
+    ResponseEntity<?> registration(RegisterRequest registerRequest) throws UserExistException, MailjetException, IOException, CaptchaCodeException;
 
     ModelAndView verifyRegistration(String email, String code) throws TokenConfirmationException;
 
@@ -28,9 +31,9 @@ public interface AccountService {
 
     DataResponse<MessageOkContent> changePassword(ChangePasswordRequest changePasswordRequest);
 
-    DataResponse<MessageOkContent> changeEmail(ChangeEmailRequest changeEmailRequest, Principal principal);
+    DataResponse<MessageOkContent> changeEmail(ChangeEmailRequest changeEmailRequest, Principal principal) throws UserExistException;
 
-    DataResponse<MessageOkContent> changeNotifications(ChangeNotificationsRequest changeNotificationsRequest, Principal principal);
+    DataResponse<MessageOkContent> changeNotifications(ChangeNotificationsRequest changeNotificationsRequest, Principal principal) throws NotFoundException;
 
     ListDataResponse<NotificationSettingData> getNotifications(Principal principal);
 }

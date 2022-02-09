@@ -7,6 +7,8 @@ import com.skillbox.javapro21.api.response.DataResponse;
 import com.skillbox.javapro21.api.response.ListDataResponse;
 import com.skillbox.javapro21.api.response.MessageOkContent;
 import com.skillbox.javapro21.api.response.account.NotificationSettingData;
+import com.skillbox.javapro21.exception.CaptchaCodeException;
+import com.skillbox.javapro21.exception.NotFoundException;
 import com.skillbox.javapro21.exception.TokenConfirmationException;
 import com.skillbox.javapro21.exception.UserExistException;
 import com.skillbox.javapro21.service.AccountService;
@@ -34,7 +36,7 @@ public class AccountController {
 
     @Operation(summary = "Регистрация")
     @PostMapping("/register")
-    public ResponseEntity<DataResponse<MessageOkContent>> registration(@RequestBody RegisterRequest registerRequest) throws UserExistException, MailjetException, IOException {
+    public ResponseEntity<?> registration(@RequestBody RegisterRequest registerRequest) throws UserExistException, MailjetException, IOException, CaptchaCodeException {
         log.info("Вызван метод регистрации по почте {}", registerRequest.getEmail());
         return new ResponseEntity<>(accountService.registration(registerRequest), HttpStatus.OK);
     }
@@ -42,7 +44,7 @@ public class AccountController {
     @Operation(summary = "Подтверждение регистрации")
     @GetMapping("/register/complete")
     public ModelAndView verifyRegistration(@RequestParam String email,
-                                          @RequestParam String code) throws TokenConfirmationException {
+                                           @RequestParam String code) throws TokenConfirmationException {
         return accountService.verifyRegistration(email, code);
     }
 
@@ -79,7 +81,7 @@ public class AccountController {
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
     public ResponseEntity<DataResponse<MessageOkContent>> changeEmail(@RequestBody ChangeEmailRequest changeEmailRequest,
-                                                                      Principal principal) {
+                                                                      Principal principal) throws UserExistException {
         return new ResponseEntity<>(accountService.changeEmail(changeEmailRequest, principal), HttpStatus.OK);
     }
 
@@ -88,7 +90,7 @@ public class AccountController {
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
     public ResponseEntity<DataResponse<MessageOkContent>> changeNotifications(@RequestBody ChangeNotificationsRequest changeNotificationsRequest,
-                                                                              Principal principal) {
+                                                                              Principal principal) throws NotFoundException {
         return new ResponseEntity<>(accountService.changeNotifications(changeNotificationsRequest, principal), HttpStatus.OK);
     }
 
