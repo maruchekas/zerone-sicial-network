@@ -33,7 +33,7 @@ public interface PersonRepository extends JpaRepository<Person, Integer> {
             "where f.srcPerson.id = :id " +
             "and fs.friendshipStatusType = 'FRIEND' " +
             "and p.isBlocked = 0" )
-    List<Long> findAllFriendsByPersonId(Long id);
+    List<Long> findAllFriendIdsByPersonId(Long id);
 
     @Query("select p from Person p where p.id in (:ids) and p.isBlocked = 0")
     List<Person> findAllById(List<Long> ids);
