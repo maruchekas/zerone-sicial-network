@@ -28,7 +28,7 @@ public class FeedsController {
     private final PostService postService;
 
     @Operation(summary = "Поиск публикации", security = @SecurityRequirement(name = "jwt"))
-    @JsonView(View.Feeds.class)
+    @JsonView(View.Posts.class)
     @GetMapping("")
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
