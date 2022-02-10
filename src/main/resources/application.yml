@@ -1,5 +1,5 @@
 server:
-  port: ${PORT:8080}
+  port: ${PORT:8083}
   base_url: ${BASE_URL}
 spring:
   application:
@@ -24,6 +24,11 @@ spring:
     admin:
       client:
         url: ${ADMIN_SERVER_URL}
+        instance:
+          management-base-url: https://zerone-2022-develop.herokuapp.com/
+          service-base-url: ${spring.boot.admin.client.instance.management-base-url}
+        auto-deregistration: true
+        period: 5m
         username: ${ADMIN_NAME}
         password: ${ADMIN_PASSWORD}
 
