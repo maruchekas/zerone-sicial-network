@@ -19,7 +19,7 @@ public class GlobalExceptionHAndler {
 
     @ExceptionHandler
     ResponseEntity<BadDataResponse> handleUserExistException(UserExistException exception){
-        BadDataResponse badDataResponse = new BadDataResponse().setError("user").setDescription(exception.getMessage());
+        BadDataResponse badDataResponse = new BadDataResponse().setError("email").setDescription(exception.getMessage());
         return new ResponseEntity<>(badDataResponse, HttpStatus.BAD_REQUEST);
     }
 

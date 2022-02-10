@@ -2,6 +2,8 @@ server:
   port: ${PORT:8080}
   base_url: ${BASE_URL}
 spring:
+  application:
+    name: Zerone SocialNetwork
   messages:
     basename: lang.messages
   profiles:
@@ -18,6 +20,17 @@ spring:
     hibernate:
       ddl-auto: none
       dialect: org.hibernate.dialect.PostgreSQLDialect
+  boot:
+    admin:
+      client:
+        url: ${ADMIN_SERVER_URL}
+        instance:
+          management-base-url: https://zerone-2022-develop.herokuapp.com/
+          service-base-url: ${spring.boot.admin.client.instance.management-base-url}
+        auto-deregistration: true
+        period: 5m
+        username: ${ADMIN_NAME}
+        password: ${ADMIN_PASSWORD}
 
 mailjet:
   mail:
@@ -44,10 +57,10 @@ management:
     web:
       base-path: ${ACTUATOR}
       exposure:
-        include: health,flyway
+        include: "*"
   endpoint:
     health:
-      show-details: when-authorized
+      show-details: always
 
 html:
   file:
