@@ -195,4 +195,6 @@ public interface PersonRepository extends JpaRepository<Person, Integer> {
             "where p.isBlocked = 0 " +
             "and p.birthDate is not null")
     List<Person> findAllPersonsWithBirthday();
+
+    Optional<Person> findByConfirmationCode(String token);
 }
