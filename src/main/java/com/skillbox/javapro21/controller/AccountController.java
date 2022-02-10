@@ -36,7 +36,7 @@ public class AccountController {
 
     @Operation(summary = "Регистрация")
     @PostMapping("/register")
-    public ResponseEntity<?> registration(@RequestBody RegisterRequest registerRequest) throws UserExistException, MailjetException, IOException, CaptchaCodeException {
+    public ResponseEntity<DataResponse<MessageOkContent>> registration(@RequestBody RegisterRequest registerRequest) throws UserExistException, MailjetException, IOException, CaptchaCodeException {
         log.info("Вызван метод регистрации по почте {}", registerRequest.getEmail());
         return new ResponseEntity<>(accountService.registration(registerRequest), HttpStatus.OK);
     }
@@ -54,11 +54,11 @@ public class AccountController {
         return new ResponseEntity<>(accountService.recoveryPasswordMessage(recoveryRequest), HttpStatus.OK);
     }
 
-    @Operation(summary = "Разрешение на восстановление пароля")
-    @GetMapping("/password/send_recovery_massage")
-    public ResponseEntity<String> verifyRecovery(@RequestParam String email,
-                                                 @RequestParam String code) throws TokenConfirmationException {
-        return new ResponseEntity<>(accountService.verifyRecovery(email, code), HttpStatus.OK);
+    @Operation(summary = "Разрешение на восстановление пароля/email")
+    @GetMapping("/send_recovery_massage")
+    public ModelAndView verifyRecovery(@RequestParam String email,
+                                       @RequestParam String code) throws TokenConfirmationException {
+        return accountService.verifyRecovery(email, code);
     }
 
     @Operation(summary = "Восстановление пароля")
@@ -72,8 +72,9 @@ public class AccountController {
     @PutMapping("/password/set")
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
-    public ResponseEntity<DataResponse<MessageOkContent>> changePassword(@RequestBody ChangePasswordRequest changePasswordRequest) {
-        return new ResponseEntity<>(accountService.changePassword(changePasswordRequest), HttpStatus.OK);
+    public ResponseEntity<DataResponse<MessageOkContent>> changePassword(@RequestBody ChangePasswordRequest changePasswordRequest,
+                                                                         Principal principal) throws UserExistException, IOException, MailjetException {
+        return new ResponseEntity<>(accountService.changePassword(changePasswordRequest, principal), HttpStatus.OK);
     }
 
     @Operation(summary = "Смена email", security = @SecurityRequirement(name = "jwt"))
@@ -81,7 +82,7 @@ public class AccountController {
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
     public ResponseEntity<DataResponse<MessageOkContent>> changeEmail(@RequestBody ChangeEmailRequest changeEmailRequest,
-                                                                      Principal principal) throws UserExistException {
+                                                                      Principal principal) throws UserExistException, IOException, MailjetException {
         return new ResponseEntity<>(accountService.changeEmail(changeEmailRequest, principal), HttpStatus.OK);
     }
 
