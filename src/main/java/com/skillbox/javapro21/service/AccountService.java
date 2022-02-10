@@ -35,4 +35,6 @@ public interface AccountService {
     DataResponse<MessageOkContent> changeNotifications(ChangeNotificationsRequest changeNotificationsRequest, Principal principal) throws NotFoundException;
 
     ListDataResponse<NotificationSettingData> getNotifications(Principal principal);
+
+    DataResponse<MessageOkContent> recoveryProfile(String email) throws IOException, MailjetException, UserExistException;
 }
