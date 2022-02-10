@@ -54,7 +54,7 @@ public class AccountController {
         return new ResponseEntity<>(accountService.recoveryPasswordMessage(recoveryRequest), HttpStatus.OK);
     }
 
-    @Operation(summary = "Разрешение на восстановление пароля/email")
+    @Operation(summary = "Разрешение на восстановление пароля/email/аккаунта")
     @GetMapping("/send_recovery_massage")
     public ModelAndView verifyRecovery(@RequestParam String email,
                                        @RequestParam String code) throws TokenConfirmationException {
@@ -101,5 +101,11 @@ public class AccountController {
     @LastActivity
     public ResponseEntity<ListDataResponse<NotificationSettingData>> getNotifications(Principal principal) {
         return new ResponseEntity<>(accountService.getNotifications(principal), HttpStatus.OK);
+    }
+
+    @Operation(summary = "Отправка письма на почту для восстановления аккаунта")
+    @PutMapping("/recovery_profile")
+    public ResponseEntity<DataResponse<MessageOkContent>> recoveryProfile(@RequestParam String email) throws MailjetException, IOException, UserExistException {
+        return new ResponseEntity<>(accountService.recoveryProfile(email), HttpStatus.OK);
     }
 }

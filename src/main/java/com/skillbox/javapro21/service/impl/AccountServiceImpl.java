@@ -112,6 +112,11 @@ public class AccountServiceImpl implements AccountService {
     public ModelAndView verifyRecovery(String email, String code) throws TokenConfirmationException {
         Person person = utilsService.findPersonByEmail(email);
         if (person.getConfirmationCode().equals(code)) {
+            if (person.getIsBlocked() == 2) {
+                person.setIsBlocked(0);
+                personRepository.save(person);
+                return new ModelAndView("redirect:" + baseUrl);
+            }
             person
                     .setIsApproved(1)
                     .setUserType(UserType.USER)
@@ -199,6 +204,17 @@ public class AccountServiceImpl implements AccountService {
         dataListNotification(save);
         dataResponse.setData(dataListNotification(save));
         return dataResponse;
+    }
+
+    @Override
+    public DataResponse<MessageOkContent> recoveryProfile(String email) throws IOException, MailjetException, UserExistException {
+        Person person = utilsService.findPersonByEmail(email);
+        if (person.getIsBlocked() == 2) {
+            String token = utilsService.getToken();
+            String text = confirmationUrl.getBaseUrl() + RECOVERY_URL + person.getEmail() + "&code=" + token;
+            confirmPersonAndSendEmail(person.getEmail(), text, token);
+        }
+        throw new UserExistException(USER_EXISTS_ERR);
     }
 
     /**
