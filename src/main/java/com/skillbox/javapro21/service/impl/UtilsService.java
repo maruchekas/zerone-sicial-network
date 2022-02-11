@@ -11,9 +11,13 @@ import com.skillbox.javapro21.repository.FriendshipRepository;
 import com.skillbox.javapro21.repository.FriendshipStatusRepository;
 import com.skillbox.javapro21.repository.NotificationRepository;
 import com.skillbox.javapro21.repository.PersonRepository;
+import com.skillbox.javapro21.service.NotificationService;
 import com.skillbox.javapro21.service.kbLayearConverter.KbLayerConverter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +36,7 @@ import java.util.Optional;
 import static com.skillbox.javapro21.domain.enumeration.FriendshipStatusType.*;
 import static com.skillbox.javapro21.domain.enumeration.NotificationType.FRIEND_REQUEST;
 
+@Setter
 @RequiredArgsConstructor
 @Component
 public class UtilsService {
@@ -39,6 +44,7 @@ public class UtilsService {
     private final FriendshipRepository friendshipRepository;
     private final FriendshipStatusRepository friendshipStatusRepository;
     private final NotificationRepository notificationRepository;
+    private NotificationService notificationService;
 
 
     /**
@@ -200,6 +206,8 @@ public class UtilsService {
             fst = INTERLOCKED;
         } else if (friendshipStatusType.equals(FRIEND)) {
             fst = FRIEND;
+            notificationService.checkBirthdayFromOneAndCreateNotificationToAnotherInCase(src, dst);
+            notificationService.checkBirthdayFromOneAndCreateNotificationToAnotherInCase(dst, src);
         }
         saveNewFriendshipForSrcAndDst(src, dst, fst);
         saveNewFriendshipForSrcAndDst(dst, src, fst);

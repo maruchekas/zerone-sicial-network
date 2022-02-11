@@ -39,8 +39,8 @@ public class NotificationsController {
     @PutMapping("")
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
-    public ResponseEntity<ListDataResponse<Content>> verifyRegistration(@RequestBody ReadNotificationRequest request,
-                                                                        Principal principal) {
+    public ResponseEntity<ListDataResponse<Content>> readNotification(@RequestBody ReadNotificationRequest request,
+                                                                      Principal principal) {
         return new ResponseEntity<>(notificationService.readNotification(request, principal), HttpStatus.OK);
     }
 }
