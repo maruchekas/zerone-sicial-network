@@ -17,6 +17,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.PostConstruct;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -33,6 +34,43 @@ public class NotificationServiceImpl implements NotificationService {
     private final UtilsService utilsService;
     private final PersonRepository personRepository;
     private final UserNotificationSettingsRepository userNotificationSettingsRepository;
+
+
+    @PostConstruct
+    void beforeAll() {
+        Thread birthDayReminder = new Thread(() -> {
+            checkBirthdayNotifications();
+            while (true) {
+                try {
+                    Thread.sleep(1000 * 60 * 60);
+                    checkBirthdayNotifications();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        birthDayReminder.start();
+    }
+
+    private void checkBirthdayNotifications() {
+        LocalDateTime now = utilsService.getLocalDateTimeZoneOffsetUtc();
+        List<Person> allUsers = personRepository.findAll();
+        for (Person person : allUsers) {
+            List<Person> friends = personRepository.findAllPersonFriends(person.getId(), PageRequest.of(0, Integer.MAX_VALUE)).getContent();
+            for (Person friend : friends) {
+                LocalDateTime birthDay = person.getBirthDate();
+                if (now.getMonth().equals(birthDay.getMonth()) && now.getDayOfMonth() == birthDay.getDayOfMonth()) {
+                    Notification notification = new Notification()
+                            .setSentTime(utilsService.getLocalDateTimeZoneOffsetUtc())
+                            .setNotificationType(NotificationType.FRIEND_BIRTHDAY)
+                            .setPerson(person)
+                            .setEntityId(friend.getId())
+                            .setContact("Contact");
+                    notificationRepository.save(notification);
+                }
+            }
+        }
+    }
 
 
     @Override
@@ -86,25 +124,9 @@ public class NotificationServiceImpl implements NotificationService {
             result.addAll(notificationRepository.findAllByNotificationTypeEquals(NotificationType.MESSAGE));
         }
         if (settings.isFriendsBirthday()) {
-            result.addAll(getFriendsBirthdayNotifications(person));
+            result.addAll(notificationRepository.findAllByNotificationTypeEquals(NotificationType.FRIEND_BIRTHDAY));
         }
         return result;
-    }
-
-    private List<Notification> getFriendsBirthdayNotifications(Person person) {
-        List<Person> friends = personRepository.findAllPersonFriends(person.getId(), PageRequest.of(0, Integer.MAX_VALUE)).getContent();
-        return friends.stream()
-                .filter(f -> {
-                    LocalDateTime now = utilsService.getLocalDateTimeZoneOffsetUtc();
-                    LocalDateTime birthDay = f.getBirthDate();
-                    return (now.getMonth().equals(birthDay.getMonth()) && now.getDayOfMonth() == birthDay.getDayOfMonth());})
-                .map(f -> new Notification()
-                            .setSentTime(utilsService.getLocalDateTimeZoneOffsetUtc())
-                            .setNotificationType(NotificationType.FRIEND_BIRTHDAY)
-                            .setPerson(person)
-                            .setEntityId(f.getId())
-                            .setContact("Contact"))
-                .toList();
     }
 }
 
