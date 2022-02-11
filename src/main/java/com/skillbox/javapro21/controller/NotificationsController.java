@@ -1,6 +1,7 @@
 package com.skillbox.javapro21.controller;
 
 import com.skillbox.javapro21.aop.LastActivity;
+import com.skillbox.javapro21.api.request.notification.ReadNotificationRequest;
 import com.skillbox.javapro21.api.response.Content;
 import com.skillbox.javapro21.api.response.ListDataResponse;
 import com.skillbox.javapro21.service.NotificationService;
@@ -38,10 +39,8 @@ public class NotificationsController {
     @PutMapping("")
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
-    public ResponseEntity<String> verifyRegistration(@RequestParam int id,
-                                                     @RequestParam boolean all,
-                                                     Principal principal) {
-
-        return new ResponseEntity<>("уведомления отмечены прочтенными", HttpStatus.OK);
+    public ResponseEntity<ListDataResponse<Content>> verifyRegistration(@RequestBody ReadNotificationRequest request,
+                                                                        Principal principal) {
+        return new ResponseEntity<>(notificationService.readNotification(request, principal), HttpStatus.OK);
     }
 }

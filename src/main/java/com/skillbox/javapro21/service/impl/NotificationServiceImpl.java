@@ -1,5 +1,6 @@
 package com.skillbox.javapro21.service.impl;
 
+import com.skillbox.javapro21.api.request.notification.ReadNotificationRequest;
 import com.skillbox.javapro21.api.response.Content;
 import com.skillbox.javapro21.api.response.ListDataResponse;
 import com.skillbox.javapro21.api.response.notification.NotificationData;
@@ -11,10 +12,10 @@ import com.skillbox.javapro21.repository.NotificationRepository;
 import com.skillbox.javapro21.repository.PersonRepository;
 import com.skillbox.javapro21.repository.UserNotificationSettingsRepository;
 import com.skillbox.javapro21.service.NotificationService;
-import io.swagger.models.auth.In;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
@@ -27,6 +28,7 @@ import java.util.stream.Collectors;
 @Component
 @RequiredArgsConstructor
 public class NotificationServiceImpl implements NotificationService {
+
     private final NotificationRepository notificationRepository;
     private final UtilsService utilsService;
     private final PersonRepository personRepository;
@@ -46,10 +48,23 @@ public class NotificationServiceImpl implements NotificationService {
         return utilsService.getListDataResponse(notifications.size(), offset, itemPerPage, convertNotificationsToNotificationData(notifications));
     }
 
+    @Transactional
+    @Override
+    public ListDataResponse<Content> readNotification(ReadNotificationRequest request, Principal principal) {
+        Person person = utilsService.findPersonByEmail(principal.getName());
+        if (request.isAll()) {
+            notificationRepository.deleteAll(notificationRepository.findAllByPerson(person));
+            return getNotifications(0, 20, principal);
+        }
+        notificationRepository.deleteById(request.getId());
+        return getNotifications(0, 20, principal);
+    }
+
 
     private List<Content> convertNotificationsToNotificationData(List<Notification> notifications) {
         return notifications.stream()
                 .map(n -> new NotificationData()
+                            .setId(n.getId())
                             .setSentTime(utilsService.getTimestampFromLocalDateTime(n.getSentTime()))
                             .setType(n.getNotificationType()))
                 .collect(Collectors.toList());
@@ -91,6 +106,5 @@ public class NotificationServiceImpl implements NotificationService {
                             .setContact("Contact"))
                 .toList();
     }
-
 }
 

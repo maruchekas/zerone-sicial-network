@@ -9,6 +9,7 @@ import lombok.experimental.Accessors;
 @Data
 public class NotificationData implements Content {
 
+    private Long id;
     private NotificationType type;
     private Long sentTime;
 }
