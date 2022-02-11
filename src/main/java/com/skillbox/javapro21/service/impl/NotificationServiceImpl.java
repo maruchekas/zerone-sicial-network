@@ -38,13 +38,6 @@ public class NotificationServiceImpl implements NotificationService {
     private final PersonRepository personRepository;
     private final UserNotificationSettingsRepository userNotificationSettingsRepository;
 
-    /**
-     * 1. Получить глобальные настройки оповещений пользователя.
-     * 2. Заполнение Notifications относительно глобальных настроек.
-     * 3. Получение информации и занесение в БД по каждой отдельной настройки.
-     * 4. Сборка ответов в ListDataResponse.
-     */
-
 
     @PostConstruct
     void beforeAll() {

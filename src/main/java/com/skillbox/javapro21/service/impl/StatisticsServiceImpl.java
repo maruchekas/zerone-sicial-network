@@ -60,12 +60,11 @@ public class StatisticsServiceImpl implements StatisticsService {
         Long countPersons = personRepository.findCountPerson();
         List<Person> personList = personRepository.findAllPersons();
         Map<LocalDate, Long> dynamic = new TreeMap<>();
-        List<Person> personListWithBD = personRepository.findAllPersonsWithBirthday();
         YearsUsersStat yearsUsersStat = new YearsUsersStat()
-                .setYoung(getPercentPersonsByYearsOld(personListWithBD,0, 18))
-                .setTeenager(getPercentPersonsByYearsOld(personListWithBD,18, 25))
-                .setAdult(getPercentPersonsByYearsOld(personListWithBD,25, 45))
-                .setElderly(getPercentPersonsByYearsOld(personListWithBD,45, 1000));
+                .setYoung(getPercentPersonsByYearsOld(0, 18))
+                .setTeenager(getPercentPersonsByYearsOld(18, 25))
+                .setAdult(getPercentPersonsByYearsOld(25, 45))
+                .setElderly(getPercentPersonsByYearsOld(45, 1000));
         for (int i = 0; i < 10; i++) {
             LocalDateTime localDateTime = LocalDateTime.now().minusDays(10 - i);
             LocalDate localDate = localDateTime.toLocalDate();
@@ -131,12 +130,9 @@ public class StatisticsServiceImpl implements StatisticsService {
         return allHourStat;
     }
 
-    private String getPercentPersonsByYearsOld(List<Person> personList, int from, int before) {
-        long count = personList.size();
+    private Integer getPercentPersonsByYearsOld(int from, int before) {
         LocalDateTime fromTime = LocalDateTime.now().minusYears(from);
         LocalDateTime beforeTime = LocalDateTime.now().minusYears(before);
-        int size = personRepository.findAllPersonsByYearsOld(beforeTime, fromTime).size();
-        double l = (double) size / count * 100.0;
-        return l + " %";
+        return personRepository.findAllPersonsByYearsOld(beforeTime, fromTime).size();
     }
 }

@@ -93,7 +93,11 @@ public class FriendsServiceImpl implements FriendsService {
         Pageable pageable = PageRequest.of(offset, itemPerPage);
         List<Long> idsFriends = personRepository.findAllPersonFriends(person.getId(), pageable).toList()
                 .stream().map(Person::getId).toList();
-        Page<Person> personPage = personRepository.findRecommendedFriendsByPerson(person.getId(), idsFriends, pageable);
+
+        List<Long> exceptIds = personRepository.findAllConnections(person.getId());
+        exceptIds.add(person.getId());
+
+        Page<Person> personPage = personRepository.findRecommendedFriendsByPerson(exceptIds, idsFriends, pageable);
         return getListDataResponse(personPage, pageable);
     }
 

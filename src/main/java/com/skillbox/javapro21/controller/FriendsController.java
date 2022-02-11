@@ -1,10 +1,12 @@
 package com.skillbox.javapro21.controller;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.skillbox.javapro21.aop.LastActivity;
 import com.skillbox.javapro21.api.request.dialogs.DialogRequestForCreate;
 import com.skillbox.javapro21.api.response.DataResponse;
 import com.skillbox.javapro21.api.response.ListDataResponse;
 import com.skillbox.javapro21.api.response.MessageOkContent;
+import com.skillbox.javapro21.api.response.View;
 import com.skillbox.javapro21.api.response.account.AuthData;
 import com.skillbox.javapro21.api.response.friends.StatusContent;
 import com.skillbox.javapro21.exception.FriendshipNotFoundException;
@@ -72,6 +74,7 @@ public class FriendsController {
     }
 
     @Operation(summary = "Получить список друзей")
+    @JsonView(View.Friends.class)
     @GetMapping("/friends")
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
@@ -83,6 +86,7 @@ public class FriendsController {
     }
 
     @Operation(summary = "Получить список входящик заявок на добавление в друзья")
+    @JsonView(View.Friends.class)
     @GetMapping("/friends/requests/in")
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
@@ -94,6 +98,7 @@ public class FriendsController {
     }
 
     @Operation(summary = "Получить список исходящих заявок на добавление в друзья")
+    @JsonView(View.Friends.class)
     @GetMapping("/friends/requests/out")
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
@@ -105,6 +110,7 @@ public class FriendsController {
     }
 
     @Operation(summary = "Получить список заблокированных пользователей")
+    @JsonView(View.Friends.class)
     @GetMapping("/friends/blocked")
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
@@ -116,6 +122,7 @@ public class FriendsController {
     }
 
     @Operation(summary = "Получить список подписчиков")
+    @JsonView(View.Friends.class)
     @GetMapping("/friends/subscribers")
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
@@ -127,6 +134,7 @@ public class FriendsController {
     }
 
     @Operation(summary = "Получить список подписок")
+    @JsonView(View.Friends.class)
     @GetMapping("/friends/subscriptions")
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
@@ -138,6 +146,7 @@ public class FriendsController {
     }
 
     @Operation(summary = "Получить список рекомендаций")
+    @JsonView(View.Friends.class)
     @GetMapping("/friends/recommendations")
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity

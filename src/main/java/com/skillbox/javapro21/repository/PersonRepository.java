@@ -172,11 +172,16 @@ public interface PersonRepository extends JpaRepository<Person, Integer> {
             "join Friendship f on f.dstPerson.id = p.id " +
             "join FriendshipStatus fs on fs.id = f.friendshipStatus.id " +
             "where f.srcPerson.id in (:idsFriends) " +
-            "and p.id not in (:id) " +
+            "and p.id not in (:exceptPersons) " +
             "and fs.friendshipStatusType = 'FRIEND' " +
             "and p.isBlocked = 0 " +
             "order by p.firstName asc")
-    Page<Person> findRecommendedFriendsByPerson(Long id, List<Long> idsFriends, Pageable pageable);
+    Page<Person> findRecommendedFriendsByPerson(List<Long> exceptPersons, List<Long> idsFriends, Pageable pageable);
+
+    @Query("select p.id from Person p " +
+            "join Friendship f on f.dstPerson.id = p.id " +
+            "where f.srcPerson.id = :id")
+    List<Long> findAllConnections(Long id);
 
     @Query("select count(p) from Person p " +
             "where p.isBlocked = 0")

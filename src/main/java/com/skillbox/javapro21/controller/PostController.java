@@ -1,5 +1,6 @@
 package com.skillbox.javapro21.controller;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.mailjet.client.errors.MailjetException;
 import com.skillbox.javapro21.aop.LastActivity;
 import com.skillbox.javapro21.api.request.post.CommentRequest;
@@ -7,6 +8,7 @@ import com.skillbox.javapro21.api.request.post.PostRequest;
 import com.skillbox.javapro21.api.response.DataResponse;
 import com.skillbox.javapro21.api.response.ListDataResponse;
 import com.skillbox.javapro21.api.response.MessageOkContent;
+import com.skillbox.javapro21.api.response.View;
 import com.skillbox.javapro21.api.response.post.CommentDelete;
 import com.skillbox.javapro21.api.response.post.CommentsData;
 import com.skillbox.javapro21.api.response.post.PostData;
@@ -39,6 +41,7 @@ public class PostController {
     }
 
     @Operation(summary = "Поиск публикации", security = @SecurityRequirement(name = "jwt"))
+    @JsonView(View.Posts.class)
     @GetMapping("/post")
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
@@ -54,6 +57,7 @@ public class PostController {
     }
 
     @Operation(summary = "Поиск публикации по id", security = @SecurityRequirement(name = "jwt"))
+    @JsonView(View.Posts.class)
     @GetMapping("/post/{id}")
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
@@ -63,6 +67,7 @@ public class PostController {
     }
 
     @Operation(summary = "Изменение публикации по id и отложенная публикация", security = @SecurityRequirement(name = "jwt"))
+    @JsonView(View.Posts.class)
     @PutMapping("/post/{id}")
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
@@ -83,6 +88,7 @@ public class PostController {
     }
 
     @Operation(summary = "Восстановление публикации по id", security = @SecurityRequirement(name = "jwt"))
+    @JsonView(View.Posts.class)
     @PutMapping("/post/{id}/recover")
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
@@ -92,6 +98,7 @@ public class PostController {
     }
 
     @Operation(summary = "Получение комментариев к посту", security = @SecurityRequirement(name = "jwt"))
+    @JsonView(View.Posts.class)
     @GetMapping("/post/{id}/comments")
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
@@ -103,6 +110,7 @@ public class PostController {
     }
 
     @Operation(summary = "Добавление комментариев к посту", security = @SecurityRequirement(name = "jwt"))
+    @JsonView(View.Posts.class)
     @PostMapping("/post/{id}/comments")
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
@@ -113,6 +121,7 @@ public class PostController {
     }
 
     @Operation(summary = "Редактирование комментария к посту", security = @SecurityRequirement(name = "jwt"))
+    @JsonView(View.Posts.class)
     @PutMapping("/post/{id}/comments/{comment_id}")
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
@@ -134,6 +143,7 @@ public class PostController {
     }
 
     @Operation(summary = "Восстановление комментария", security = @SecurityRequirement(name = "jwt"))
+    @JsonView(View.Posts.class)
     @PutMapping("/post/{id}/comments/{comment_id}/recover")
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
