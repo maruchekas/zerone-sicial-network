@@ -1,5 +1,6 @@
 package com.skillbox.javapro21.controller;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.skillbox.javapro21.aop.LastActivity;
 import com.skillbox.javapro21.api.request.dialogs.DialogRequestForCreate;
 import com.skillbox.javapro21.api.request.dialogs.LincRequest;
@@ -7,6 +8,7 @@ import com.skillbox.javapro21.api.request.dialogs.MessageTextRequest;
 import com.skillbox.javapro21.api.response.DataResponse;
 import com.skillbox.javapro21.api.response.ListDataResponse;
 import com.skillbox.javapro21.api.response.MessageOkContent;
+import com.skillbox.javapro21.api.response.View;
 import com.skillbox.javapro21.api.response.dialogs.*;
 import com.skillbox.javapro21.exception.MessageNotFoundException;
 import com.skillbox.javapro21.exception.PersonNotFoundException;
@@ -32,6 +34,7 @@ import java.security.Principal;
 public class DialogsController {
     private final DialogsService dialogsService;
 
+    @JsonView(View.Dialogs.class)
     @GetMapping("")
     @Operation(summary = "Получение диалогов", security = @SecurityRequirement(name = "jwt"))
     @PreAuthorize("hasAuthority('user:write')")
@@ -43,6 +46,7 @@ public class DialogsController {
         return new ResponseEntity<>(dialogsService.getDialogs(query, offset, itemPerPage, principal), HttpStatus.OK);
     }
 
+    @JsonView(View.Dialogs.class)
     @PostMapping("")
     @Operation(summary = "Добавление диалога", security = @SecurityRequirement(name = "jwt"))
     @PreAuthorize("hasAuthority('user:write')")
@@ -60,6 +64,7 @@ public class DialogsController {
         return new ResponseEntity<>(dialogsService.getUnreadedDialogs(principal), HttpStatus.OK);
     }
 
+    @JsonView(View.Dialogs.class)
     @DeleteMapping("/{id}")
     @Operation(summary = "Удаление диалога", security = @SecurityRequirement(name = "jwt"))
     @PreAuthorize("hasAuthority('user:write')")
@@ -107,8 +112,9 @@ public class DialogsController {
         return new ResponseEntity<>(dialogsService.joinInLink(id, lincRequest, principal), HttpStatus.OK);
     }
 
+    @JsonView(View.Dialogs.class)
     @GetMapping("/{id}/messages")
-    @Operation(summary = "Получение списка сообщений в диалога", security = @SecurityRequirement(name = "jwt"))
+    @Operation(summary = "Получение списка сообщений диалога", security = @SecurityRequirement(name = "jwt"))
     @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<ListDataResponse<MessageContent>> getMessagesById(@PathVariable int id,
                                                                             @RequestParam(name = "query", defaultValue = "") String query,
@@ -119,6 +125,7 @@ public class DialogsController {
         return new ResponseEntity<>(dialogsService.getMessagesById(id, query, offset, itemPerPage, fromMessageId, principal), HttpStatus.OK);
     }
 
+    @JsonView(View.Dialogs.class)
     @PostMapping("/{id}/messages")
     @Operation(summary = "Отправка сообщений", security = @SecurityRequirement(name = "jwt"))
     @PreAuthorize("hasAuthority('user:write')")
@@ -139,6 +146,7 @@ public class DialogsController {
         return new ResponseEntity<>(dialogsService.deleteMessageById(dialogId, messageId, principal), HttpStatus.OK);
     }
 
+    @JsonView(View.Dialogs.class)
     @PutMapping("/{dialog_id}/messages/{message_id}")
     @Operation(summary = "Редактирование сообщения", security = @SecurityRequirement(name = "jwt"))
     @PreAuthorize("hasAuthority('user:write')")
@@ -150,6 +158,7 @@ public class DialogsController {
         return new ResponseEntity<>(dialogsService.putMessageById(dialogId, messageId, messageText, principal), HttpStatus.OK);
     }
 
+    @JsonView(View.Dialogs.class)
     @PutMapping("/{dialog_id}/messages/{message_id}/recover")
     @Operation(summary = "Восстановление сообщения", security = @SecurityRequirement(name = "jwt"))
     @PreAuthorize("hasAuthority('user:write')")

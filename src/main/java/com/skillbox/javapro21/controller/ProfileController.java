@@ -1,12 +1,10 @@
 package com.skillbox.javapro21.controller;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.skillbox.javapro21.aop.LastActivity;
 import com.skillbox.javapro21.api.request.post.PostRequest;
 import com.skillbox.javapro21.api.request.profile.EditProfileRequest;
-import com.skillbox.javapro21.api.response.Content;
-import com.skillbox.javapro21.api.response.DataResponse;
-import com.skillbox.javapro21.api.response.ListDataResponse;
-import com.skillbox.javapro21.api.response.MessageOkContent;
+import com.skillbox.javapro21.api.response.*;
 import com.skillbox.javapro21.api.response.account.AuthData;
 import com.skillbox.javapro21.api.response.post.PostData;
 import com.skillbox.javapro21.exception.*;
@@ -37,6 +35,7 @@ public class ProfileController {
     }
 
     @Operation(summary = "Получить текущего пользователя", security = @SecurityRequirement(name = "jwt"))
+    @JsonView(View.Profile.class)
     @GetMapping("/me")
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
@@ -45,6 +44,7 @@ public class ProfileController {
     }
 
     @Operation(summary = "Редактирование текущего пользователя", security = @SecurityRequirement(name = "jwt"))
+    @JsonView(View.Profile.class)
     @PutMapping("/me")
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
@@ -62,6 +62,7 @@ public class ProfileController {
     }
 
     @Operation(summary = "Получить пользователя по id", security = @SecurityRequirement(name = "jwt"))
+    @JsonView(View.Profile.class)
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
@@ -70,6 +71,7 @@ public class ProfileController {
     }
 
     @Operation(summary = "Получить публикации пользователя на стене", security = @SecurityRequirement(name = "jwt"))
+    @JsonView(View.Posts.class)
     @GetMapping("/{id}/wall")
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
@@ -81,6 +83,7 @@ public class ProfileController {
     }
 
     @Operation(summary = "Сделать убликацию пользователем на стене", security = @SecurityRequirement(name = "jwt"))
+    @JsonView(View.Posts.class)
     @PostMapping("/{id}/wall")
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
@@ -110,6 +113,7 @@ public class ProfileController {
     @Operation(summary = "Поиск по пользователю", security = @SecurityRequirement(name = "jwt"))
     @LastActivity
     @PreAuthorize("hasAuthority('user:write')")
+    @JsonView(View.Search.class)
     @GetMapping("/search")
     public ResponseEntity<ListDataResponse<Content>> searchByPerson(@RequestParam(name = "first_name", defaultValue = "") String firstName,
                                                                     @RequestParam(name = "last_name", defaultValue = "") String lastName,
