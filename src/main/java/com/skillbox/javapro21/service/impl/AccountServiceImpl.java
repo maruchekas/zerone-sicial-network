@@ -199,7 +199,7 @@ public class AccountServiceImpl implements AccountService {
                         .setFriendsRequest(true)
                         .setMessage(true)
                         .setFriendsBirthday(true));
-        UserNotificationSettings save = userNotificationSettingsRepository.save(notificationType);
+        UserNotificationSettings save = userNotificationSettingsRepository.save(userNotificationSettings);
         ListDataResponse<NotificationSettingData> dataResponse = new ListDataResponse<>();
         dataResponse.setTimestamp(utilsService.getTimestamp());
         dataListNotification(save);

@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static com.skillbox.javapro21.domain.enumeration.FriendshipStatusType.*;
+import static com.skillbox.javapro21.domain.enumeration.NotificationType.*;
 
 @RequiredArgsConstructor
 @Component
@@ -235,12 +236,14 @@ public class UtilsService {
                 .setFriendshipStatus(saveFSSrc);
         friendshipRepository.save(friendshipSrc);
 
-        notificationRepository.save(new Notification()
-                                        .setSentTime(getLocalDateTimeZoneOffsetUtc())
-                                        .setNotificationType(NotificationType.FRIEND_REQUEST)
-                                        .setPerson(dst)
-                                        .setEntityId(friendshipSrc.getId())
-                                        .setContact("Contact"));
+        if (type == REQUEST) {
+            notificationRepository.save(new Notification()
+                    .setSentTime(getLocalDateTimeZoneOffsetUtc())
+                    .setNotificationType(FRIEND_REQUEST)
+                    .setPerson(dst)
+                    .setEntityId(friendshipSrc.getId())
+                    .setContact("Contact"));
+        }
     }
 
     /**

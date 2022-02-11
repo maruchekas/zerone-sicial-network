@@ -32,13 +32,6 @@ public class NotificationServiceImpl implements NotificationService {
     private final PersonRepository personRepository;
     private final UserNotificationSettingsRepository userNotificationSettingsRepository;
 
-    /**
-     * 1. Получить глобальные настройки оповещений пользователя.
-     * 2. Заполнение Notifications относительно глобальных настроек.
-     * 3. Получение информации и занесение в БД по каждой отдельной настройки.
-     * 4. Сборка ответов в ListDataResponse.
-     */
-
 
     @Override
     public ListDataResponse<Content> getNotifications(int offset, int itemPerPage, Principal principal) {
@@ -46,11 +39,11 @@ public class NotificationServiceImpl implements NotificationService {
         Optional<UserNotificationSettings> possibleSettings =
                 userNotificationSettingsRepository.findNotificationSettingsByPersonId(person.getId());
         if (possibleSettings.isEmpty()) {
-            return utilsService.getListDataResponse(0, 0, 20, new ArrayList<>());
+            return utilsService.getListDataResponse(0, offset, itemPerPage, new ArrayList<>());
         }
         List<Notification> notifications = getNotificationListBySetting(possibleSettings.get(), person);
 
-        return utilsService.getListDataResponse(notifications.size(), 0, 20, convertNotificationsToNotificationData(notifications));
+        return utilsService.getListDataResponse(notifications.size(), offset, itemPerPage, convertNotificationsToNotificationData(notifications));
     }
 
 
@@ -85,7 +78,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     private List<Notification> getFriendsBirthdayNotifications(Person person) {
         List<Person> friends = personRepository.findAllPersonFriends(person.getId(), PageRequest.of(0, Integer.MAX_VALUE)).getContent();
-        List<Notification> friendsWithBirthday = friends.stream()
+        return friends.stream()
                 .filter(f -> {
                     LocalDateTime now = utilsService.getLocalDateTimeZoneOffsetUtc();
                     LocalDateTime birthDay = f.getBirthDate();
@@ -97,7 +90,6 @@ public class NotificationServiceImpl implements NotificationService {
                             .setEntityId(f.getId())
                             .setContact("Contact"))
                 .toList();
-        return friendsWithBirthday;
     }
 
 }
