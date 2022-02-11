@@ -8,11 +8,11 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class YearsUsersStat {
     @JsonProperty(value = "0-18")
-    private String young;
+    private Integer young;
     @JsonProperty(value = "18-25")
-    private String teenager;
+    private Integer teenager;
     @JsonProperty(value = "25-45")
-    private String adult;
+    private Integer adult;
     @JsonProperty(value = "45+")
-    private String elderly;
+    private Integer elderly;
 }
