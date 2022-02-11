@@ -8,6 +8,7 @@ import com.skillbox.javapro21.api.response.ListDataResponse;
 import com.skillbox.javapro21.api.response.MessageOkContent;
 import com.skillbox.javapro21.api.response.account.NotificationSettingData;
 import com.skillbox.javapro21.exception.CaptchaCodeException;
+import com.skillbox.javapro21.exception.NotFoundException;
 import com.skillbox.javapro21.exception.TokenConfirmationException;
 import com.skillbox.javapro21.exception.UserExistException;
 import com.skillbox.javapro21.service.AccountService;
@@ -35,7 +36,7 @@ public class AccountController {
 
     @Operation(summary = "Регистрация")
     @PostMapping("/register")
-    public ResponseEntity<?> registration(@RequestBody RegisterRequest registerRequest) throws UserExistException, MailjetException, IOException, CaptchaCodeException {
+    public ResponseEntity<DataResponse<MessageOkContent>> registration(@RequestBody RegisterRequest registerRequest) throws UserExistException, MailjetException, IOException, CaptchaCodeException {
         log.info("Вызван метод регистрации по почте {}", registerRequest.getEmail());
         return new ResponseEntity<>(accountService.registration(registerRequest), HttpStatus.OK);
     }
@@ -53,11 +54,11 @@ public class AccountController {
         return new ResponseEntity<>(accountService.recoveryPasswordMessage(recoveryRequest), HttpStatus.OK);
     }
 
-    @Operation(summary = "Разрешение на восстановление пароля")
-    @GetMapping("/password/send_recovery_massage")
-    public ResponseEntity<String> verifyRecovery(@RequestParam String email,
-                                                 @RequestParam String code) throws TokenConfirmationException {
-        return new ResponseEntity<>(accountService.verifyRecovery(email, code), HttpStatus.OK);
+    @Operation(summary = "Разрешение на восстановление пароля/email/аккаунта")
+    @GetMapping("/send_recovery_massage")
+    public ModelAndView verifyRecovery(@RequestParam String email,
+                                       @RequestParam String code) throws TokenConfirmationException {
+        return accountService.verifyRecovery(email, code);
     }
 
     @Operation(summary = "Восстановление пароля")
@@ -71,8 +72,9 @@ public class AccountController {
     @PutMapping("/password/set")
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
-    public ResponseEntity<DataResponse<MessageOkContent>> changePassword(@RequestBody ChangePasswordRequest changePasswordRequest) {
-        return new ResponseEntity<>(accountService.changePassword(changePasswordRequest), HttpStatus.OK);
+    public ResponseEntity<DataResponse<MessageOkContent>> changePassword(@RequestBody ChangePasswordRequest changePasswordRequest,
+                                                                         Principal principal) throws UserExistException, IOException, MailjetException {
+        return new ResponseEntity<>(accountService.changePassword(changePasswordRequest, principal), HttpStatus.OK);
     }
 
     @Operation(summary = "Смена email", security = @SecurityRequirement(name = "jwt"))
@@ -80,7 +82,7 @@ public class AccountController {
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
     public ResponseEntity<DataResponse<MessageOkContent>> changeEmail(@RequestBody ChangeEmailRequest changeEmailRequest,
-                                                                      Principal principal) {
+                                                                      Principal principal) throws UserExistException, IOException, MailjetException {
         return new ResponseEntity<>(accountService.changeEmail(changeEmailRequest, principal), HttpStatus.OK);
     }
 
@@ -89,7 +91,7 @@ public class AccountController {
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
     public ResponseEntity<DataResponse<MessageOkContent>> changeNotifications(@RequestBody ChangeNotificationsRequest changeNotificationsRequest,
-                                                                              Principal principal) {
+                                                                              Principal principal) throws NotFoundException {
         return new ResponseEntity<>(accountService.changeNotifications(changeNotificationsRequest, principal), HttpStatus.OK);
     }
 
@@ -99,5 +101,11 @@ public class AccountController {
     @LastActivity
     public ResponseEntity<ListDataResponse<NotificationSettingData>> getNotifications(Principal principal) {
         return new ResponseEntity<>(accountService.getNotifications(principal), HttpStatus.OK);
+    }
+
+    @Operation(summary = "Отправка письма на почту для восстановления аккаунта")
+    @PutMapping("/recovery_profile")
+    public ResponseEntity<DataResponse<MessageOkContent>> recoveryProfile(@RequestParam String email) throws MailjetException, IOException, UserExistException {
+        return new ResponseEntity<>(accountService.recoveryProfile(email), HttpStatus.OK);
     }
 }

@@ -28,6 +28,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
+import static com.skillbox.javapro21.domain.enumeration.NotificationType.*;
+
 @SpringBootTest
 @AutoConfigureMockMvc
 @TestPropertySource(value = {"classpath:application-test.properties"})
@@ -38,8 +40,6 @@ public class AccountControllerTest extends AbstractTest {
     private PersonRepository personRepository;
     @Autowired
     private CaptchaRepository captchaRepository;
-    @Autowired
-    private JwtGenerator jwtGenerator;
 
     private Person person;
     private Person verifyPerson;
@@ -183,7 +183,6 @@ public class AccountControllerTest extends AbstractTest {
     void changePassword() throws Exception {
         ChangePasswordRequest changePasswordRequest = new ChangePasswordRequest();
         changePasswordRequest.setPassword(verifyPerson.getPassword());
-        changePasswordRequest.setToken(jwtGenerator.generateToken(verifyPerson.getEmail()));
 
         mockMvc.perform(MockMvcRequestBuilders
                         .put("/api/v1/account/password/set")
@@ -208,14 +207,14 @@ public class AccountControllerTest extends AbstractTest {
                         .content(mapper.writeValueAsString(changeEmailRequest))
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.status().isOk());
+                .andExpect(MockMvcResultMatchers.status().is4xxClientError());
     }
 
     @Test
     @WithMockUser(username = "test1@test.ru", authorities = "user:write")
     void changeNotifications() throws Exception {
         ChangeNotificationsRequest changeNotificationsRequest = new ChangeNotificationsRequest();
-        changeNotificationsRequest.setNotificationType(NotificationType.MESSAGE);
+        changeNotificationsRequest.setNotificationType(MESSAGE);
         changeNotificationsRequest.setEnable(true);
 
         mockMvc.perform(MockMvcRequestBuilders
@@ -225,7 +224,7 @@ public class AccountControllerTest extends AbstractTest {
                         .content(mapper.writeValueAsString(changeNotificationsRequest))
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.status().isOk());
+                .andExpect(MockMvcResultMatchers.status().isNotFound());
     }
 
     @Test

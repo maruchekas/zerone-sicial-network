@@ -1,6 +1,7 @@
 package com.skillbox.javapro21.controller;
 
 import com.skillbox.javapro21.aop.LastActivity;
+import com.skillbox.javapro21.api.request.notification.ReadNotificationRequest;
 import com.skillbox.javapro21.api.response.Content;
 import com.skillbox.javapro21.api.response.ListDataResponse;
 import com.skillbox.javapro21.service.NotificationService;
@@ -31,7 +32,6 @@ public class NotificationsController {
     public ResponseEntity<ListDataResponse<Content>> getNotifications(@RequestParam(name = "offset", defaultValue = "0") int offset,
                                                                       @RequestParam(name = "item_per_page", defaultValue = "20") int itemPerPage,
                                                                       Principal principal) {
-//        log.info("Получение списка уведомлений ожидающих прочтения {}", principal.getName());
         return new ResponseEntity<>(notificationService.getNotifications(offset, itemPerPage, principal), HttpStatus.OK);
     }
 
@@ -39,10 +39,8 @@ public class NotificationsController {
     @PutMapping("")
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
-    public ResponseEntity<String> verifyRegistration(@RequestParam int id,
-                                                     @RequestParam boolean all,
-                                                     Principal principal) {
-//        log.info("Can`t verify user with email {}", principal.getName());
-        return new ResponseEntity<>("уведомления отмечены прочтенными", HttpStatus.OK);
+    public ResponseEntity<ListDataResponse<Content>> verifyRegistration(@RequestBody ReadNotificationRequest request,
+                                                                        Principal principal) {
+        return new ResponseEntity<>(notificationService.readNotification(request, principal), HttpStatus.OK);
     }
 }

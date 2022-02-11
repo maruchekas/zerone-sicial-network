@@ -35,6 +35,8 @@ import java.time.ZoneOffset;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.skillbox.javapro21.domain.enumeration.NotificationType.*;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -146,7 +148,6 @@ public class PostServiceImpl implements PostService {
 
     @Transactional
     @Override
-    //:TODO добавить имя и фамилию в ответ на комментарий (parent_id)
     public DataResponse<CommentsData> postComments(Long id, CommentRequest commentRequest, Principal principal) throws PostNotFoundException, CommentNotFoundException {
         Person person = utilsService.findPersonByEmail(principal.getName());
         Post post = postRepository.findPostById(id).orElseThrow(() -> new PostNotFoundException("Поста с id " + id + "не существует"));
@@ -165,11 +166,11 @@ public class PostServiceImpl implements PostService {
         postCommentRepository.save(postComment);
 
         notificationRepository.save(new Notification()
-                                        .setSentTime(utilsService.getLocalDateTimeZoneOffsetUtc())
-                                        .setNotificationType(NotificationType.POST_COMMENT)
-                                        .setPerson(post.getAuthor())
-                                        .setEntityId(postComment.getParent() == null ? post.getId() : postComment.getParent().getId())
-                                        .setContact("contact"));
+                        .setSentTime(utilsService.getLocalDateTimeZoneOffsetUtc())
+                        .setNotificationType(postComment.getParent() == null ? POST_COMMENT : COMMENT_COMMENT)
+                        .setPerson(post.getAuthor())
+                        .setEntityId(postComment.getParent() == null ? post.getId() : postComment.getParent().getId())
+                        .setContact("contact"));
 
         return getCommentResponse(postComment, person);
     }

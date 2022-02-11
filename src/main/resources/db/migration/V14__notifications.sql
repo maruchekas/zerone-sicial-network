@@ -10,7 +10,7 @@ VALUES (31, true, true, true, true, true, true);
 
 INSERT INTO persons (first_name, last_name, reg_date, birth_date, email, phone, password, photo, about, town, country,
                      confirmation_code, is_approved, messages_permission, user_type, last_online_time, is_blocked)
-VALUES ('Сергей', 'Сергеев', '2021-07-30 23:30:03', '1995-08-15', 'mwittey1@ovh.net', '+7 (917) 836-9756', '$2a$12$xdO/.HMmiJV1SUTRAhSgAeYTPZaSxi0mwi0tnoeug2mQmCu1bghue',
+VALUES ('Sergey', 'Sergeev', '2021-07-30 23:30:03', '1995-08-15', 'mwittey1@ovh.net', '+7 (917) 836-9756', '$2a$12$xdO/.HMmiJV1SUTRAhSgAeYTPZaSxi0mwi0tnoeug2mQmCu1bghue',
         'https://robohash.org/velsaepeea.png?size=50x50&set=set1',
         'Для того, чтобы служить публике, надо иметь смелость и быть готовым ей не нравиться.', 'Курск', 'Россия',
         '1899', 1, 'FRIENDS', 'USER', '2021-12-16 16:57:08', 0);

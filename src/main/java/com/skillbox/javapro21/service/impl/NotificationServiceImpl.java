@@ -1,5 +1,6 @@
 package com.skillbox.javapro21.service.impl;
 
+import com.skillbox.javapro21.api.request.notification.ReadNotificationRequest;
 import com.skillbox.javapro21.api.response.Content;
 import com.skillbox.javapro21.api.response.ListDataResponse;
 import com.skillbox.javapro21.api.response.notification.NotificationData;
@@ -14,6 +15,7 @@ import com.skillbox.javapro21.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
@@ -26,6 +28,7 @@ import java.util.stream.Collectors;
 @Component
 @RequiredArgsConstructor
 public class NotificationServiceImpl implements NotificationService {
+
     private final NotificationRepository notificationRepository;
     private final UtilsService utilsService;
     private final PersonRepository personRepository;
@@ -45,11 +48,23 @@ public class NotificationServiceImpl implements NotificationService {
         Optional<UserNotificationSettings> possibleSettings =
                 userNotificationSettingsRepository.findNotificationSettingsByPersonId(person.getId());
         if (possibleSettings.isEmpty()) {
-            return utilsService.getListDataResponse(0, 0, 20, new ArrayList<>());
+            return utilsService.getListDataResponse(0, offset, itemPerPage, new ArrayList<>());
         }
         List<Notification> notifications = getNotificationListBySetting(possibleSettings.get(), person);
 
-        return utilsService.getListDataResponse(notifications.size(), 0, 20, convertNotificationsToNotificationData(notifications));
+        return utilsService.getListDataResponse(notifications.size(), offset, itemPerPage, convertNotificationsToNotificationData(notifications));
+    }
+
+    @Transactional
+    @Override
+    public ListDataResponse<Content> readNotification(ReadNotificationRequest request, Principal principal) {
+        Person person = utilsService.findPersonByEmail(principal.getName());
+        if (request.isAll()) {
+            notificationRepository.deleteAll(notificationRepository.findAllByPerson(person));
+            return getNotifications(0, 20, principal);
+        }
+        notificationRepository.deleteById(request.getId());
+        return getNotifications(0, 20, principal);
     }
 
     private NotificationData convertNotificationToNotificationData(Notification notification) {
@@ -62,8 +77,9 @@ public class NotificationServiceImpl implements NotificationService {
     private List<Content> convertNotificationsToNotificationData(List<Notification> notifications) {
         return notifications.stream()
                 .map(n -> new NotificationData()
-                        .setSentTime(utilsService.getTimestampFromLocalDateTime(n.getSentTime()))
-                        .setType(String.valueOf(n.getNotificationType())))
+                            .setId(n.getId())
+                            .setSentTime(utilsService.getTimestampFromLocalDateTime(n.getSentTime()))
+                            .setType(n.getNotificationType()))
                 .collect(Collectors.toList());
     }
 
@@ -90,19 +106,18 @@ public class NotificationServiceImpl implements NotificationService {
 
     private List<Notification> getFriendsBirthdayNotifications(Person person) {
         List<Person> friends = personRepository.findAllPersonFriends(person.getId(), PageRequest.of(0, Integer.MAX_VALUE)).getContent();
-        List<Notification> friendsWithBirthday = friends.stream()
+        return friends.stream()
                 .filter(f -> {
                     LocalDateTime now = utilsService.getLocalDateTimeZoneOffsetUtc();
                     LocalDateTime birthDay = f.getBirthDate();
-                    return (now.getMonth().equals(birthDay.getMonth()) && now.getDayOfMonth() == birthDay.getDayOfMonth());
-                })
+                    return (now.getMonth().equals(birthDay.getMonth()) && now.getDayOfMonth() == birthDay.getDayOfMonth());})
                 .map(f -> new Notification()
-                        .setSentTime(utilsService.getLocalDateTimeZoneOffsetUtc())
-                        .setNotificationType(NotificationType.FRIEND_BIRTHDAY)
-                        .setPerson(person)
-                        .setEntityId(f.getId())
-                        .setContact("Contact"))
+                            .setSentTime(utilsService.getLocalDateTimeZoneOffsetUtc())
+                            .setNotificationType(NotificationType.FRIEND_BIRTHDAY)
+                            .setPerson(person)
+                            .setEntityId(f.getId())
+                            .setContact("Contact"))
                 .toList();
-        return friendsWithBirthday;
     }
 }
+
