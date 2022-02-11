@@ -14,6 +14,8 @@ import com.skillbox.javapro21.repository.UserNotificationSettingsRepository;
 import com.skillbox.javapro21.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +29,7 @@ import java.util.stream.Collectors;
 
 
 @Component
+@EnableScheduling
 @RequiredArgsConstructor
 public class NotificationServiceImpl implements NotificationService {
 
@@ -38,21 +41,12 @@ public class NotificationServiceImpl implements NotificationService {
 
     @PostConstruct
     void beforeAll() {
-        Thread birthDayReminder = new Thread(() -> {
-            checkBirthdayNotifications();
-            while (true) {
-                try {
-                    Thread.sleep(1000 * 60 * 60);
-                    checkBirthdayNotifications();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-        birthDayReminder.start();
+        utilsService.setNotificationService(this);
+        checkBirthdayNotifications();
     }
 
-    private void checkBirthdayNotifications() {
+    @Scheduled(cron = "5 0 0 * * *")
+    void checkBirthdayNotifications() {
         LocalDateTime now = utilsService.getLocalDateTimeZoneOffsetUtc();
         List<Person> allUsers = personRepository.findAll();
         for (Person person : allUsers) {
@@ -61,11 +55,11 @@ public class NotificationServiceImpl implements NotificationService {
                 LocalDateTime birthDay = person.getBirthDate();
                 if (now.getMonth().equals(birthDay.getMonth()) && now.getDayOfMonth() == birthDay.getDayOfMonth()) {
                     Notification notification = new Notification()
-                            .setSentTime(utilsService.getLocalDateTimeZoneOffsetUtc())
-                            .setNotificationType(NotificationType.FRIEND_BIRTHDAY)
-                            .setPerson(person)
-                            .setEntityId(friend.getId())
-                            .setContact("Contact");
+                                                .setSentTime(utilsService.getLocalDateTimeZoneOffsetUtc())
+                                                .setNotificationType(NotificationType.FRIEND_BIRTHDAY)
+                                                .setPerson(person)
+                                                .setEntityId(friend.getId())
+                                                .setContact("Contact");
                     notificationRepository.save(notification);
                 }
             }
@@ -127,6 +121,19 @@ public class NotificationServiceImpl implements NotificationService {
             result.addAll(notificationRepository.findAllByNotificationTypeEquals(NotificationType.FRIEND_BIRTHDAY));
         }
         return result;
+    }
+
+    public void checkBirthdayFromOneAndCreateNotificationToAnotherInCase(Person one, Person another) {
+        LocalDateTime now = utilsService.getLocalDateTimeZoneOffsetUtc();
+        if (now.getMonth().equals(one.getBirthDate().minusDays(1).getMonth()) && now.getDayOfMonth() == one.getBirthDate().getDayOfMonth()) {
+            Notification notification = new Notification()
+                                            .setSentTime(utilsService.getLocalDateTimeZoneOffsetUtc())
+                                            .setNotificationType(NotificationType.FRIEND_BIRTHDAY)
+                                            .setPerson(another)
+                                            .setEntityId(one.getId())
+                                            .setContact("Contact");
+            notificationRepository.save(notification);
+        }
     }
 }
 
