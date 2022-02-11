@@ -1,10 +1,9 @@
 package com.skillbox.javapro21.config;
 
 public final class Constants {
-
     public static final String CLOUDINARY_AVATARS_FOLDER = "Zerone/Users/";
     public static final String BASE_ROBOTIC_AVA_URL = "https://robohash.org/";
-    public static final String RECOVERY_PASSWORD_URL = "/api/v1/account/password/send_recovery_massage?email=";
+    public static final String RECOVERY_URL = "/api/v1/account/send_recovery_massage?email=";
     public static final String COMPLETE_REGISTER_URL = "/api/v1/account/register/complete?email=";
     public static final String AVATAR_CONFIG = ".png?size=360x360&set=set";
     public static final int CAPTCHA_WIDTH = 193;
@@ -19,11 +18,9 @@ public final class Constants {
     public static final String USER_EXISTS_ERR = "Пользователь с данным email уже подтвержден " +
             "или слишком много попыток пройти регистрацию по одному email";
 
-
     public enum FileType {
         IMAGE
     }
-
 
     private Constants() {
     }
