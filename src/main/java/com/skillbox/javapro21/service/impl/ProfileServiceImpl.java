@@ -14,10 +14,17 @@ import com.skillbox.javapro21.domain.Post;
 import com.skillbox.javapro21.domain.Tag;
 import com.skillbox.javapro21.domain.enumeration.FriendshipStatusType;
 import com.skillbox.javapro21.exception.*;
-import com.skillbox.javapro21.repository.*;
+import com.skillbox.javapro21.repository.FriendshipRepository;
+import com.skillbox.javapro21.repository.FriendshipStatusRepository;
+import com.skillbox.javapro21.repository.PersonRepository;
+import com.skillbox.javapro21.repository.PostRepository;
 import com.skillbox.javapro21.service.ProfileService;
 import com.skillbox.javapro21.service.TagService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -37,6 +44,7 @@ import java.util.stream.Collectors;
 
 import static com.skillbox.javapro21.domain.enumeration.FriendshipStatusType.*;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class ProfileServiceImpl implements ProfileService {
@@ -50,12 +58,18 @@ public class ProfileServiceImpl implements ProfileService {
     private final FriendshipStatusRepository friendshipStatusRepository;
 
     @Override
+    @Cacheable(value = "person", key = "#principal.name")
     public DataResponse<AuthData> getPerson(Principal principal) {
+        log.info("caching person " + principal.getName());
         Person person = utilsService.findPersonByEmail(principal.getName());
         return getPersonDataResponse(person);
     }
 
     @Override
+    @Caching(evict = {
+            @CacheEvict(value = "person", key = "#principal.name", allEntries = true),
+            @CacheEvict(value = "persons", allEntries = true)
+    })
     public DataResponse<AuthData> editPerson(Principal principal, EditProfileRequest editProfileRequest) {
         Person person = utilsService.findPersonByEmail(principal.getName());
         Person sPerson = savePersonByRequest(person, editProfileRequest);
@@ -63,6 +77,10 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     @Override
+    @Caching(evict = {
+            @CacheEvict(value = "person", key = "#principal.name", allEntries = true),
+            @CacheEvict(value = "persons", allEntries = true)
+    })
     public DataResponse<MessageOkContent> deletePerson(Principal principal) {
         Person person = utilsService.findPersonByEmail(principal.getName())
                 .setIsBlocked(2);
@@ -95,12 +113,15 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     @Override
+    @Caching(evict = {
+            @CacheEvict(value = "person", key = "#principal.name", allEntries = true),
+            @CacheEvict(value = "persons", allEntries = true)
+    })
     public DataResponse<PostData> postPostOnPersonWallById(Long id, Long publishDate, PostRequest postRequest, Principal principal) throws InterlockedFriendshipStatusException, PersonNotFoundException, PostNotFoundException {
         Person src = utilsService.findPersonByEmail(principal.getName());
         Person dst = personRepository.findPersonById(id).orElseThrow(() -> new PersonNotFoundException("Пользователя с данным id не существует"));
         Post post;
         Set<Tag> tags = tagService.addTagsToPost(postRequest.getTags());
-
         if (src.getId().equals(id)) {
             post = new Post()
                     .setTitle(postRequest.getTitle())
@@ -130,11 +151,14 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     @Override
+    @Caching(evict = {
+            @CacheEvict(value = "person", key = "#principal.name", allEntries = true),
+            @CacheEvict(value = "persons", allEntries = true)
+    })
     public DataResponse<MessageOkContent> blockPersonById(Long id, Principal principal) throws BlockPersonHimselfException, InterlockedFriendshipStatusException, PersonNotFoundException, FriendshipNotFoundException {
         Person src = utilsService.findPersonByEmail(principal.getName());
         Person dst = personRepository.findPersonById(id).orElseThrow(() -> new PersonNotFoundException("Пользователя с данным id не существует"));
         if (src.getId().equals(dst.getId())) throw new BlockPersonHimselfException("Пользователь пытается заблокировать сам себя");
-
         Optional<Friendship> optionalFriendship = friendshipRepository.findFriendshipBySrcPersonAndDstPerson(src.getId(), id);
         if (optionalFriendship.isEmpty()) {
             utilsService.createFriendship(src, dst, BLOCKED);
@@ -152,6 +176,10 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     @Override
+    @Caching(evict = {
+            @CacheEvict(value = "person", key = "#principal.name", allEntries = true),
+            @CacheEvict(value = "persons", allEntries = true)
+    })
     public DataResponse<MessageOkContent> unblockPersonById(Long id, Principal principal) throws PersonNotFoundException, BlockPersonHimselfException, NonBlockedFriendshipException, FriendshipNotFoundException {
         Person src = utilsService.findPersonByEmail(principal.getName());
         Person dst = personRepository.findPersonById(id).orElseThrow(() -> new PersonNotFoundException("Пользователя с данным id не существует"));
@@ -172,24 +200,21 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     @Override
+    @Cacheable(value = "persons", key = "#firstName + #lastName + #ageFrom + #ageTo + #country + #city + #offset + #limit + #principal.name")
     public ListDataResponse<Content> searchByPerson(String firstName, String lastName, Integer ageFrom, Integer ageTo,
                                                     String country, String city,
                                                     Integer offset, Integer limit, Principal principal) {
         Person currentUser = utilsService.findPersonByEmail(principal.getName());
         Pageable nextPage = PageRequest.of(offset, limit);
-
         String selectAge = (ageFrom == 0 || ageTo == 150)
                 ? "AND (DATE_PART('year', AGE(birth_date)) BETWEEN (?) AND (?) OR birth_date IS NULL) "
                 : "AND DATE_PART('year', AGE(birth_date)) BETWEEN (?) AND (?) ";
-
         String selectCountry = country.isBlank()
                 ? "AND (country ILIKE CONCAT('%', (?), '%') OR country IS NULL) "
                 : "AND country ILIKE CONCAT('%', (?), '%') ";
-
         String selectCity = city.isBlank()
                 ? "AND (town ILIKE CONCAT('%', (?), '%') OR town IS NULL) "
                 : "AND town ILIKE CONCAT('%', (?), '%') ";
-
         String query = "(" +
                 "SELECT id FROM persons " +
                 "WHERE id != (?) " +
@@ -206,7 +231,6 @@ public class ProfileServiceImpl implements ProfileService {
                 selectCity +
                 "AND is_blocked = 0" +
                 ")";
-
         List<Long> ids = jdbcTemplate.query(query,
                 (ResultSet rs, int rowNum) -> rs.getLong("id"),
                 currentUser.getId(), currentUser.getId(), firstName, lastName, ageFrom, ageTo, country, city);
@@ -217,13 +241,10 @@ public class ProfileServiceImpl implements ProfileService {
                     (ResultSet rs, int rowNum) -> rs.getLong("id"),
                     currentUser.getId(), currentUser.getId(), firstName, lastName, ageFrom, ageTo, country, city);
         }
-
         Page<Person> personPage = personRepository.findAllValidById(ids, nextPage);
-
         List<Content> data = personPage.getContent().stream()
                 .map(p -> utilsService.getAuthData(p, null))
                 .collect(Collectors.toList());
-
         return utilsService.getListDataResponse((int) personPage.getTotalElements(), offset, limit, data);
     }
 
@@ -256,5 +277,4 @@ public class ProfileServiceImpl implements ProfileService {
         personRepository.save(personById);
         return personById;
     }
-
 }
