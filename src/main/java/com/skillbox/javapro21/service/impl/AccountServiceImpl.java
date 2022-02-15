@@ -192,6 +192,7 @@ public class AccountServiceImpl implements AccountService {
     @Override
     @Cacheable(value = "notifications", key = "#principal.name")
     public ListDataResponse<NotificationSettingData> getNotifications(Principal principal) {
+        log.info("caching notifications for " + principal.getName());
         Person person = utilsService.findPersonByEmail(principal.getName());
         NotificationType notificationType = notificationTypeRepository.findNotificationTypeByPersonId(person.getId())
                 .orElse(new NotificationType()

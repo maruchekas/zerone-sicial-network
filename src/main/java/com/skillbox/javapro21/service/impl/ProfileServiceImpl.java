@@ -204,6 +204,8 @@ public class ProfileServiceImpl implements ProfileService {
     public ListDataResponse<Content> searchByPerson(String firstName, String lastName, Integer ageFrom, Integer ageTo,
                                                     String country, String city,
                                                     Integer offset, Integer limit, Principal principal) {
+
+        log.info("caching persons search for " + principal.getName());
         Person currentUser = utilsService.findPersonByEmail(principal.getName());
         Pageable nextPage = PageRequest.of(offset, limit);
         String selectAge = (ageFrom == 0 || ageTo == 150)
