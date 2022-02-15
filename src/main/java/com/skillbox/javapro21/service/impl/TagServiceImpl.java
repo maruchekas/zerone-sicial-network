@@ -7,6 +7,10 @@ import com.skillbox.javapro21.domain.Tag;
 import com.skillbox.javapro21.repository.TagRepository;
 import com.skillbox.javapro21.service.TagService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -18,66 +22,64 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class TagServiceImpl implements TagService {
-
     private final TagRepository tagRepository;
     private final UtilsService utilsService;
 
+    @Cacheable(value = "tags")
     public ListDataResponse<TagData> getTags(String tag, int offset, int itemPerPage) {
-
+        log.info("getTags");
         Pageable pageable = PageRequest.of(offset / itemPerPage, itemPerPage);
         Page<Tag> pageableTagList = tagRepository.findAllByTag(tag.toLowerCase(), pageable);
-
         return getTagResponse(pageableTagList, offset, itemPerPage);
     }
 
-    public DataResponse<TagData> addTag(String name) {
+    @CacheEvict(value = "tags")
+    public DataResponse<TagData> addTag(String tag) {
         DataResponse<TagData> dataResponse = new DataResponse<>();
         TagData tagData = new TagData();
-        Tag tag = tagRepository.findByName(name);
-        if (tag == null) {
-            tag = new Tag();
-            tag.setTag(name);
+        Tag tagByName = tagRepository.findByName(tag);
+        if (tagByName == null) {
+            tagByName = new Tag();
+            tagByName.setTag(tag);
             dataResponse.setError("ok");
             dataResponse.setTimestamp(utilsService.getTimestampFromLocalDateTime(LocalDateTime.now()));
             dataResponse.setData(tagData);
-            tagRepository.save(tag);
-            tagData.setId(tag.getId());
-            tagData.setTag(name);
+            tagRepository.save(tagByName);
+            tagData.setId(tagByName.getId());
+            tagData.setTag(tag);
             return dataResponse;
         }
         dataResponse.setError("ok");
         dataResponse.setTimestamp(utilsService.getTimestampFromLocalDateTime(LocalDateTime.now()));
-        tagData.setTag(tag.getTag());
-        tagData.setId(tag.getId());
+        tagData.setTag(tagByName.getTag());
+        tagData.setId(tagByName.getId());
         dataResponse.setData(tagData);
-        tagRepository.save(tag);
+        tagRepository.save(tagByName);
         return dataResponse;
 
     }
 
+    @CacheEvict(value = "tags")
     public DataResponse<TagData> deleteTagById(long id) {
         DataResponse<TagData> dataResponse = new DataResponse<>();
         Tag tag = getTagById(id);
-
         if (tag == null) {
             return dataResponse
                     .setError("invalid_request")
                     .setTimestamp(utilsService.getTimestampFromLocalDateTime(LocalDateTime.now()));
-
         }
         TagData tagData = new TagData()
                 .setId(tag.getId())
                 .setTag(tag.getTag());
         tagRepository.delete(tag);
-
         return dataResponse
                 .setError("ok")
                 .setTimestamp(utilsService.getTimestampFromLocalDateTime(LocalDateTime.now()))
                 .setData(tagData);
-
     }
 
     private Tag getTagById(long id) {
