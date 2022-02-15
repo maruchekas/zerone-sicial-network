@@ -45,7 +45,6 @@ public class ProfileServiceImpl implements ProfileService {
     private final TagService tagService;
     private final PersonRepository personRepository;
     private final PostRepository postRepository;
-    private final TagRepository tagRepository;
     private final JdbcTemplate jdbcTemplate;
     private final FriendshipRepository friendshipRepository;
     private final FriendshipStatusRepository friendshipStatusRepository;
