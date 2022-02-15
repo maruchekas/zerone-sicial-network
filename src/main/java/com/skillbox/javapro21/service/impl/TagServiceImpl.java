@@ -9,7 +9,6 @@ import com.skillbox.javapro21.service.TagService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -29,15 +28,17 @@ public class TagServiceImpl implements TagService {
     private final TagRepository tagRepository;
     private final UtilsService utilsService;
 
-    @Cacheable(value = "tags")
+    @Override
+    @Cacheable(value = "tags", key = "#tag + #offset + #itemPerPage")
     public ListDataResponse<TagData> getTags(String tag, int offset, int itemPerPage) {
-        log.info("getTags");
+        log.info("caching tags " + tag + " " + offset + " " + itemPerPage);
         Pageable pageable = PageRequest.of(offset / itemPerPage, itemPerPage);
         Page<Tag> pageableTagList = tagRepository.findAllByTag(tag.toLowerCase(), pageable);
         return getTagResponse(pageableTagList, offset, itemPerPage);
     }
 
-    @CacheEvict(value = "tags")
+    @Override
+    @CacheEvict(value = "tags", allEntries = true)
     public DataResponse<TagData> addTag(String tag) {
         DataResponse<TagData> dataResponse = new DataResponse<>();
         TagData tagData = new TagData();
@@ -60,10 +61,10 @@ public class TagServiceImpl implements TagService {
         dataResponse.setData(tagData);
         tagRepository.save(tagByName);
         return dataResponse;
-
     }
 
-    @CacheEvict(value = "tags")
+    @Override
+    @CacheEvict(value = "tags", allEntries = true)
     public DataResponse<TagData> deleteTagById(long id) {
         DataResponse<TagData> dataResponse = new DataResponse<>();
         Tag tag = getTagById(id);

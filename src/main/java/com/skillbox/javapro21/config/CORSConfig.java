@@ -11,7 +11,6 @@ public class CORSConfig implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-
         registry.addMapping("/**")
                 .allowedOrigins("https://zerone-2022-develop.herokuapp.com/")
                 .allowedOrigins("https://zerone-2022.herokuapp.com/")
