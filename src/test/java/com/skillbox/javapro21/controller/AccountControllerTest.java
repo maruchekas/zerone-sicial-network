@@ -39,8 +39,6 @@ public class AccountControllerTest extends AbstractTest {
     private PersonRepository personRepository;
     @Autowired
     private CaptchaRepository captchaRepository;
-    @Autowired
-    private JwtGenerator jwtGenerator;
 
     private Person person;
     private Person verifyPerson;
@@ -184,7 +182,6 @@ public class AccountControllerTest extends AbstractTest {
     void changePassword() throws Exception {
         ChangePasswordRequest changePasswordRequest = new ChangePasswordRequest();
         changePasswordRequest.setPassword(verifyPerson.getPassword());
-        changePasswordRequest.setToken(jwtGenerator.generateToken(verifyPerson.getEmail()));
 
         mockMvc.perform(MockMvcRequestBuilders
                         .put("/api/v1/account/password/set")

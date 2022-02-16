@@ -1,7 +1,9 @@
 package com.skillbox.javapro21.controller;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.skillbox.javapro21.aop.LastActivity;
 import com.skillbox.javapro21.api.response.ListDataResponse;
+import com.skillbox.javapro21.api.response.View;
 import com.skillbox.javapro21.api.response.post.PostData;
 import com.skillbox.javapro21.service.PostService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -26,6 +28,7 @@ public class FeedsController {
     private final PostService postService;
 
     @Operation(summary = "Поиск публикации", security = @SecurityRequirement(name = "jwt"))
+    @JsonView(View.Posts.class)
     @GetMapping("")
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity

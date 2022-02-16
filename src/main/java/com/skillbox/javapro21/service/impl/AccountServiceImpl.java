@@ -8,7 +8,6 @@ import com.skillbox.javapro21.api.response.MessageOkContent;
 import com.skillbox.javapro21.api.response.account.NotificationSettingData;
 import com.skillbox.javapro21.config.MailjetSender;
 import com.skillbox.javapro21.config.properties.ConfirmationUrl;
-import com.skillbox.javapro21.config.security.JwtGenerator;
 import com.skillbox.javapro21.domain.NotificationType;
 import com.skillbox.javapro21.domain.Person;
 import com.skillbox.javapro21.domain.enumeration.MessagesPermission;
@@ -26,8 +25,6 @@ import com.skillbox.javapro21.service.ResourceService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -53,7 +50,6 @@ public class AccountServiceImpl implements AccountService {
     private final CaptchaRepository captchaRepository;
     private final MailjetSender mailMessage;
     private final ConfirmationUrl confirmationUrl;
-    private final JwtGenerator jwtGenerator;
     private final NotificationTypeRepository notificationTypeRepository;
     private final ResourceService resourceService;
 
@@ -62,7 +58,7 @@ public class AccountServiceImpl implements AccountService {
     private static String baseUrl;
 
     @Override
-    public ResponseEntity<?> registration(RegisterRequest registerRequest)
+    public DataResponse<MessageOkContent> registration(RegisterRequest registerRequest)
             throws UserExistException, MailjetException, IOException, CaptchaCodeException {
         String captcha = registerRequest.getCaptcha();
         if (!captcha.equals(captchaRepository.findBySecretCode(registerRequest.getCaptchaSecret()).getCode())) {
@@ -81,7 +77,7 @@ public class AccountServiceImpl implements AccountService {
             createNewPerson(registerRequest);
             mailMessageForRegistration(registerRequest);
         }
-        return new ResponseEntity<>(utilsService.getMessageOkResponse(), HttpStatus.OK);
+        return utilsService.getMessageOkResponse();
     }
 
     @Override
@@ -93,14 +89,12 @@ public class AccountServiceImpl implements AccountService {
                     .setUserType(UserType.USER)
                     .setMessagesPermission(MessagesPermission.ALL)
                     .setConfirmationCode("");
-
             try {
                 person.setPhoto(resourceService.setDefaultAvatarToUser(email));
             } catch (IOException e) {
                 person.setPhoto(null);
                 e.printStackTrace();
             }
-
             personRepository.save(person);
         } else throw new TokenConfirmationException(CONFIRMATION_CODE_ERR);
         return new ModelAndView("redirect:" + baseUrl);
@@ -109,43 +103,66 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public String recoveryPasswordMessage(RecoveryRequest recoveryRequest) throws MailjetException, IOException {
         String token = utilsService.getToken();
-        String text = confirmationUrl.getBaseUrl() + RECOVERY_PASSWORD_URL + recoveryRequest.getEmail() + "&code=" + token;
+        String text = confirmationUrl.getBaseUrl() + RECOVERY_URL + recoveryRequest.getEmail() + "&code=" + token;
         confirmPersonAndSendEmail(recoveryRequest.getEmail(), text, token);
         return MESSAGE_SENT_SUCCESS;
     }
 
     @Override
-    public String verifyRecovery(String email, String code) throws TokenConfirmationException {
+    public ModelAndView verifyRecovery(String email, String code) throws TokenConfirmationException {
         Person person = utilsService.findPersonByEmail(email);
         if (person.getConfirmationCode().equals(code)) {
-            return PASSWORD_CHANGE_ALLOW;
+            if (person.getIsBlocked() == 2) {
+                person.setIsBlocked(0);
+                personRepository.save(person);
+                return new ModelAndView("redirect:" + baseUrl);
+            }
+            person
+                    .setIsApproved(1)
+                    .setUserType(UserType.USER)
+                    .setMessagesPermission(MessagesPermission.ALL)
+                    .setConfirmationCode("");
+            personRepository.save(person);
+            return new ModelAndView("redirect:" + baseUrl);
         } else throw new TokenConfirmationException(CONFIRMATION_CODE_ERR);
     }
 
     @Override
     public String recoveryPassword(String email, String password) {
         Person person = utilsService.findPersonByEmail(email);
-        person.setPassword(password);
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
+        person.setPassword(passwordEncoder.encode(password));
         personRepository.save(person);
         return PASSWORD_CHANGE_SUCCESS;
     }
 
     @Override
-    public DataResponse<MessageOkContent> changePassword(ChangePasswordRequest changePasswordRequest) {
-        Person person = utilsService.findPersonByEmail(jwtGenerator.getLoginFromToken(changePasswordRequest.getToken()));
+    public DataResponse<MessageOkContent> changePassword(ChangePasswordRequest changePasswordRequest, Principal principal) throws IOException, MailjetException {
+        Person person = utilsService.findPersonByEmail(principal.getName());
+        String token = utilsService.getToken();
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
-        person.setPassword(passwordEncoder.encode(changePasswordRequest.getPassword()));
+        person
+                .setPassword(passwordEncoder.encode(changePasswordRequest.getPassword()))
+                .setIsApproved(0)
+                .setMessagesPermission(MessagesPermission.NOBODY);
         personRepository.save(person);
+        String text = confirmationUrl.getBaseUrl() + RECOVERY_URL + person.getEmail() + "&code=" + token;
+        confirmPersonAndSendEmail(person.getEmail(), text, token);
         return utilsService.getMessageOkResponse();
     }
 
     @Override
-    public DataResponse<MessageOkContent> changeEmail(ChangeEmailRequest changeEmailRequest, Principal principal) throws UserExistException {
+    public DataResponse<MessageOkContent> changeEmail(ChangeEmailRequest changeEmailRequest, Principal principal) throws UserExistException, IOException, MailjetException {
         Optional<Person> byEmail = personRepository.findByEmail(changeEmailRequest.getEmail());
+        String token = utilsService.getToken();
         if (byEmail.isEmpty()) {
             Person person = utilsService.findPersonByEmail(principal.getName());
-            person.setEmail(changeEmailRequest.getEmail().toLowerCase(Locale.ROOT));
+            person.setEmail(changeEmailRequest.getEmail().toLowerCase(Locale.ROOT))
+                    .setIsApproved(0)
+                    .setMessagesPermission(MessagesPermission.NOBODY);
             personRepository.save(person);
+            String text = confirmationUrl.getBaseUrl() + RECOVERY_URL + changeEmailRequest.getEmail() + "&code=" + token;
+            confirmPersonAndSendEmail(changeEmailRequest.getEmail(), text, token);
             return utilsService.getMessageOkResponse();
         } else {
             throw new UserExistException("Пользователь с данным email уже существует");
@@ -187,6 +204,17 @@ public class AccountServiceImpl implements AccountService {
         dataListNotification(save);
         dataResponse.setData(dataListNotification(save));
         return dataResponse;
+    }
+
+    @Override
+    public DataResponse<MessageOkContent> recoveryProfile(String email) throws IOException, MailjetException, UserExistException {
+        Person person = utilsService.findPersonByEmail(email);
+        if (person.getIsBlocked() == 2) {
+            String token = utilsService.getToken();
+            String text = confirmationUrl.getBaseUrl() + RECOVERY_URL + person.getEmail() + "&code=" + token;
+            confirmPersonAndSendEmail(person.getEmail(), text, token);
+        }
+        throw new UserExistException(USER_EXISTS_ERR);
     }
 
     /**
