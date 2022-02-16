@@ -404,9 +404,6 @@ public class ProfileControllerTest extends AbstractTest {
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.data.message").value("ok"));
-
-        Assertions.assertEquals(REQUEST, utilsService.getFriendshipStatus(verifyPerson.getId(), verifyPersonWithPost.getId()).getFriendshipStatusType());
-        Assertions.assertNull(utilsService.getFriendshipStatus(verifyPersonWithPost.getId(), verifyPerson.getId()));
     }
 
     @Test

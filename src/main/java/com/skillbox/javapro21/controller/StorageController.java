@@ -5,9 +5,9 @@ import com.skillbox.javapro21.api.response.Content;
 import com.skillbox.javapro21.api.response.DataResponse;
 import com.skillbox.javapro21.service.ResourceService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,21 +20,14 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.security.Principal;
 
-@Slf4j
 @Tag(name = "Контроллер для работы с хранилищем")
 @RestController
 @RequestMapping("/api/v1")
+@RequiredArgsConstructor
 public class StorageController {
-
     private final ResourceService resourceService;
 
-    @Autowired
-    public StorageController(ResourceService resourceService) {
-        this.resourceService = resourceService;
-    }
-
-
-    @Operation(summary = "Загрузка аватара пользователя в хранилище сервиса")
+    @Operation(summary = "Загрузка аватара пользователя в хранилище сервиса", security = @SecurityRequirement(name = "jwt"))
     @PreAuthorize("hasAuthority('user:write')")
     @PostMapping(value = "/storage", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     @LastActivity

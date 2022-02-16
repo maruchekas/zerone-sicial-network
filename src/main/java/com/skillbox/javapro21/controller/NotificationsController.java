@@ -2,6 +2,7 @@ package com.skillbox.javapro21.controller;
 
 import com.skillbox.javapro21.aop.LastActivity;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -18,7 +19,7 @@ import java.security.Principal;
 public class NotificationsController {
 
 
-    @Operation(summary = "Получить список уведомлений для текущего пользователя")
+    @Operation(summary = "Получить список уведомлений для текущего пользователя", security = @SecurityRequirement(name = "jwt"))
     @GetMapping("")
     @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<String> getNotifications(@RequestParam(name = "offset", defaultValue = "0") int offset,
@@ -28,7 +29,7 @@ public class NotificationsController {
         return new ResponseEntity<>("Уведомления", HttpStatus.OK);
     }
 
-    @Operation(summary = "Отметить уведомление как \"прочитанное\"")
+    @Operation(summary = "Отметить уведомление как прочитанное", security = @SecurityRequirement(name = "jwt"))
     @PutMapping("")
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity

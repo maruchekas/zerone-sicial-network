@@ -82,7 +82,7 @@ public class ProfileController {
         return new ResponseEntity<>(profileService.getPersonWallById(id, offset, itemPerPage, principal), HttpStatus.OK);
     }
 
-    @Operation(summary = "Сделать убликацию пользователем на стене", security = @SecurityRequirement(name = "jwt"))
+    @Operation(summary = "Сделать публикацию на стене", security = @SecurityRequirement(name = "jwt"))
     @JsonView(View.Posts.class)
     @PostMapping("/{id}/wall")
     @PreAuthorize("hasAuthority('user:write')")
