@@ -44,13 +44,14 @@ public class FriendsServiceImpl implements FriendsService {
     public DataResponse<MessageOkContent> revokeRequest(Long id, Principal principal) {
         Person srcPerson = utilsService.findPersonByEmail(principal.getName());
         Person dstPerson = personRepository.findPersonById(id).orElseThrow();
-        FriendshipStatus outgoingFriendshipStatus = utilsService.getFriendshipStatus(dstPerson.getId(), srcPerson.getId());
-        FriendshipStatus incomingFriendshipStatus = utilsService.getFriendshipStatus(srcPerson.getId(), dstPerson.getId());
 
-        if (outgoingFriendshipStatus != null) {
-            friendshipStatusRepository.delete(outgoingFriendshipStatus);
-        } else if (incomingFriendshipStatus != null) {
-            utilsService.createFriendship(srcPerson, dstPerson, FriendshipStatusType.DECLINED);
+        FriendshipStatus srcFriendshipStatus = utilsService.getFriendshipStatus(dstPerson.getId(), srcPerson.getId());
+        FriendshipStatus dstFriendshipStatus = utilsService.getFriendshipStatus(srcPerson.getId(), dstPerson.getId());
+
+        if (srcFriendshipStatus != null) {
+            friendshipStatusRepository.delete(srcFriendshipStatus);
+        } else if (dstFriendshipStatus != null) {
+            utilsService.createFriendship(dstPerson, srcPerson, FriendshipStatusType.DECLINED);
         }
         return utilsService.getMessageOkResponse();
     }
@@ -60,13 +61,12 @@ public class FriendsServiceImpl implements FriendsService {
         Person srcPerson = utilsService.findPersonByEmail(principal.getName());
         Person dstPerson = personRepository.findPersonById(id).orElseThrow();
 
-        FriendshipStatus outgoingFriendshipStatus = utilsService.getFriendshipStatus(dstPerson.getId(), srcPerson.getId());
-        FriendshipStatus incomingFriendshipStatus = utilsService.getFriendshipStatus(srcPerson.getId(), dstPerson.getId());
+        FriendshipStatus srcFriendshipStatus = utilsService.getFriendshipStatus(srcPerson.getId(), dstPerson.getId());
+        FriendshipStatus dstFriendshipStatus = utilsService.getFriendshipStatus(dstPerson.getId(), srcPerson.getId());
 
-        if (outgoingFriendshipStatus != null) {
-            friendshipStatusRepository.delete(outgoingFriendshipStatus);
-        } else if (incomingFriendshipStatus != null) {
-            friendshipStatusRepository.delete(incomingFriendshipStatus);
+        if (srcFriendshipStatus.getFriendshipStatusType().equals(DECLINED)) {
+            friendshipStatusRepository.delete(srcFriendshipStatus);
+            friendshipStatusRepository.delete(dstFriendshipStatus);
         } else {
             throw new FriendshipNotFoundException("Не найдена связь между пользователями.");
         }
