@@ -188,9 +188,9 @@ public class ProfileServiceImpl implements ProfileService {
         if (dst.getIsBlocked() == 2) throw new PersonNotFoundException("Попытка работы с удаленным пользователем");
         if (utilsService.isBlockedBy(src.getId(), dst.getId(), optionalFriendship))
             throw new NonBlockedFriendshipException("Пользователь не может разблокировать не заблокированного пользователя");
-        Friendship friendship = optionalFriendship.orElseThrow(() -> new FriendshipNotFoundException("Дружбы с данным id не существует"));
+        Friendship friendship = optionalFriendship.orElseThrow(() -> new FriendshipNotFoundException("Отношений с данным id не существует"));
         if (friendship.getFriendshipStatus().getFriendshipStatusType().equals(BLOCKED)) {
-            utilsService.createFriendship(src, dst, REQUEST);
+            friendshipStatusRepository.delete(utilsService.getFriendshipStatus(src.getId(), dst.getId()));
             friendshipStatusRepository.delete(utilsService.getFriendshipStatus(dst.getId(), src.getId()));
         } else if (friendship.getFriendshipStatus().getFriendshipStatusType().equals(INTERLOCKED)) {
             utilsService.createFriendship(src, dst, BLOCKED);
