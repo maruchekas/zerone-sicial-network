@@ -176,6 +176,8 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
             nativeQuery = true)
     Page<Post> getEndlessFeedsForPerson(Long id, String text, Pageable pageable);
 
+    @Query("SELECT p FROM Post p WHERE p.id IN :ids " +
+            "ORDER BY p.likes.size DESC, p.comments.size DESC, p.time ASC")
     Page<Post> findAllByIdIn(List<Long> ids, Pageable pageable);
 
     @Query("select count(p) from Post p " +
