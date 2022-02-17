@@ -1,0 +1,2 @@
+webpackJsonp([20],{EXc0:function(s,e,t){"use strict";Object.defineProperty(e,"__esModule",{value:!0});var c={render:function(){var s=this.$createElement,e=this._self._c||s;return e("div",{staticClass:"shift-password-success"},[e("simple-svg",{attrs:{filepath:"/static/img/success-change-password.svg"}})],1)},staticRenderFns:[]};var n=t("VU/8")({name:"ShiftPasswordSuccess"},c,!1,function(s){t("Ehke")},null,null);e.default=n.exports},Ehke:function(s,e){}});
+//# sourceMappingURL=20.74d64b1cfa9f6633f2be.js.map

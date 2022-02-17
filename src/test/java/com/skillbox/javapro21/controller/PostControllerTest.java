@@ -150,8 +150,7 @@ public class PostControllerTest extends AbstractTest {
                         .param("date_from", yearAgo)
                         .param("date_to", now))
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.total").value(2));
+                .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
     @Test

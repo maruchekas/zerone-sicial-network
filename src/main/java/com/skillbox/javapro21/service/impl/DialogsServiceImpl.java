@@ -90,7 +90,6 @@ public class DialogsServiceImpl implements DialogsService {
             }
         } else {
             setNewChat(person, personList);
-
         }
         return null;
     }
@@ -171,14 +170,14 @@ public class DialogsServiceImpl implements DialogsService {
             dialog
                     .setCode("")
                     .setPersons(personSet);
-            Dialog sDialog = dialogRepository.save(dialog);
+            dialogRepository.save(dialog);
             List<Long> list = new ArrayList<>();
             for (Person p : personSet) {
                 list.add(p.getId());
             }
             return getDataResponseWithListPersonsId(list);
         } else {
-            throw new UserExistOnDialogException("Пользователь уже в есть в диалоге");
+            throw new UserExistOnDialogException("Пользователь уже есть в диалоге");
         }
     }
 
