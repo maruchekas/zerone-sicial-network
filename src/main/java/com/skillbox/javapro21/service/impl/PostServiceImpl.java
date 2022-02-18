@@ -76,8 +76,16 @@ public class PostServiceImpl implements PostService {
         } else if ((text.matches("\\s*") || text.equals("")) && tags.length == 0 && !author.isEmpty()) {
             pageablePostList = postRepository.findAllPostsByAuthor(author.toLowerCase(Locale.ROOT), datetimeFrom, datetimeTo, pageable);
         } else {
-            List<Long> tagsId = getTags(tags);
-            pageablePostList = postRepository.findPostsByTextByAuthorByTagsContainingByDateExcludingBlockers(text.toLowerCase(Locale.ROOT), datetimeFrom, datetimeTo, author.toLowerCase(Locale.ROOT), tags, pageable);
+            List<Post> foundPosts = postRepository.findPostsByTextByAuthorByTagsContainingByDateExcludingBlockers(text.toLowerCase(Locale.ROOT), datetimeFrom, datetimeTo, author.toLowerCase(Locale.ROOT), tags, pageable).stream().toList();
+            List<Long> tagsIds = new ArrayList<>();
+
+            for (Post post: foundPosts
+                 ) {
+                List<String> tagNames = post.getTags().stream().map(Tag::getTag).toList();
+                if (tagNames.containsAll(Arrays.asList(tags)))
+                    tagsIds.add(post.getId());
+            }
+            pageablePostList = postRepository.findAllByIdIn(tagsIds, pageable);
         }
         return getPostsResponse(offset, itemPerPage, pageablePostList, currentPerson);
     }
@@ -424,12 +432,4 @@ public class PostServiceImpl implements PostService {
         return commentsDataArrayList;
     }
 
-    private List<Long> getTags(String[] tags) {
-
-        return Arrays.stream(tags)
-                .map(t -> tagRepository.findByTag(t).orElse(null))
-                .filter(Objects::nonNull)
-                .map(Tag::getId)
-                .collect(Collectors.toList());
-    }
 }
