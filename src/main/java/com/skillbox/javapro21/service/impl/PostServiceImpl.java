@@ -12,6 +12,7 @@ import com.skillbox.javapro21.api.response.post.PostData;
 import com.skillbox.javapro21.api.response.post.PostDeleteResponse;
 import com.skillbox.javapro21.config.MailjetSender;
 import com.skillbox.javapro21.domain.*;
+import com.skillbox.javapro21.domain.enumeration.NotificationType;
 import com.skillbox.javapro21.exception.*;
 import com.skillbox.javapro21.repository.*;
 import com.skillbox.javapro21.service.PostService;
@@ -24,6 +25,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.security.Principal;
@@ -33,6 +35,8 @@ import java.time.ZoneOffset;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static com.skillbox.javapro21.domain.enumeration.NotificationType.*;
 
 @Slf4j
 @Component
@@ -50,6 +54,7 @@ public class PostServiceImpl implements PostService {
     private final CommentLikeRepository commentLikeRepository;
     private final MailjetSender mailjetSender;
     private final JdbcTemplate jdbcTemplate;
+    private final NotificationRepository notificationRepository;
 
     @Override
     public ListDataResponse<PostData> getPosts(String text, long dateFrom, long dateTo, int offset, int itemPerPage,
@@ -142,6 +147,7 @@ public class PostServiceImpl implements PostService {
         return getListDataResponseWithComments(pageable, post, person);
     }
 
+    @Transactional
     @Override
     public DataResponse<CommentsData> postComments(Long id, CommentRequest commentRequest, Principal principal) throws PostNotFoundException, CommentNotFoundException {
         Person person = utilsService.findPersonByEmail(principal.getName());
@@ -159,6 +165,14 @@ public class PostServiceImpl implements PostService {
                 .setPost(post)
                 .setTime(LocalDateTime.now(ZoneOffset.UTC));
         postCommentRepository.save(postComment);
+
+        notificationRepository.save(new Notification()
+                        .setSentTime(utilsService.getLocalDateTimeZoneOffsetUtc())
+                        .setNotificationType(postComment.getParent() == null ? POST_COMMENT : COMMENT_COMMENT)
+                        .setPerson(post.getAuthor())
+                        .setEntityId(postComment.getParent() == null ? post.getId() : postComment.getParent().getId())
+                        .setContact("contact"));
+
         return getCommentResponse(postComment, person);
     }
 

@@ -1,4 +1,4 @@
-package com.skillbox.javapro21.api.response.account;
+package com.skillbox.javapro21.api.response.notification;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.skillbox.javapro21.api.response.Content;
@@ -6,10 +6,11 @@ import com.skillbox.javapro21.domain.enumeration.NotificationType;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
-@Data
 @Accessors(chain = true)
-public class NotificationSettingData implements Content {
-    @JsonProperty(value = "notification_type")
-    private NotificationType notificationType;
-    boolean enable;
+@Data
+public class NotificationData implements Content {
+    private Long id;
+    private NotificationType type;
+    @JsonProperty(value = "sent_time")
+    private Long sentTime;
 }
