@@ -156,7 +156,7 @@ class NotificationsControllerTest extends AbstractTest {
                 .andExpect(jsonPath("$.data[*].id", containsInAnyOrder(
                                 notification1.getId().intValue(), notification2.getId().intValue(),
                                 notification3.getId().intValue(), notification4.getId().intValue(),
-                                notificationRepository.findAllByNotificationTypeEquals(FRIEND_BIRTHDAY).get(0).getId().intValue())));
+                                notification5.getId().intValue())));
 
     }
 
@@ -178,7 +178,7 @@ class NotificationsControllerTest extends AbstractTest {
                 .andExpect(jsonPath("$.data[*].id", containsInAnyOrder(
                         notification1.getId().intValue(),
                         notification3.getId().intValue(), notification4.getId().intValue(),
-                        notificationRepository.findAllByNotificationTypeEquals(FRIEND_BIRTHDAY).get(0).getId().intValue())));
+                        notification5.getId().intValue())));
 
         request.setAll(true);
 

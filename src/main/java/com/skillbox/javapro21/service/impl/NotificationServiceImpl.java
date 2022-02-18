@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static com.skillbox.javapro21.domain.enumeration.NotificationType.*;
+
 
 @Component
 @EnableScheduling
@@ -48,15 +50,15 @@ public class NotificationServiceImpl implements NotificationService {
     @Scheduled(cron = "5 0 0 * * *")
     void checkBirthdayNotifications() {
         LocalDateTime now = utilsService.getLocalDateTimeZoneOffsetUtc();
-        List<Person> allUsers = personRepository.findAll();
-        for (Person person : allUsers) {
+        List<Person> activeUsers = personRepository.findAllByIsApprovedAndIsBlocked(1, 0);
+        for (Person person : activeUsers) {
             List<Person> friends = personRepository.findAllPersonFriends(person.getId(), PageRequest.of(0, Integer.MAX_VALUE)).getContent();
             for (Person friend : friends) {
                 LocalDateTime birthDay = person.getBirthDate();
-                if (now.getMonth().equals(birthDay.getMonth()) && now.getDayOfMonth() == birthDay.getDayOfMonth()) {
+                if (birthDay != null && now.getMonth().equals(birthDay.getMonth()) && now.getDayOfMonth() == birthDay.getDayOfMonth()) {
                     Notification notification = new Notification()
                                                 .setSentTime(utilsService.getLocalDateTimeZoneOffsetUtc())
-                                                .setNotificationType(NotificationType.FRIEND_BIRTHDAY)
+                                                .setNotificationType(FRIEND_BIRTHDAY)
                                                 .setPerson(person)
                                                 .setEntityId(friend.getId())
                                                 .setContact("Contact");
@@ -92,12 +94,19 @@ public class NotificationServiceImpl implements NotificationService {
         return getNotifications(0, 20, principal);
     }
 
-    private NotificationData convertNotificationToNotificationData(Notification notification) {
-        NotificationData notificationData = new NotificationData();
-        notification.setNotificationType(notification.getNotificationType());
-        notification.setSentTime(notification.getSentTime());
-        return notificationData;
+    public void checkBirthdayFromOneAndCreateNotificationToAnotherInCase(Person one, Person another) {
+        LocalDateTime now = utilsService.getLocalDateTimeZoneOffsetUtc();
+        if (now.getMonth().equals(one.getBirthDate().minusDays(1).getMonth()) && now.getDayOfMonth() == one.getBirthDate().getDayOfMonth()) {
+            Notification notification = new Notification()
+                    .setSentTime(utilsService.getLocalDateTimeZoneOffsetUtc())
+                    .setNotificationType(FRIEND_BIRTHDAY)
+                    .setPerson(another)
+                    .setEntityId(one.getId())
+                    .setContact("Contact");
+            notificationRepository.save(notification);
+        }
     }
+
 
     private List<Content> convertNotificationsToNotificationData(List<Notification> notifications) {
         return notifications.stream()
@@ -109,37 +118,21 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     private List<Notification> getNotificationListBySetting(UserNotificationSettings settings, Person person) {
-        List<Notification> result = new ArrayList<>();
-
-        if (settings.isPostComment()) {
-            result.addAll(notificationRepository.findAllByNotificationTypeEquals(NotificationType.POST_COMMENT));
-        }
-        if (settings.isCommentComment()) {
-            result.addAll(notificationRepository.findAllByNotificationTypeEquals(NotificationType.COMMENT_COMMENT));
-        }
-        if (settings.isFriendsRequest()) {
-            result.addAll(notificationRepository.findAllByNotificationTypeEquals(NotificationType.FRIEND_REQUEST));
-        }
-        if (settings.isMessage()) {
-            result.addAll(notificationRepository.findAllByNotificationTypeEquals(NotificationType.MESSAGE));
-        }
-        if (settings.isFriendsBirthday()) {
-            result.addAll(notificationRepository.findAllByNotificationTypeEquals(NotificationType.FRIEND_BIRTHDAY));
-        }
-        return result;
+        List<Notification> allByPerson = notificationRepository.findAllByPerson(person);
+        return allByPerson.stream()
+                .filter(n -> filter(settings.isPostComment(), n.getNotificationType(), POST_COMMENT))
+                .filter(n -> filter(settings.isCommentComment(), n.getNotificationType(), COMMENT_COMMENT))
+                .filter(n -> filter(settings.isFriendsRequest(), n.getNotificationType(), FRIEND_REQUEST))
+                .filter(n -> filter(settings.isMessage(), n.getNotificationType(), MESSAGE))
+                .filter(n -> filter(settings.isFriendsBirthday(), n.getNotificationType(), FRIEND_BIRTHDAY))
+                .toList();
     }
 
-    public void checkBirthdayFromOneAndCreateNotificationToAnotherInCase(Person one, Person another) {
-        LocalDateTime now = utilsService.getLocalDateTimeZoneOffsetUtc();
-        if (now.getMonth().equals(one.getBirthDate().minusDays(1).getMonth()) && now.getDayOfMonth() == one.getBirthDate().getDayOfMonth()) {
-            Notification notification = new Notification()
-                                            .setSentTime(utilsService.getLocalDateTimeZoneOffsetUtc())
-                                            .setNotificationType(NotificationType.FRIEND_BIRTHDAY)
-                                            .setPerson(another)
-                                            .setEntityId(one.getId())
-                                            .setContact("Contact");
-            notificationRepository.save(notification);
+    private boolean filter(boolean setting, NotificationType typeToCheck, NotificationType typToMatch) {
+        if (!setting) {
+            return !typeToCheck.equals(typToMatch);
         }
+        return true;
     }
 }
 
