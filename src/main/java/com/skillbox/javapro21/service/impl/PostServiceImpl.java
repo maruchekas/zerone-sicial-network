@@ -12,19 +12,18 @@ import com.skillbox.javapro21.api.response.post.PostData;
 import com.skillbox.javapro21.api.response.post.PostDeleteResponse;
 import com.skillbox.javapro21.config.MailjetSender;
 import com.skillbox.javapro21.domain.*;
-import com.skillbox.javapro21.domain.enumeration.NotificationType;
 import com.skillbox.javapro21.exception.*;
 import com.skillbox.javapro21.repository.*;
 import com.skillbox.javapro21.service.PostService;
 import com.skillbox.javapro21.service.TagService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,9 +32,9 @@ import java.security.Principal;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
-import java.util.stream.Collectors;
 
-import static com.skillbox.javapro21.domain.enumeration.NotificationType.*;
+import static com.skillbox.javapro21.domain.enumeration.NotificationType.COMMENT_COMMENT;
+import static com.skillbox.javapro21.domain.enumeration.NotificationType.POST_COMMENT;
 
 @Slf4j
 @Component
@@ -47,12 +46,10 @@ public class PostServiceImpl implements PostService {
     private final UtilsService utilsService;
     private final TagService tagService;
     private final PostRepository postRepository;
-    private final TagRepository tagRepository;
     private final PostLikeRepository postLikeRepository;
     private final PostCommentRepository postCommentRepository;
     private final CommentLikeRepository commentLikeRepository;
     private final MailjetSender mailjetSender;
-    private final JdbcTemplate jdbcTemplate;
     private final NotificationRepository notificationRepository;
 
     @Override
@@ -63,9 +60,9 @@ public class PostServiceImpl implements PostService {
         LocalDateTime datetimeTo = (dateTo != -1) ? utilsService.getLocalDateTime(dateTo) : LocalDateTime.now();
         Pageable pageable = PageRequest.of(offset / itemPerPage, itemPerPage);
         Page<Post> pageablePostList;
-        if ((text.matches("\\s*") || text.equals("")) && tags.length == 0 && author.equals("")) {
+        if ((StringUtils.isBlank(text)) && tags.length == 0 && author.equals("")) {
             pageablePostList = postRepository.findAllPosts(datetimeFrom, datetimeTo, pageable);
-        } else if (!text.isEmpty() && !text.matches("\\s*") && tags.length == 0 && author.equals("")) {
+        } else if (!StringUtils.isBlank(text) && tags.length == 0 && author.equals("")) {
             pageablePostList = postRepository.findAllPostsByText(text.toLowerCase(Locale.ROOT), datetimeFrom, datetimeTo, pageable);
             if (pageablePostList.getTotalElements() == 0) {
                 text = utilsService.convertKbLayer(text);
@@ -77,18 +74,13 @@ public class PostServiceImpl implements PostService {
                 text = utilsService.convertKbLayer(text);
                 pageablePostList = postRepository.findPostsByTextByAuthorWithoutTagsContainingByDateExcludingBlockers(text.toLowerCase(Locale.ROOT), datetimeFrom, datetimeTo, author.toLowerCase(Locale.ROOT), pageable);
             }
-        } else if ((text.matches("\\s*") || text.equals("")) && tags.length == 0 && !author.isEmpty()) {
+        } else if (StringUtils.isBlank(text) && tags.length == 0 && !author.isEmpty()) {
             pageablePostList = postRepository.findAllPostsByAuthor(author.toLowerCase(Locale.ROOT), datetimeFrom, datetimeTo, pageable);
         } else {
-            List<Post> foundPosts = postRepository.findPostsByTextByAuthorByTagsContainingByDateExcludingBlockers(text.toLowerCase(Locale.ROOT), datetimeFrom, datetimeTo, author.toLowerCase(Locale.ROOT), tags, pageable).stream().toList();
-            List<Long> tagsIds = new ArrayList<>();
-
-            for (Post post: foundPosts
-                 ) {
-                List<String> tagNames = post.getTags().stream().map(Tag::getTag).toList();
-                if (tagNames.containsAll(Arrays.asList(tags)))
-                    tagsIds.add(post.getId());
-            }
+            List<Post> foundPosts
+                    = postRepository.findPostsByTextByAuthorByTagsContainingByDateExcludingBlockers(
+                            text.toLowerCase(Locale.ROOT), datetimeFrom, datetimeTo, author.toLowerCase(Locale.ROOT), tags, pageable).getContent();
+            List<Long> tagsIds = filterPostsByTagList(tags, foundPosts);
             pageablePostList = postRepository.findAllByIdIn(tagsIds, pageable);
         }
         return getPostsResponse(offset, itemPerPage, pageablePostList, currentPerson);
@@ -174,11 +166,11 @@ public class PostServiceImpl implements PostService {
         postCommentRepository.save(postComment);
 
         notificationRepository.save(new Notification()
-                        .setSentTime(utilsService.getLocalDateTimeZoneOffsetUtc())
-                        .setNotificationType(postComment.getParent() == null ? POST_COMMENT : COMMENT_COMMENT)
-                        .setPerson(post.getAuthor())
-                        .setEntityId(postComment.getParent() == null ? post.getId() : postComment.getParent().getId())
-                        .setContact("contact"));
+                .setSentTime(utilsService.getLocalDateTimeZoneOffsetUtc())
+                .setNotificationType(postComment.getParent() == null ? POST_COMMENT : COMMENT_COMMENT)
+                .setPerson(post.getAuthor())
+                .setEntityId(postComment.getParent() == null ? post.getId() : postComment.getParent().getId())
+                .setContact("contact"));
 
         return getCommentResponse(postComment, person);
     }
@@ -399,6 +391,18 @@ public class PostServiceImpl implements PostService {
             }
         });
         return commentsDataArrayList;
+    }
+
+    private List<Long> filterPostsByTagList(String[] tags, List<Post> foundPosts) {
+        List<Long> tagsIds = new ArrayList<>();
+
+        foundPosts.forEach((post) -> {
+                    List<String> tagNames = post.getTags().stream().map(Tag::getTag).toList();
+                    if (tagNames.containsAll(Arrays.asList(tags)))
+                        tagsIds.add(post.getId());
+                }
+        );
+        return tagsIds;
     }
 
 }
