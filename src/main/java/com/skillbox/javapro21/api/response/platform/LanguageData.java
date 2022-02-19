@@ -11,13 +11,13 @@ import lombok.experimental.Accessors;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class LanguageData implements Content {
 
-        private Long id;
-        @JsonProperty("type_id")
-        private Long typeId;
-        @JsonProperty("sent_time")
-        private Long sentTime;
-        @JsonProperty("entity_id")
-        private Long entityId;
-        private String info;
+    private Long id;
+    @JsonProperty("type_id")
+    private Long typeId;
+    @JsonProperty("sent_time")
+    private Long sentTime;
+    @JsonProperty("entity_id")
+    private Long entityId;
+    private String info;
 
-    }
+}

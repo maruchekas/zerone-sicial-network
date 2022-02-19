@@ -62,7 +62,7 @@ public class PostController {
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
     public ResponseEntity<DataResponse<PostData>> getPostById(@PathVariable Long id,
-                                                               Principal principal) throws PostNotFoundException {
+                                                              Principal principal) throws PostNotFoundException {
         return new ResponseEntity<>(postService.getPostById(id, principal), HttpStatus.OK);
     }
 
@@ -126,9 +126,9 @@ public class PostController {
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
     public ResponseEntity<DataResponse<CommentsData>> putComments(@PathVariable Long id,
-                                                                   @PathVariable(name = "comment_id") Long commentId,
-                                                                   @RequestBody CommentRequest commentRequest,
-                                                                   Principal principal) throws PostNotFoundException, CommentNotFoundException, CommentNotAuthorException {
+                                                                  @PathVariable(name = "comment_id") Long commentId,
+                                                                  @RequestBody CommentRequest commentRequest,
+                                                                  Principal principal) throws PostNotFoundException, CommentNotFoundException, CommentNotAuthorException {
         return new ResponseEntity<>(postService.putComments(id, commentId, commentRequest, principal), HttpStatus.OK);
     }
 
@@ -158,7 +158,7 @@ public class PostController {
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
     public ResponseEntity<DataResponse<MessageOkContent>> ratPostController(@PathVariable Long id,
-                                                                        Principal principal) throws PostNotFoundException, CommentNotFoundException, CommentNotAuthorException, MailjetException, IOException {
+                                                                            Principal principal) throws PostNotFoundException, CommentNotFoundException, CommentNotAuthorException, MailjetException, IOException {
         return new ResponseEntity<>(postService.ratPostController(id, principal), HttpStatus.OK);
     }
 
@@ -168,7 +168,7 @@ public class PostController {
     @LastActivity
     public ResponseEntity<DataResponse<MessageOkContent>> ratCommentController(@PathVariable Long id,
                                                                                @PathVariable(name = "comment_id") Long commentId,
-                                                                        Principal principal) throws PostNotFoundException, CommentNotFoundException, CommentNotAuthorException, MailjetException, IOException {
+                                                                               Principal principal) throws PostNotFoundException, CommentNotFoundException, CommentNotAuthorException, MailjetException, IOException {
         return new ResponseEntity<>(postService.ratCommentController(id, commentId, principal), HttpStatus.OK);
     }
 }

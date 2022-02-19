@@ -9,5 +9,6 @@ import java.io.IOException;
 @Service
 public interface LocationService {
     StringListDataResponse getCountries() throws IOException, SAXException;
+
     StringListDataResponse getCities(String country) throws IOException, SAXException;
 }

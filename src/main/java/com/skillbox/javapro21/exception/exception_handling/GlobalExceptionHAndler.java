@@ -12,13 +12,13 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 public class GlobalExceptionHAndler {
 
     @ExceptionHandler
-    ResponseEntity<BadDataResponse> handleIncorrectCaptchaException(CaptchaCodeException exception){
+    ResponseEntity<BadDataResponse> handleIncorrectCaptchaException(CaptchaCodeException exception) {
         BadDataResponse badDataResponse = new BadDataResponse().setError("captcha").setDescription(exception.getMessage());
         return new ResponseEntity<>(badDataResponse, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler
-    ResponseEntity<BadDataResponse> handleUserExistException(UserExistException exception){
+    ResponseEntity<BadDataResponse> handleUserExistException(UserExistException exception) {
         BadDataResponse badDataResponse = new BadDataResponse().setError("email").setDescription(exception.getMessage());
         return new ResponseEntity<>(badDataResponse, HttpStatus.BAD_REQUEST);
     }

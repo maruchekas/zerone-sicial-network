@@ -4,7 +4,7 @@ import com.skillbox.javapro21.aop.LastActivity;
 import com.skillbox.javapro21.api.request.like.LikeRequest;
 import com.skillbox.javapro21.api.response.Content;
 import com.skillbox.javapro21.api.response.DataResponse;
-import com.skillbox.javapro21.exception.*;
+import com.skillbox.javapro21.exception.CustomException;
 import com.skillbox.javapro21.service.impl.LikeServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;

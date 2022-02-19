@@ -118,64 +118,37 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
             "order by p.time desc")
     Page<Post> findPostsContainingNoBlocked(List<Long> friendsAndSubscribersIds, Pageable pageable);
 
+    @Query("SELECT p FROM Post p " +
+            "where p.author.id <> :currentUserId AND p.author.id in " +
+            "(SELECT p.id FROM Person p " +
+            "JOIN Friendship f on f.dstPerson.id = p.id " +
+            "JOIN FriendshipStatus fst on fst.id = f.friendshipStatus.id " +
+            "WHERE f.srcPerson.id = :currentUserId " +
+            "AND (fst.friendshipStatusType = 'FRIEND' OR fst.friendshipStatusType = 'SUBSCRIBED') " +
+            "AND p.isBlocked = 0) " +
+            "AND p.isBlocked = 0 " +
+            "GROUP BY p.id " +
+            "ORDER BY p.likes.size DESC, p.time DESC ")
+    List<Post> findPostsByFriendsAndSubscribersSortedByLikes(Long currentUserId);
+
     @Query("select p from Post p " +
             "join Person ps on ps.id = p.author.id " +
-            "where p.author.id not in (:ids) " +
+            "where p.author.id <> :currentUserId AND p.author.id not in " +
+            "(SELECT p.id FROM Person p " +
+            "JOIN Friendship f on f.dstPerson.id = p.id " +
+            "JOIN FriendshipStatus fst on fst.id = f.friendshipStatus.id " +
+            "WHERE f.srcPerson.id = :currentUserId " +
+            "AND (fst.friendshipStatusType = 'FRIEND' " +
+            "OR fst.friendshipStatusType = 'SUBSCRIBED' " +
+            "OR fst.friendshipStatusType = 'BLOCKED' " +
+            "OR fst.friendshipStatusType = 'INTERLOCKED') " +
+            "AND p.isBlocked = 0) " +
             "and p.isBlocked = 0 " +
             "and ps.isBlocked = 0 " +
-            "order by size(p.likes) desc")
-    Page<Post> findBestPostsByPerson(List<Long> ids, Pageable pageable);
+            "order by size(p.likes) desc, p.time desc")
+    List<Post> findBestPosts(long currentUserId);
 
-    @Query(value =
-            "(" +
-            "SELECT p.id FROM posts p " +
-            "JOIN persons ps ON ps.id = p.author_id " +
-            "WHERE ps.id IN (" +
-                            "SELECT p.id FROM persons p " +
-                            "JOIN friendship f on f.dst_person_id = p.id " +
-                            "JOIN friendship_statuses fst on fst.id = f.status_id " +
-                            "WHERE f.src_person_id = :id " +
-                                "AND (fst.name = 'FRIEND' OR fst.name = 'SUBSCRIBED')" +
-                            ") " +
-                "AND p.is_Blocked = 0 " +
-                "AND ps.is_Blocked = 0 " +
-                "AND (p.title ILIKE CONCAT('%', :text,'%') OR p.post_text ILIKE CONCAT('%', :text,'%')) " +
-            "ORDER BY p.time DESC" +
-            ") " +
-            "UNION ALL " +
-            "(" +
-            "SELECT p.id FROM posts p " +
-                "JOIN persons ps ON ps.id = p.author_id " +
-                "LEFT JOIN post_likes pl ON pl.post_id = p.id " +
-                "WHERE p.author_id NOT IN (" +
-                                            "(" +
-                                            "SELECT p.id FROM persons p " +
-                                            "JOIN friendship f ON f.dst_person_id = p.id " +
-                                            "JOIN friendship_statuses fst ON fst.id = f.status_id " +
-                                            "WHERE f.src_person_id = :id " +
-                                                "AND (fst.name = 'FRIEND' OR fst.name = 'SUBSCRIBED')" +
-                                            ") " +
-                                            "UNION ALL " +
-                                            "(" +
-                                            "SELECT p.id FROM persons p " +
-                                            "JOIN friendship f ON f.dst_person_id = p.id " +
-                                            "JOIN friendship_statuses fs ON fs.id = f.status_id " +
-                                            "WHERE f.src_person_id = :id" +
-                                                "AND (fs.name = 'BLOCKED' OR fs.name = 'INTERLOCKED') " +
-                                                "OR (p.is_blocked != 0) " +
-                                            "GROUP BY p.id" +
-                                            ") " +
-                                          ") " +
-                "AND p.id != :id " +
-                "AND p.is_Blocked = 0 " +
-                "AND ps.is_Blocked = 0 " +
-                "AND (p.title ILIKE CONCAT('%', :text,'%') OR p.post_text ILIKE CONCAT('%', :text,'%')) " +
-            "GROUP BY p.id " +
-            "ORDER BY count(pl) DESC, p.time DESC" +
-            ")",
-            nativeQuery = true)
-    Page<Post> getEndlessFeedsForPerson(Long id, String text, Pageable pageable);
-
+    @Query("SELECT p FROM Post p WHERE p.id IN :ids ")
     Page<Post> findAllByIdIn(List<Long> ids, Pageable pageable);
 
     @Query("select count(p) from Post p " +
