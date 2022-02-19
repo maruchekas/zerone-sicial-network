@@ -14,10 +14,10 @@ public class PostgreSQLEnumType extends EnumType {
                             Object value,
                             int index,
                             SharedSessionContractImplementor session)
-                            throws HibernateException, SQLException {
+            throws HibernateException, SQLException {
         st.setObject(index,
-                    value != null ? ((Enum) value).name() : null,
-                    Types.OTHER);
+                value != null ? ((Enum) value).name() : null,
+                Types.OTHER);
     }
 
 }

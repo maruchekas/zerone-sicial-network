@@ -38,7 +38,7 @@ public class TagController {
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
     ResponseEntity<DataResponse<TagData>> addTag(
-            @RequestBody String tag ){
+            @RequestBody String tag) {
         return new ResponseEntity<>(tagService.addTag(tag), HttpStatus.OK);
     }
 

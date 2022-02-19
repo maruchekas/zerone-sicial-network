@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @RequiredArgsConstructor
 @Service
-public class LikeServiceImpl implements LikeService{
+public class LikeServiceImpl implements LikeService {
 
     private static final String POST = "Post";
     private static final String COMMENT = "Comment";

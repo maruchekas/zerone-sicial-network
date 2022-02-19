@@ -62,13 +62,13 @@ public class PostServiceImpl implements PostService {
             pageablePostList = postRepository.findAllPosts(datetimeFrom, datetimeTo, pageable);
         } else if (!text.isEmpty() && !text.matches("\\s*") && tags.length == 0 && author.equals("")) {
             pageablePostList = postRepository.findAllPostsByText(text.toLowerCase(Locale.ROOT), datetimeFrom, datetimeTo, pageable);
-            if (pageablePostList.getTotalElements() == 0){
+            if (pageablePostList.getTotalElements() == 0) {
                 text = utilsService.convertKbLayer(text);
                 pageablePostList = postRepository.findAllPostsByText(text.toLowerCase(Locale.ROOT), datetimeFrom, datetimeTo, pageable);
             }
         } else if (!text.trim().isEmpty() && tags.length == 0 && !author.isEmpty()) {
             pageablePostList = postRepository.findPostsByTextByAuthorWithoutTagsContainingByDateExcludingBlockers(text.toLowerCase(Locale.ROOT), datetimeFrom, datetimeTo, author.toLowerCase(Locale.ROOT), pageable);
-            if (pageablePostList.getTotalElements() == 0){
+            if (pageablePostList.getTotalElements() == 0) {
                 text = utilsService.convertKbLayer(text);
                 pageablePostList = postRepository.findPostsByTextByAuthorWithoutTagsContainingByDateExcludingBlockers(text.toLowerCase(Locale.ROOT), datetimeFrom, datetimeTo, author.toLowerCase(Locale.ROOT), pageable);
             }
@@ -232,8 +232,8 @@ public class PostServiceImpl implements PostService {
         Pageable pageable = PageRequest.of(offset, itemPerPage);
 
         List<Post> postsToFeeds =
-                (postRepository.findPostsByFriendsAndSubscribersSortedByLikes(currentPerson.getId()));
-                  postsToFeeds.addAll(postRepository.findBestPosts(currentPerson.getId()));
+                postRepository.findPostsByFriendsAndSubscribersSortedByLikes(currentPerson.getId());
+        postsToFeeds.addAll(postRepository.findBestPosts(currentPerson.getId()));
 
         int start = offset * itemPerPage;
         int limit = Math.min(start + pageable.getPageSize(), postsToFeeds.size());

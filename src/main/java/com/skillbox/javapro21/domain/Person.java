@@ -96,7 +96,7 @@ public class Person implements UserDetails {
     @ToString.Exclude
     private Set<Dialog> dialogs;
 
-//    @OneToMany(mappedBy = "person", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    //    @OneToMany(mappedBy = "person", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 //    @JsonIgnoreProperties(value = {"post", "comment", "person"}, allowSetters = true)
 //    @ToString.Exclude
 //    private Set<BlockHistory> blocksLists = new HashSet<>();

@@ -158,7 +158,8 @@ public class ProfileServiceImpl implements ProfileService {
     public DataResponse<MessageOkContent> blockPersonById(Long id, Principal principal) throws BlockPersonHimselfException, InterlockedFriendshipStatusException, PersonNotFoundException, FriendshipNotFoundException {
         Person src = utilsService.findPersonByEmail(principal.getName());
         Person dst = personRepository.findPersonById(id).orElseThrow(() -> new PersonNotFoundException("Пользователя с данным id не существует"));
-        if (src.getId().equals(dst.getId())) throw new BlockPersonHimselfException("Пользователь пытается заблокировать сам себя");
+        if (src.getId().equals(dst.getId()))
+            throw new BlockPersonHimselfException("Пользователь пытается заблокировать сам себя");
         Optional<Friendship> optionalFriendship = friendshipRepository.findFriendshipBySrcPersonAndDstPerson(src.getId(), id);
         if (optionalFriendship.isEmpty()) {
             utilsService.createFriendship(src, dst, BLOCKED);

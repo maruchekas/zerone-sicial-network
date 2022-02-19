@@ -45,6 +45,7 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
     Page<Post> findPostsByTextByAuthorWithoutTagsContainingByDateExcludingBlockers(String text, LocalDateTime dateFrom,
                                                                                    LocalDateTime dateTo, String author,
                                                                                    Pageable pageable);
+
     @Query("select p from Post p " +
             "where p.id = :id")
     Optional<Post> findDeletedPostById(Long id);
@@ -119,8 +120,6 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
     Page<Post> findPostsContainingNoBlocked(List<Long> friendsAndSubscribersIds, Pageable pageable);
 
     @Query("SELECT p FROM Post p " +
-            "JOIN Friendship f on f.dstPerson.id = p.author.id " +
-            "JOIN FriendshipStatus fst on fst.id = f.friendshipStatus.id " +
             "where p.author.id <> :currentUserId AND p.author.id in " +
             "(SELECT p.id FROM Person p " +
             "JOIN Friendship f on f.dstPerson.id = p.id " +

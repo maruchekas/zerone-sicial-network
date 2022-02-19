@@ -62,7 +62,7 @@ public class UtilsService {
 
     /**
      * Шаблон для DataResponse
-     * */
+     */
     public DataResponse<Content> getDataResponse(Content data) {
         return new DataResponse<>()
                 .setError("ok")
@@ -72,7 +72,7 @@ public class UtilsService {
 
     /**
      * Шаблон для ListDataResponse
-     * */
+     */
     public ListDataResponse<Content> getListDataResponse(int total, int offset, int limit, List<Content> data) {
         return new ListDataResponse<>()
                 .setError("ok")
@@ -85,7 +85,7 @@ public class UtilsService {
 
     /**
      * Шаблон для StringListDataResponse
-     * */
+     */
     public StringListDataResponse getStringListDataResponse(List<String> dataList) {
         return new StringListDataResponse()
                 .setError("ok")
@@ -144,12 +144,12 @@ public class UtilsService {
 
     /**
      * Получение Timestamp
-     * */
+     */
     public long getTimestamp() {
         return LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli();
     }
 
-    public long getTimestampFromLocalDateTime(LocalDateTime localDateTime){
+    public long getTimestampFromLocalDateTime(LocalDateTime localDateTime) {
         return ZonedDateTime.of(localDateTime, ZoneId.systemDefault()).toInstant().getEpochSecond();
     }
 
@@ -212,7 +212,6 @@ public class UtilsService {
     }
 
 
-
     private FriendshipStatus saveFriendshipStatus(FriendshipStatus friendshipStatus, FriendshipStatusType type) {
         friendshipStatus.setFriendshipStatusType(type).setTime(LocalDateTime.now(ZoneOffset.UTC));
         return friendshipStatusRepository.save(friendshipStatus);
@@ -249,7 +248,7 @@ public class UtilsService {
      * example: Ghbdtn vbh! -> Привет мир!
      */
 
-    public String convertKbLayer(String input){
+    public String convertKbLayer(String input) {
         KbLayerConverter kbLayerConverter = new KbLayerConverter();
         return kbLayerConverter.convertString(input);
     }
