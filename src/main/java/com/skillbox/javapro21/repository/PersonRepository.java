@@ -202,4 +202,6 @@ public interface PersonRepository extends JpaRepository<Person, Integer> {
     List<Person> findAllPersonsWithBirthday();
 
     Optional<Person> findByConfirmationCode(String token);
+
+    List<Person> findAllByIsApprovedAndIsBlocked(int isApproved, int isBlocked);
 }
