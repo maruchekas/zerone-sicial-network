@@ -115,8 +115,8 @@ public class PostController {
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
     public ResponseEntity<DataResponse<CommentsData>> postComments(@PathVariable Long id,
-                                                                       @RequestBody CommentRequest commentRequest,
-                                                                       Principal principal) throws PostNotFoundException, CommentNotFoundException {
+                                                                   @RequestBody CommentRequest commentRequest,
+                                                                   Principal principal) throws PostNotFoundException, CommentNotFoundException {
         return new ResponseEntity<>(postService.postComments(id, commentRequest, principal), HttpStatus.OK);
     }
 

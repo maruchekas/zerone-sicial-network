@@ -1,18 +1,21 @@
 package com.skillbox.javapro21.domain;
 
+import com.skillbox.javapro21.domain.enumeration.NotificationType;
 import com.skillbox.javapro21.domain.marker.HavePerson;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Setter
 @Getter
 @Entity
-@Table(name = "notification_type")
+@Table(name = "user_notification_settings")
 @Accessors(chain = true)
-public class NotificationType implements HavePerson {
+public class UserNotificationSettings implements HavePerson {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
