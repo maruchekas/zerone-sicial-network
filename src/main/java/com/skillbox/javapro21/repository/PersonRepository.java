@@ -25,7 +25,7 @@ public interface PersonRepository extends JpaRepository<Person, Integer> {
             "join FriendshipStatus fs on fs.id = f.friendshipStatus.id " +
             "where f.srcPerson.id = :id " +
             "and ( fs.friendshipStatusType = 'FRIEND' or fs.friendshipStatusType = 'SUBSCRIBED' ) " +
-            "and p.isBlocked = 0")
+            "and p.isBlocked = 0" )
     List<Long> findAllFriendsAndSubscribersByPersonId(Long id);
 
     @Query("select p.id from Person p " +
@@ -33,8 +33,8 @@ public interface PersonRepository extends JpaRepository<Person, Integer> {
             "join FriendshipStatus fs on fs.id = f.friendshipStatus.id " +
             "where f.srcPerson.id = :id " +
             "and fs.friendshipStatusType = 'FRIEND' " +
-            "and p.isBlocked = 0")
-    List<Long> findAllFriendsByPersonId(Long id);
+            "and p.isBlocked = 0" )
+    List<Long> findAllFriendIdsByPersonId(Long id);
 
     @Query("select p from Person p where p.id in (:ids) and p.isBlocked = 0")
     List<Person> findAllById(List<Long> ids);
@@ -54,7 +54,7 @@ public interface PersonRepository extends JpaRepository<Person, Integer> {
             "join FriendshipStatus fs on fs.id = f.friendshipStatus.id " +
             "where f.srcPerson.id = :id " +
             "and ( fs.friendshipStatusType = 'BLOCKED' or fs.friendshipStatusType = 'INTERLOCKED') " +
-            "and ( p.isBlocked = 1 or p.isBlocked = 2 ) ")
+            "and ( p.isBlocked = 1 or p.isBlocked = 2 ) " )
     List<Long> findAllBlocksPersons(Long id);
 
     @Query("select p from Person p " +
