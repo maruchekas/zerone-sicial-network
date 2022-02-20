@@ -35,6 +35,7 @@ import java.util.*;
 
 import static com.skillbox.javapro21.domain.enumeration.NotificationType.COMMENT_COMMENT;
 import static com.skillbox.javapro21.domain.enumeration.NotificationType.POST_COMMENT;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -278,7 +279,7 @@ public class PostServiceImpl implements PostService {
                 .setTimestamp(utilsService.getTimestamp())
                 .setOffset((int) pageable.getOffset())
                 .setTotal(pageablePostComments.getTotalPages())
-                .setData(getCommentDataForResponse(pageablePostComments.toList(), currentPerson));
+                .setData(getCommentDataForResponse(pageablePostComments.stream().filter(pc -> pc.getParent() == null).toList(), currentPerson));
         return commentsDataListDataResponse;
     }
 
@@ -305,7 +306,9 @@ public class PostServiceImpl implements PostService {
                 .setMyLike(likes.stream().map(CommentLike::getPerson).toList().contains(currentPerson))
                 .setLikes(likes.size())
                 .setSubComments(getSubCommentsData(postCommentsByParentId, currentPerson));
-        if (postComment.getParent() != null) commentsData.setParentId(postComment.getParent().getId());
+        if (postComment.getParent() != null) {
+            commentsData.setParentId(postComment.getParent().getId());
+        }
         return commentsData;
     }
 
@@ -404,5 +407,4 @@ public class PostServiceImpl implements PostService {
         );
         return tagsIds;
     }
-
 }
