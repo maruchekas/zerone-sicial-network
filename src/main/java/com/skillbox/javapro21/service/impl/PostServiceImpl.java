@@ -32,7 +32,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Slf4j
 @Component
@@ -63,13 +62,13 @@ public class PostServiceImpl implements PostService {
             pageablePostList = postRepository.findAllPosts(datetimeFrom, datetimeTo, pageable);
         } else if (!text.isEmpty() && !text.matches("\\s*") && tags.length == 0 && author.equals("")) {
             pageablePostList = postRepository.findAllPostsByText(text.toLowerCase(Locale.ROOT), datetimeFrom, datetimeTo, pageable);
-            if (pageablePostList.getTotalElements() == 0){
+            if (pageablePostList.getTotalElements() == 0) {
                 text = utilsService.convertKbLayer(text);
                 pageablePostList = postRepository.findAllPostsByText(text.toLowerCase(Locale.ROOT), datetimeFrom, datetimeTo, pageable);
             }
         } else if (!text.trim().isEmpty() && tags.length == 0 && !author.isEmpty()) {
             pageablePostList = postRepository.findPostsByTextByAuthorWithoutTagsContainingByDateExcludingBlockers(text.toLowerCase(Locale.ROOT), datetimeFrom, datetimeTo, author.toLowerCase(Locale.ROOT), pageable);
-            if (pageablePostList.getTotalElements() == 0){
+            if (pageablePostList.getTotalElements() == 0) {
                 text = utilsService.convertKbLayer(text);
                 pageablePostList = postRepository.findPostsByTextByAuthorWithoutTagsContainingByDateExcludingBlockers(text.toLowerCase(Locale.ROOT), datetimeFrom, datetimeTo, author.toLowerCase(Locale.ROOT), pageable);
             }
@@ -309,7 +308,7 @@ public class PostServiceImpl implements PostService {
                 .setTimestamp(utilsService.getTimestamp())
                 .setOffset((int) pageable.getOffset())
                 .setTotal(pageablePostComments.getTotalPages())
-                .setData(getCommentDataForResponse(pageablePostComments.toList(), currentPerson));
+                .setData(getCommentDataForResponse(pageablePostComments.stream().filter(pc -> pc.getParent() == null).toList(), currentPerson));
         return commentsDataListDataResponse;
     }
 
@@ -336,7 +335,9 @@ public class PostServiceImpl implements PostService {
                 .setMyLike(likes.stream().map(CommentLike::getPerson).toList().contains(currentPerson))
                 .setLikes(likes.size())
                 .setSubComments(getSubCommentsData(postCommentsByParentId, currentPerson));
-        if (postComment.getParent() != null) commentsData.setParentId(postComment.getParent().getId());
+        if (postComment.getParent() != null) {
+            commentsData.setParentId(postComment.getParent().getId());
+        }
         return commentsData;
     }
 
