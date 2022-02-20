@@ -46,7 +46,6 @@ public class UtilsService {
     private final NotificationRepository notificationRepository;
     private NotificationService notificationService;
 
-
     /**
      * поиск пользователя по почте, если не найден выбрасывает ошибку
      */
