@@ -44,7 +44,7 @@ public class FriendsController {
     @DeleteMapping("/friends/requests/{id}")
     @LastActivity
     public ResponseEntity<DataResponse<MessageOkContent>> revokeRequest(@PathVariable Long id,
-                                                                          Principal principal) {
+                                                                        Principal principal) {
         return new ResponseEntity<>(friendsService.revokeRequest(id, principal), HttpStatus.OK);
     }
 
@@ -52,7 +52,7 @@ public class FriendsController {
     @DeleteMapping("/friends/subscriptions/{id}")
     @LastActivity
     public ResponseEntity<DataResponse<MessageOkContent>> deleteSubscription(@PathVariable Long id,
-                                                                        Principal principal) throws FriendshipNotFoundException {
+                                                                             Principal principal) throws FriendshipNotFoundException {
         return new ResponseEntity<>(friendsService.deleteSubscription(id, principal), HttpStatus.OK);
     }
 
@@ -128,9 +128,9 @@ public class FriendsController {
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
     public ResponseEntity<ListDataResponse<AuthData>> getSubscribers(@RequestParam(name = "name", defaultValue = "") String name,
-                                                                        @RequestParam(name = "offset", defaultValue = "0") int offset,
-                                                                        @RequestParam(name = "item_per_page", defaultValue = "5") int itemPerPage,
-                                                                        Principal principal) {
+                                                                     @RequestParam(name = "offset", defaultValue = "0") int offset,
+                                                                     @RequestParam(name = "item_per_page", defaultValue = "5") int itemPerPage,
+                                                                     Principal principal) {
         return new ResponseEntity<>(friendsService.getSubscribers(name, offset, itemPerPage, principal), HttpStatus.OK);
     }
 
@@ -140,9 +140,9 @@ public class FriendsController {
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
     public ResponseEntity<ListDataResponse<AuthData>> getSubscriptions(@RequestParam(name = "name", defaultValue = "") String name,
-                                                                     @RequestParam(name = "offset", defaultValue = "0") int offset,
-                                                                     @RequestParam(name = "item_per_page", defaultValue = "5") int itemPerPage,
-                                                                     Principal principal) {
+                                                                       @RequestParam(name = "offset", defaultValue = "0") int offset,
+                                                                       @RequestParam(name = "item_per_page", defaultValue = "5") int itemPerPage,
+                                                                       Principal principal) {
         return new ResponseEntity<>(friendsService.getSubscriptions(name, offset, itemPerPage, principal), HttpStatus.OK);
     }
 

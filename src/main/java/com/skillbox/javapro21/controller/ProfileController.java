@@ -98,7 +98,7 @@ public class ProfileController {
     @PutMapping("block/{id}")
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
-    public ResponseEntity<DataResponse<MessageOkContent>> blockPersonById(@PathVariable Long id,Principal principal) throws InterlockedFriendshipStatusException, BlockPersonHimselfException, PersonNotFoundException, FriendshipNotFoundException {
+    public ResponseEntity<DataResponse<MessageOkContent>> blockPersonById(@PathVariable Long id, Principal principal) throws InterlockedFriendshipStatusException, BlockPersonHimselfException, PersonNotFoundException, FriendshipNotFoundException {
         return new ResponseEntity<>(profileService.blockPersonById(id, principal), HttpStatus.OK);
     }
 
@@ -106,7 +106,7 @@ public class ProfileController {
     @DeleteMapping("block/{id}")
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
-    public ResponseEntity<DataResponse<MessageOkContent>> unblockPersonById(@PathVariable Long id,Principal principal) throws InterlockedFriendshipStatusException, BlockPersonHimselfException, PersonNotFoundException, NonBlockedFriendshipException, FriendshipNotFoundException {
+    public ResponseEntity<DataResponse<MessageOkContent>> unblockPersonById(@PathVariable Long id, Principal principal) throws InterlockedFriendshipStatusException, BlockPersonHimselfException, PersonNotFoundException, NonBlockedFriendshipException, FriendshipNotFoundException {
         return new ResponseEntity<>(profileService.unblockPersonById(id, principal), HttpStatus.OK);
     }
 

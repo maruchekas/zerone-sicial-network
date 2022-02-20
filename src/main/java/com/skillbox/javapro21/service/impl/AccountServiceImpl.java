@@ -8,17 +8,18 @@ import com.skillbox.javapro21.api.response.MessageOkContent;
 import com.skillbox.javapro21.api.response.account.NotificationSettingData;
 import com.skillbox.javapro21.config.MailjetSender;
 import com.skillbox.javapro21.config.properties.ConfirmationUrl;
-import com.skillbox.javapro21.domain.NotificationType;
+import com.skillbox.javapro21.config.security.JwtGenerator;
+import com.skillbox.javapro21.domain.UserNotificationSettings;
 import com.skillbox.javapro21.domain.Person;
 import com.skillbox.javapro21.domain.enumeration.MessagesPermission;
-import com.skillbox.javapro21.domain.enumeration.NotificationTypeStatus;
+import com.skillbox.javapro21.domain.enumeration.NotificationType;
 import com.skillbox.javapro21.domain.enumeration.UserType;
 import com.skillbox.javapro21.exception.CaptchaCodeException;
 import com.skillbox.javapro21.exception.NotFoundException;
 import com.skillbox.javapro21.exception.TokenConfirmationException;
 import com.skillbox.javapro21.exception.UserExistException;
 import com.skillbox.javapro21.repository.CaptchaRepository;
-import com.skillbox.javapro21.repository.NotificationTypeRepository;
+import com.skillbox.javapro21.repository.UserNotificationSettingsRepository;
 import com.skillbox.javapro21.repository.PersonRepository;
 import com.skillbox.javapro21.service.AccountService;
 import com.skillbox.javapro21.service.ResourceService;
@@ -53,7 +54,8 @@ public class AccountServiceImpl implements AccountService {
     private final CaptchaRepository captchaRepository;
     private final MailjetSender mailMessage;
     private final ConfirmationUrl confirmationUrl;
-    private final NotificationTypeRepository notificationTypeRepository;
+    private final JwtGenerator jwtGenerator;
+    private final UserNotificationSettingsRepository userNotificationSettingsRepository;
     private final ResourceService resourceService;
 
     private static int countRegisterPost = 0;
@@ -179,17 +181,17 @@ public class AccountServiceImpl implements AccountService {
     @CacheEvict(value = "notifications", key = "#principal.name", allEntries = true)
     public DataResponse<MessageOkContent> changeNotifications(ChangeNotificationsRequest changeNotificationsRequest, Principal principal) throws NotFoundException {
         Person person = utilsService.findPersonByEmail(principal.getName());
-        NotificationType notificationType = notificationTypeRepository.findNotificationTypeByPersonId(person.getId())
+        UserNotificationSettings userNotificationSettings = userNotificationSettingsRepository.findNotificationSettingsByPersonId(person.getId())
                 .orElseThrow(NotFoundException::new);
-        switch (changeNotificationsRequest.getNotificationTypeStatus()) {
-            case POST -> notificationType.setPost(changeNotificationsRequest.isEnable());
-            case POST_COMMENT -> notificationType.setPostComment(changeNotificationsRequest.isEnable());
-            case COMMENT_COMMENT -> notificationType.setCommentComment(changeNotificationsRequest.isEnable());
-            case FRIEND_REQUEST -> notificationType.setFriendsRequest(changeNotificationsRequest.isEnable());
-            case MESSAGE -> notificationType.setMessage(changeNotificationsRequest.isEnable());
-            case FRIEND_BIRTHDAY -> notificationType.setFriendsBirthday(changeNotificationsRequest.isEnable());
+        switch (changeNotificationsRequest.getNotificationType()) {
+            case POST -> userNotificationSettings.setPost(changeNotificationsRequest.isEnable());
+            case POST_COMMENT -> userNotificationSettings.setPostComment(changeNotificationsRequest.isEnable());
+            case COMMENT_COMMENT -> userNotificationSettings.setCommentComment(changeNotificationsRequest.isEnable());
+            case FRIEND_REQUEST -> userNotificationSettings.setFriendsRequest(changeNotificationsRequest.isEnable());
+            case MESSAGE -> userNotificationSettings.setMessage(changeNotificationsRequest.isEnable());
+            case FRIEND_BIRTHDAY -> userNotificationSettings.setFriendsBirthday(changeNotificationsRequest.isEnable());
         }
-        notificationTypeRepository.save(notificationType);
+        userNotificationSettingsRepository.save(userNotificationSettings);
         return utilsService.getMessageOkResponse();
     }
 
@@ -198,16 +200,15 @@ public class AccountServiceImpl implements AccountService {
     public ListDataResponse<NotificationSettingData> getNotifications(Principal principal) {
         log.info("caching notifications for " + principal.getName());
         Person person = utilsService.findPersonByEmail(principal.getName());
-        NotificationType notificationType = notificationTypeRepository.findNotificationTypeByPersonId(person.getId())
-                .orElse(new NotificationType()
-                        .setPost(false)
-                        .setPostComment(false)
-                        .setCommentComment(false)
-                        .setFriendsRequest(false)
-                        .setMessage(false)
-                        .setFriendsBirthday(false)
-                        .setPerson(person));
-        NotificationType save = notificationTypeRepository.save(notificationType);
+        UserNotificationSettings userNotificationSettings = userNotificationSettingsRepository.findNotificationSettingsByPersonId(person.getId())
+                .orElse(new UserNotificationSettings()
+                        .setPost(true)
+                        .setPostComment(true)
+                        .setCommentComment(true)
+                        .setFriendsRequest(true)
+                        .setMessage(true)
+                        .setFriendsBirthday(true));
+        UserNotificationSettings save = userNotificationSettingsRepository.save(userNotificationSettings);
         ListDataResponse<NotificationSettingData> dataResponse = new ListDataResponse<>();
         dataResponse.setTimestamp(utilsService.getTimestamp());
         dataListNotification(save);
@@ -229,20 +230,20 @@ public class AccountServiceImpl implements AccountService {
     /**
      * Заполнение новыми парраметрами настроек оповещения
      */
-    private List<NotificationSettingData> dataListNotification(NotificationType notificationType) {
+    private List<NotificationSettingData> dataListNotification(UserNotificationSettings userNotificationSettings) {
         List<NotificationSettingData> list = new ArrayList<>();
-        list.add(new NotificationSettingData().setNotificationTypeStatus(NotificationTypeStatus.POST)
-                .setEnable(notificationType.isPost()));
-        list.add(new NotificationSettingData().setNotificationTypeStatus(NotificationTypeStatus.POST_COMMENT)
-                .setEnable(notificationType.isPostComment()));
-        list.add(new NotificationSettingData().setNotificationTypeStatus(NotificationTypeStatus.COMMENT_COMMENT)
-                .setEnable(notificationType.isCommentComment()));
-        list.add(new NotificationSettingData().setNotificationTypeStatus(NotificationTypeStatus.FRIEND_REQUEST)
-                .setEnable(notificationType.isFriendsRequest()));
-        list.add(new NotificationSettingData().setNotificationTypeStatus(NotificationTypeStatus.MESSAGE)
-                .setEnable(notificationType.isMessage()));
-        list.add(new NotificationSettingData().setNotificationTypeStatus(NotificationTypeStatus.FRIEND_BIRTHDAY)
-                .setEnable(notificationType.isFriendsBirthday()));
+        list.add(new NotificationSettingData().setNotificationType(NotificationType.POST)
+                .setEnable(userNotificationSettings.isPost()));
+        list.add(new NotificationSettingData().setNotificationType(NotificationType.POST_COMMENT)
+                .setEnable(userNotificationSettings.isPostComment()));
+        list.add(new NotificationSettingData().setNotificationType(NotificationType.COMMENT_COMMENT)
+                .setEnable(userNotificationSettings.isCommentComment()));
+        list.add(new NotificationSettingData().setNotificationType(NotificationType.FRIEND_REQUEST)
+                .setEnable(userNotificationSettings.isFriendsRequest()));
+        list.add(new NotificationSettingData().setNotificationType(NotificationType.MESSAGE)
+                .setEnable(userNotificationSettings.isMessage()));
+        list.add(new NotificationSettingData().setNotificationType(NotificationType.FRIEND_BIRTHDAY)
+                .setEnable(userNotificationSettings.isFriendsBirthday()));
         return list;
     }
 
@@ -308,13 +309,13 @@ public class AccountServiceImpl implements AccountService {
      * Стартовые настройки оповещения
      */
     private void globalNotificationsSettings(Person person) {
-        NotificationType notificationType = new NotificationType()
+        UserNotificationSettings userNotificationSettings = new UserNotificationSettings()
                 .setPerson(person)
                 .setPost(true)
                 .setPostComment(true)
                 .setCommentComment(true)
                 .setFriendsRequest(true)
                 .setMessage(true);
-        notificationTypeRepository.save(notificationType);
+        userNotificationSettingsRepository.save(userNotificationSettings);
     }
 }

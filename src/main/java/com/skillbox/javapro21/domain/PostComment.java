@@ -3,7 +3,10 @@ package com.skillbox.javapro21.domain;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.skillbox.javapro21.domain.marker.ForStream;
 import com.skillbox.javapro21.domain.marker.HavePerson;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.hibernate.Hibernate;
 

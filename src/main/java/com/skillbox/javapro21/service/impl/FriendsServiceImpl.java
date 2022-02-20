@@ -104,7 +104,7 @@ public class FriendsServiceImpl implements FriendsService {
     @Override
     public DataResponse<StatusContent> isFriend(DialogRequestForCreate users, Principal principal) {
         Person person = utilsService.findPersonByEmail(principal.getName());
-        List<Long> idsFriends = personRepository.findAllFriendsByPersonId(person.getId());
+        List<Long> idsFriends = personRepository.findAllFriendIdsByPersonId(person.getId());
         idsFriends.retainAll(users.getUsersIds());
         if (idsFriends.size() > 0) {
             return new DataResponse<StatusContent>()

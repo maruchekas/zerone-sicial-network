@@ -11,6 +11,7 @@ import java.util.Optional;
 @Repository
 public interface PostLikeRepository extends JpaRepository<PostLike, Long> {
     List<PostLike> findPostLikeByPostId(Long id);
+
     Optional<PostLike> findByPersonIdAndPostId(Long personId, Long postId);
 
     @Query("select count(pl) from PostLike pl")
