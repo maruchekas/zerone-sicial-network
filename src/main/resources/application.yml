@@ -68,3 +68,7 @@ html:
     recovery: ./src/main/resources/messages/recovery.html
 
 location: src/main/resources/location/locations.xml
+
+weather:
+  api:
+    key: ${WEATHER_API_KEY}
