@@ -126,4 +126,11 @@ public class ProfileController {
                                                                     Principal principal) {
         return new ResponseEntity<>(profileService.searchByPerson(firstName, lastName, ageFrom, ageTo, country, city, offset, limit, principal), HttpStatus.OK);
     }
+
+    @Operation(summary = "Получить email пользователя", security = @SecurityRequirement(name = "jwt"))
+    @GetMapping("/email")
+    @PreAuthorize("hasAuthority('user:write')")
+    public ResponseEntity<String> getEmail(Principal principal) {
+        return new ResponseEntity<>(principal.getName(), HttpStatus.OK);
+    }
 }
