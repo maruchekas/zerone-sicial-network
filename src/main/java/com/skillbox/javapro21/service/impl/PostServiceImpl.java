@@ -35,7 +35,6 @@ import java.util.*;
 
 import static com.skillbox.javapro21.domain.enumeration.NotificationType.COMMENT_COMMENT;
 import static com.skillbox.javapro21.domain.enumeration.NotificationType.POST_COMMENT;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component
