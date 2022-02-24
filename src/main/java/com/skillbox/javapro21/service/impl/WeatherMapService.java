@@ -4,6 +4,7 @@ import com.skillbox.javapro21.api.response.platform.WeatherResponse;
 import com.skillbox.javapro21.domain.Person;
 import com.skillbox.javapro21.exception.UnauthorizedUserException;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -31,12 +32,12 @@ public class WeatherMapService {
 
     public WeatherResponse showWeather(Principal principal) throws UnauthorizedUserException, IOException, ParseException {
         if (principal == null) {
-            throw new UnauthorizedUserException(UNAUTHORISED_USER_ERR);
+            throw new UnauthorizedUserException();
         }
 
         WeatherResponse weatherResponse = new WeatherResponse();
         Person person = utilsService.findPersonByEmail(principal.getName());
-        String cityName = person.getTown() == null ? "Москва" : person.getTown();
+        String cityName = StringUtils.isEmpty(person.getTown()) ? "Москва" : person.getTown();
 
         JSONObject jsonObject = getWeatherJsonObject(cityName);
 
@@ -51,7 +52,8 @@ public class WeatherMapService {
 
         weatherResponse
                 .setCity(cityName)
-                .setTemp(temp).setForecastIcon(icon)
+                .setTemp(temp)
+                .setForecastIcon(icon)
                 .setDescription(description);
 
         return weatherResponse;
