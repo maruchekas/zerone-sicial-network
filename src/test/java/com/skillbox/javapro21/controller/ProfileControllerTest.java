@@ -34,6 +34,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
+import static com.skillbox.javapro21.config.Constants.USER_WASBLOCKED_ERR;
 import static com.skillbox.javapro21.domain.enumeration.FriendshipStatusType.*;
 
 @SpringBootTest
@@ -325,7 +326,37 @@ public class ProfileControllerTest extends AbstractTest {
                         .principal(() -> "test1@test.ru")
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.status().is4xxClientError());
+                .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @Test
+    @WithMockUser(username = "test1@test.ru", authorities = "user:write")
+    void getPersonWallByIdWhenPersonIsBlocker() throws Exception {
+        friendshipStatusSrc.setFriendshipStatusType(WASBLOCKED);
+        friendshipStatusSrc.setTime(LocalDateTime.now().minusHours(2));
+        friendshipStatusRepository.save(friendshipStatusSrc);
+        friendshipSrc.setFriendshipStatus(friendshipStatusSrc);
+        friendshipRepository.save(friendshipSrc);
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/api/v1/users/{id}/wall", verifyPersonWithPost.getId())
+                        .principal(() -> "test1@test.ru")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
+
+        friendshipStatusSrc.setFriendshipStatusType(INTERLOCKED);
+        friendshipStatusSrc.setTime(LocalDateTime.now().minusHours(2));
+        friendshipStatusRepository.save(friendshipStatusSrc);
+        friendshipSrc.setFriendshipStatus(friendshipStatusSrc);
+        friendshipRepository.save(friendshipSrc);
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/api/v1/users/{id}/wall", verifyPersonWithPost.getId())
+                        .principal(() -> "test1@test.ru")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.error").value("user"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.error_description").value(USER_WASBLOCKED_ERR));
     }
 
 

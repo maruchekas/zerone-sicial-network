@@ -19,6 +19,8 @@ public final class Constants {
     public static final String PASSWORD_CHANGE_ALLOW = "Пользователь может приступить к изменению пароля";
     public static final String MESSAGE_SENT_SUCCESS = "Ссылка отправлена на почту";
     public static final String UNAUTHORISED_USER_ERR = "Пользователь не авторизован";
+    public static final String USER_NOT_FOUND_ERR = "Пользователя с данным айди не существует";
+    public static final String USER_WASBLOCKED_ERR = "Пользователь заблокирован и не может смотреть посты";
     public static final String USER_EXISTS_ERR = "Пользователь с данным email уже подтвержден " +
             "или слишком много попыток пройти регистрацию по одному email";
 

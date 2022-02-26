@@ -18,19 +18,27 @@ import java.security.Principal;
 public interface ProfileService {
     DataResponse<AuthData> getPerson(Principal principal);
 
-    DataResponse<AuthData> editPerson(Principal principal, EditProfileRequest editProfileRequest) throws UserPrincipalNotFoundException;
+    DataResponse<AuthData> editPerson(Principal principal, EditProfileRequest editProfileRequest)
+            throws UserPrincipalNotFoundException;
 
     DataResponse<MessageOkContent> deletePerson(Principal principal);
 
     DataResponse<AuthData> getPersonById(Long id) throws PersonNotFoundException;
 
-    ListDataResponse<PostData> getPersonWallById(Long id, int offset, int itemPerPage, Principal principal) throws PersonNotFoundException, InterlockedFriendshipStatusException;
+    ListDataResponse<PostData> getPersonWallById(Long id, int offset, int itemPerPage, Principal principal)
+            throws PersonNotFoundException, InterlockedFriendshipStatusException;
 
-    DataResponse<PostData> postPostOnPersonWallById(Long id, Long publishDate, PostRequest postRequest, Principal principal) throws InterlockedFriendshipStatusException, PersonNotFoundException, PostNotFoundException;
+    DataResponse<PostData> postPostOnPersonWallById(Long id, Long publishDate, PostRequest postRequest, Principal principal)
+            throws InterlockedFriendshipStatusException, PersonNotFoundException, PostNotFoundException;
 
-    DataResponse<MessageOkContent> blockPersonById(Long id, Principal principal) throws BlockPersonHimselfException, InterlockedFriendshipStatusException, PersonNotFoundException, FriendshipNotFoundException;
+    DataResponse<MessageOkContent> blockPersonById(Long id, Principal principal)
+            throws BlockPersonHimselfException, InterlockedFriendshipStatusException, PersonNotFoundException, FriendshipNotFoundException;
 
-    DataResponse<MessageOkContent> unblockPersonById(Long id, Principal principal) throws PersonNotFoundException, BlockPersonHimselfException, NonBlockedFriendshipException, InterlockedFriendshipStatusException, FriendshipNotFoundException;
+    DataResponse<MessageOkContent> unblockPersonById(Long id, Principal principal)
+            throws PersonNotFoundException, BlockPersonHimselfException, NonBlockedFriendshipException,
+            InterlockedFriendshipStatusException, FriendshipNotFoundException;
 
-    ListDataResponse<Content> searchByPerson(String firstName, String lastName, Integer ageFrom, Integer ageTo, String country, String city, Integer offset, Integer itemPerPage, Principal principal);
+    ListDataResponse<Content> searchByPerson(String firstName, String lastName, Integer ageFrom,
+                                             Integer ageTo, String country, String city, Integer offset,
+                                             Integer itemPerPage, Principal principal);
 }

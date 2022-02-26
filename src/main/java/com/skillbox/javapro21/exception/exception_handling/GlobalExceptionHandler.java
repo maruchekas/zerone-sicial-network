@@ -2,6 +2,7 @@ package com.skillbox.javapro21.exception.exception_handling;
 
 import com.skillbox.javapro21.api.response.BadDataResponse;
 import com.skillbox.javapro21.exception.CaptchaCodeException;
+import com.skillbox.javapro21.exception.InterlockedFriendshipStatusException;
 import com.skillbox.javapro21.exception.UnauthorizedUserException;
 import com.skillbox.javapro21.exception.UserExistException;
 import org.json.simple.parser.ParseException;
@@ -26,13 +27,19 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler
-    ResponseEntity<BadDataResponse> handleUserExistException(UnauthorizedUserException exception) {
+    ResponseEntity<BadDataResponse> handleUserNotAuthorisedException(UnauthorizedUserException exception) {
         BadDataResponse badDataResponse = new BadDataResponse().setError("user").setDescription(exception.getMessage());
         return new ResponseEntity<>(badDataResponse, HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler
-    ResponseEntity<BadDataResponse> handleUserExistException(ParseException exception) {
+    ResponseEntity<BadDataResponse> handleUserNotAuthorisedException(InterlockedFriendshipStatusException exception) {
+        BadDataResponse badDataResponse = new BadDataResponse().setError("user").setDescription(exception.getMessage());
+        return new ResponseEntity<>(badDataResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler
+    ResponseEntity<BadDataResponse> handleParseWeatherException(ParseException exception) {
         BadDataResponse badDataResponse =
                 new BadDataResponse().setError("weather_parse").setDescription("Не удалось получить данные о погоде");
         return new ResponseEntity<>(badDataResponse, HttpStatus.BAD_REQUEST);

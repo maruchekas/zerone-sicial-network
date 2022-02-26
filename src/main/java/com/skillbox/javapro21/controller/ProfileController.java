@@ -78,7 +78,8 @@ public class ProfileController {
     public ResponseEntity<ListDataResponse<PostData>> getPersonWallById(@PathVariable Long id,
                                                                         @RequestParam(name = "offset", defaultValue = "0") int offset,
                                                                         @RequestParam(name = "item_per_page", defaultValue = "20") int itemPerPage,
-                                                                        Principal principal) throws InterlockedFriendshipStatusException, PersonNotFoundException {
+                                                                        Principal principal)
+            throws InterlockedFriendshipStatusException, PersonNotFoundException {
         return new ResponseEntity<>(profileService.getPersonWallById(id, offset, itemPerPage, principal), HttpStatus.OK);
     }
 
