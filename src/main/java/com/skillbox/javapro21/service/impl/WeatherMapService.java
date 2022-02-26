@@ -50,9 +50,11 @@ public class WeatherMapService {
         String icon = String.format(WEATHER_ICON_URL,
                 weatherToday.get("icon"));
 
+        String formattedTemp = temp < 0 ? String.valueOf(temp) : "+" + temp;
+
         weatherResponse
                 .setCity(cityName)
-                .setTemp(temp)
+                .setTemp(formattedTemp)
                 .setForecastIcon(icon)
                 .setDescription(description);
 

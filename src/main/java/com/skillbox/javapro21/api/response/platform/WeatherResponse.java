@@ -10,7 +10,7 @@ import lombok.experimental.Accessors;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class WeatherResponse {
     private String city;
-    private int temp;
+    private String temp;
     @JsonProperty("icon")
     private String forecastIcon;
     private String description;
