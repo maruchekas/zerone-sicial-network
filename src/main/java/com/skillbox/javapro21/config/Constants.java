@@ -21,6 +21,8 @@ public final class Constants {
     public static final String UNAUTHORISED_USER_ERR = "Пользователь не авторизован";
     public static final String USER_NOT_FOUND_ERR = "Пользователя с данным айди не существует";
     public static final String USER_WASBLOCKED_ERR = "Пользователь заблокирован и не может смотреть посты";
+    public static final String USER_INTERLOCKED_ERR = "Этот пользователь вас заблокировал и вы не можете смотреть его" +
+            " профиль";
     public static final String USER_EXISTS_ERR = "Пользователь с данным email уже подтвержден " +
             "или слишком много попыток пройти регистрацию по одному email";
 

@@ -23,7 +23,7 @@ public interface ProfileService {
 
     DataResponse<MessageOkContent> deletePerson(Principal principal);
 
-    DataResponse<AuthData> getPersonById(Long id) throws PersonNotFoundException;
+    DataResponse<AuthData> getPersonById(Long id, Principal principal) throws PersonNotFoundException, InterlockedFriendshipStatusException;
 
     ListDataResponse<PostData> getPersonWallById(Long id, int offset, int itemPerPage, Principal principal)
             throws PersonNotFoundException, InterlockedFriendshipStatusException;
@@ -32,7 +32,7 @@ public interface ProfileService {
             throws InterlockedFriendshipStatusException, PersonNotFoundException, PostNotFoundException;
 
     DataResponse<MessageOkContent> blockPersonById(Long id, Principal principal)
-            throws BlockPersonHimselfException, InterlockedFriendshipStatusException, PersonNotFoundException, FriendshipNotFoundException;
+            throws InterlockedFriendshipStatusException, PersonNotFoundException, FriendshipNotFoundException;
 
     DataResponse<MessageOkContent> unblockPersonById(Long id, Principal principal)
             throws PersonNotFoundException, BlockPersonHimselfException, NonBlockedFriendshipException,
