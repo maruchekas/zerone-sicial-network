@@ -19,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
@@ -39,6 +40,7 @@ public class DialogsServiceImpl implements DialogsService {
     private final UtilsService utilsService;
     private final MessageRepository messageRepository;
     private final NotificationRepository notificationRepository;
+    private final SimpMessagingTemplate messagingTemplate;
 
     @Override
     public ListDataResponse<DialogContent> getDialogs(String query, int offset, int itemPerPage, Principal principal) {
@@ -92,18 +94,7 @@ public class DialogsServiceImpl implements DialogsService {
 
     @Override
     public DataResponse<CountContent> getUnreadedDialogs(Principal principal) {
-        Person person = utilsService.findPersonByEmail(principal.getName());
-        List<PersonToDialog> dialogs = personToDialogRepository.findDialogsByPersonId(person.getId());
-        int count = 0;
-        for (PersonToDialog p2d : dialogs) {
-            count += dialogRepository.findDialogById(p2d.getDialogId()).orElseThrow().getMessages().stream()
-                    .filter(message -> {
-                        if (!message.getAuthor().getId().equals(person.getId())) {
-                            return message.getReadStatus().equals(SENT);
-                        }
-                        return false;
-                    }).count();
-        }
+        int count = getCountMessages(principal.getName());
         return new DataResponse<CountContent>()
                 .setError("")
                 .setTimestamp(utilsService.getTimestamp())
@@ -208,6 +199,10 @@ public class DialogsServiceImpl implements DialogsService {
             return null;
         }
         Person person = utilsService.findPersonByEmail(principal.getName());
+
+        Person dstPerson = personRepository.findPersonById((long) id).get();
+        messagingTemplate.convertAndSendToUser(dstPerson.getEmail(), "/topic/messages", messageText);
+
         PersonToDialog p2d = personToDialogRepository.findDialogByPersonIdAndDialogId(person.getId(), id);
         p2d.setLastCheck(LocalDateTime.now(ZoneOffset.UTC));
         personToDialogRepository.save(p2d);
@@ -245,6 +240,10 @@ public class DialogsServiceImpl implements DialogsService {
                     .setEntityId(message.getId())
                     .setContact("Contact"));
         }
+        int countMessages = getCountMessages(dstPerson.getEmail());
+        messagingTemplate.convertAndSendToUser(dstPerson.getEmail(),
+                "/topic/unreaded", new CountContent().setCount(countMessages));
+
         PersonToDialog p2DByDialogAndMessage = personToDialogRepository.findP2DByDialogAndMessage(id, person.getId());
         return getDataResponseWithMessageData(save, p2DByDialogAndMessage);
     }
@@ -476,5 +475,21 @@ public class DialogsServiceImpl implements DialogsService {
                 .setError("")
                 .setTimestamp(utilsService.getTimestamp())
                 .setData(new DialogContent().setId(savedDialog.getId()));
+    }
+
+    private int getCountMessages(String name) {
+        Person person = utilsService.findPersonByEmail(name);
+        List<PersonToDialog> dialogs = personToDialogRepository.findDialogsByPersonId(person.getId());
+        int count = 0;
+        for (PersonToDialog p2d : dialogs) {
+            count += dialogRepository.findDialogById(p2d.getDialogId()).orElseThrow().getMessages().stream()
+                    .filter(message -> {
+                        if (!message.getAuthor().getId().equals(person.getId())) {
+                            return message.getReadStatus().equals(SENT);
+                        }
+                        return false;
+                    }).count();
+        }
+        return count;
     }
 }
