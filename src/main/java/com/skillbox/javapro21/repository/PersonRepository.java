@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface PersonRepository extends JpaRepository<Person, Integer> {
+public interface PersonRepository extends JpaRepository<Person, Long> {
     @Query("SELECT p FROM Person p " +
             "WHERE p.email = :email")
     Optional<Person> findByEmail(String email);
@@ -34,7 +34,7 @@ public interface PersonRepository extends JpaRepository<Person, Integer> {
             "where f.srcPerson.id = :id " +
             "and fs.friendshipStatusType = 'FRIEND' " +
             "and p.isBlocked = 0" )
-    List<Long> findAllFriendsByPersonId(Long id);
+    List<Long> findAllFriendIdsByPersonId(Long id);
 
     @Query("select p from Person p where p.id in (:ids) and p.isBlocked = 0")
     List<Person> findAllById(List<Long> ids);
@@ -202,4 +202,6 @@ public interface PersonRepository extends JpaRepository<Person, Integer> {
     List<Person> findAllPersonsWithBirthday();
 
     Optional<Person> findByConfirmationCode(String token);
+
+    List<Person> findAllByIsApprovedAndIsBlocked(int isApproved, int isBlocked);
 }

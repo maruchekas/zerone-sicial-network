@@ -4,16 +4,21 @@ import com.skillbox.javapro21.api.response.*;
 import com.skillbox.javapro21.api.response.account.AuthData;
 import com.skillbox.javapro21.domain.Friendship;
 import com.skillbox.javapro21.domain.FriendshipStatus;
+import com.skillbox.javapro21.domain.Notification;
 import com.skillbox.javapro21.domain.Person;
 import com.skillbox.javapro21.domain.enumeration.FriendshipStatusType;
 import com.skillbox.javapro21.repository.FriendshipRepository;
 import com.skillbox.javapro21.repository.FriendshipStatusRepository;
+import com.skillbox.javapro21.repository.NotificationRepository;
 import com.skillbox.javapro21.repository.PersonRepository;
+import com.skillbox.javapro21.service.NotificationService;
 import com.skillbox.javapro21.service.kbLayearConverter.KbLayerConverter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -27,19 +32,17 @@ import java.util.Map;
 import java.util.Optional;
 
 import static com.skillbox.javapro21.domain.enumeration.FriendshipStatusType.*;
+import static com.skillbox.javapro21.domain.enumeration.NotificationType.FRIEND_REQUEST;
 
+@Setter
+@RequiredArgsConstructor
 @Component
 public class UtilsService {
     private final PersonRepository personRepository;
     private final FriendshipRepository friendshipRepository;
     private final FriendshipStatusRepository friendshipStatusRepository;
-
-    @Autowired
-    protected UtilsService(PersonRepository personRepository, FriendshipRepository friendshipRepository, FriendshipStatusRepository friendshipStatusRepository) {
-        this.personRepository = personRepository;
-        this.friendshipRepository = friendshipRepository;
-        this.friendshipStatusRepository = friendshipStatusRepository;
-    }
+    private final NotificationRepository notificationRepository;
+    private NotificationService notificationService;
 
     /**
      * поиск пользователя по почте, если не найден выбрасывает ошибку
@@ -62,7 +65,7 @@ public class UtilsService {
 
     /**
      * Шаблон для DataResponse
-     * */
+     */
     public DataResponse<Content> getDataResponse(Content data) {
         return new DataResponse<>()
                 .setError("ok")
@@ -72,7 +75,7 @@ public class UtilsService {
 
     /**
      * Шаблон для ListDataResponse
-     * */
+     */
     public ListDataResponse<Content> getListDataResponse(int total, int offset, int limit, List<Content> data) {
         return new ListDataResponse<>()
                 .setError("ok")
@@ -85,7 +88,7 @@ public class UtilsService {
 
     /**
      * Шаблон для StringListDataResponse
-     * */
+     */
     public StringListDataResponse getStringListDataResponse(List<String> dataList) {
         return new StringListDataResponse()
                 .setError("ok")
@@ -142,14 +145,18 @@ public class UtilsService {
                 DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
     }
 
+    public LocalDateTime getLocalDateTimeZoneOffsetUtc() {
+        return LocalDateTime.now(ZoneOffset.UTC);
+    }
+
     /**
      * Получение Timestamp
-     * */
+     */
     public long getTimestamp() {
         return LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli();
     }
 
-    public long getTimestampFromLocalDateTime(LocalDateTime localDateTime){
+    public long getTimestampFromLocalDateTime(LocalDateTime localDateTime) {
         return ZonedDateTime.of(localDateTime, ZoneId.systemDefault()).toInstant().getEpochSecond();
     }
 
@@ -166,6 +173,7 @@ public class UtilsService {
     /**
      * создание отношений между пользователями
      */
+    @Transactional
     public void createFriendship(Person src, Person dst, FriendshipStatusType friendshipStatusType) {
         switch (friendshipStatusType) {
             case BLOCKED -> setFriendshipStatusBlocked(src, dst);
@@ -195,6 +203,8 @@ public class UtilsService {
             fst = INTERLOCKED;
         } else if (friendshipStatusType.equals(FRIEND)) {
             fst = FRIEND;
+            notificationService.checkBirthdayFromOneAndCreateNotificationToAnotherInCase(src, dst);
+            notificationService.checkBirthdayFromOneAndCreateNotificationToAnotherInCase(dst, src);
         }
         saveNewFriendshipForSrcAndDst(src, dst, fst);
         saveNewFriendshipForSrcAndDst(dst, src, fst);
@@ -212,7 +222,6 @@ public class UtilsService {
     }
 
 
-
     private FriendshipStatus saveFriendshipStatus(FriendshipStatus friendshipStatus, FriendshipStatusType type) {
         friendshipStatus.setFriendshipStatusType(type).setTime(LocalDateTime.now(ZoneOffset.UTC));
         return friendshipStatusRepository.save(friendshipStatus);
@@ -228,6 +237,15 @@ public class UtilsService {
                 .setDstPerson(dst)
                 .setFriendshipStatus(saveFSSrc);
         friendshipRepository.save(friendshipSrc);
+
+        if (type == REQUEST) {
+            notificationRepository.save(new Notification()
+                    .setSentTime(getLocalDateTimeZoneOffsetUtc())
+                    .setNotificationType(FRIEND_REQUEST)
+                    .setPerson(dst)
+                    .setEntityId(friendshipSrc.getId())
+                    .setContact("Contact"));
+        }
     }
 
     /**
@@ -249,7 +267,7 @@ public class UtilsService {
      * example: Ghbdtn vbh! -> Привет мир!
      */
 
-    public String convertKbLayer(String input){
+    public String convertKbLayer(String input) {
         KbLayerConverter kbLayerConverter = new KbLayerConverter();
         return kbLayerConverter.convertString(input);
     }

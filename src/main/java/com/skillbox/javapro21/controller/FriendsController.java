@@ -12,6 +12,7 @@ import com.skillbox.javapro21.api.response.friends.StatusContent;
 import com.skillbox.javapro21.exception.FriendshipNotFoundException;
 import com.skillbox.javapro21.service.FriendsService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,7 +31,7 @@ import java.security.Principal;
 public class FriendsController {
     private final FriendsService friendsService;
 
-    @Operation(summary = "Удаление пользователя из друзей")
+    @Operation(summary = "Удаление пользователя из друзей", security = @SecurityRequirement(name = "jwt"))
     @DeleteMapping("/friends/{id}")
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
@@ -39,23 +40,23 @@ public class FriendsController {
         return new ResponseEntity<>(friendsService.deleteFriend(id, principal), HttpStatus.OK);
     }
 
-    @Operation(summary = "Отозвать исходящий/отклонить входящий запрос в друзья")
+    @Operation(summary = "Отозвать исходящий/отклонить входящий запрос в друзья", security = @SecurityRequirement(name = "jwt"))
     @DeleteMapping("/friends/requests/{id}")
     @LastActivity
     public ResponseEntity<DataResponse<MessageOkContent>> revokeRequest(@PathVariable Long id,
-                                                                          Principal principal) {
+                                                                        Principal principal) {
         return new ResponseEntity<>(friendsService.revokeRequest(id, principal), HttpStatus.OK);
     }
 
-    @Operation(summary = "Удалить подписку на пользователя")
+    @Operation(summary = "Удалить подписку на пользователя", security = @SecurityRequirement(name = "jwt"))
     @DeleteMapping("/friends/subscriptions/{id}")
     @LastActivity
     public ResponseEntity<DataResponse<MessageOkContent>> deleteSubscription(@PathVariable Long id,
-                                                                        Principal principal) throws FriendshipNotFoundException {
+                                                                             Principal principal) throws FriendshipNotFoundException {
         return new ResponseEntity<>(friendsService.deleteSubscription(id, principal), HttpStatus.OK);
     }
 
-    @Operation(summary = "Принять/Добавить пользователя в друзья")
+    @Operation(summary = "Принять/Добавить пользователя в друзья", security = @SecurityRequirement(name = "jwt"))
     @PostMapping("/friends/{id}")
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
@@ -64,7 +65,7 @@ public class FriendsController {
         return new ResponseEntity<>(friendsService.editFriend(id, principal), HttpStatus.OK);
     }
 
-    @Operation(summary = "Получить информацию является ли пользователь другом указанных пользователей")
+    @Operation(summary = "Получить информацию является ли пользователь другом указанных пользователей", security = @SecurityRequirement(name = "jwt"))
     @PostMapping("/is/friends")
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
@@ -73,7 +74,7 @@ public class FriendsController {
         return new ResponseEntity<>(friendsService.isFriend(users, principal), HttpStatus.OK);
     }
 
-    @Operation(summary = "Получить список друзей")
+    @Operation(summary = "Получить список друзей", security = @SecurityRequirement(name = "jwt"))
     @JsonView(View.Friends.class)
     @GetMapping("/friends")
     @PreAuthorize("hasAuthority('user:write')")
@@ -85,7 +86,7 @@ public class FriendsController {
         return new ResponseEntity<>(friendsService.getFriends(name, offset, itemPerPage, principal), HttpStatus.OK);
     }
 
-    @Operation(summary = "Получить список входящик заявок на добавление в друзья")
+    @Operation(summary = "Получить список входящик заявок на добавление в друзья", security = @SecurityRequirement(name = "jwt"))
     @JsonView(View.Friends.class)
     @GetMapping("/friends/requests/in")
     @PreAuthorize("hasAuthority('user:write')")
@@ -97,7 +98,7 @@ public class FriendsController {
         return new ResponseEntity<>(friendsService.getIncomingRequests(name, offset, itemPerPage, principal), HttpStatus.OK);
     }
 
-    @Operation(summary = "Получить список исходящих заявок на добавление в друзья")
+    @Operation(summary = "Получить список исходящих заявок на добавление в друзья", security = @SecurityRequirement(name = "jwt"))
     @JsonView(View.Friends.class)
     @GetMapping("/friends/requests/out")
     @PreAuthorize("hasAuthority('user:write')")
@@ -109,7 +110,7 @@ public class FriendsController {
         return new ResponseEntity<>(friendsService.getOutgoingRequests(name, offset, itemPerPage, principal), HttpStatus.OK);
     }
 
-    @Operation(summary = "Получить список заблокированных пользователей")
+    @Operation(summary = "Получить список заблокированных пользователей", security = @SecurityRequirement(name = "jwt"))
     @JsonView(View.Friends.class)
     @GetMapping("/friends/blocked")
     @PreAuthorize("hasAuthority('user:write')")
@@ -121,31 +122,31 @@ public class FriendsController {
         return new ResponseEntity<>(friendsService.getBlockedUsers(name, offset, itemPerPage, principal), HttpStatus.OK);
     }
 
-    @Operation(summary = "Получить список подписчиков")
+    @Operation(summary = "Получить список подписчиков", security = @SecurityRequirement(name = "jwt"))
     @JsonView(View.Friends.class)
     @GetMapping("/friends/subscribers")
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
     public ResponseEntity<ListDataResponse<AuthData>> getSubscribers(@RequestParam(name = "name", defaultValue = "") String name,
-                                                                        @RequestParam(name = "offset", defaultValue = "0") int offset,
-                                                                        @RequestParam(name = "item_per_page", defaultValue = "5") int itemPerPage,
-                                                                        Principal principal) {
+                                                                     @RequestParam(name = "offset", defaultValue = "0") int offset,
+                                                                     @RequestParam(name = "item_per_page", defaultValue = "5") int itemPerPage,
+                                                                     Principal principal) {
         return new ResponseEntity<>(friendsService.getSubscribers(name, offset, itemPerPage, principal), HttpStatus.OK);
     }
 
-    @Operation(summary = "Получить список подписок")
+    @Operation(summary = "Получить список подписок", security = @SecurityRequirement(name = "jwt"))
     @JsonView(View.Friends.class)
     @GetMapping("/friends/subscriptions")
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
     public ResponseEntity<ListDataResponse<AuthData>> getSubscriptions(@RequestParam(name = "name", defaultValue = "") String name,
-                                                                     @RequestParam(name = "offset", defaultValue = "0") int offset,
-                                                                     @RequestParam(name = "item_per_page", defaultValue = "5") int itemPerPage,
-                                                                     Principal principal) {
+                                                                       @RequestParam(name = "offset", defaultValue = "0") int offset,
+                                                                       @RequestParam(name = "item_per_page", defaultValue = "5") int itemPerPage,
+                                                                       Principal principal) {
         return new ResponseEntity<>(friendsService.getSubscriptions(name, offset, itemPerPage, principal), HttpStatus.OK);
     }
 
-    @Operation(summary = "Получить список рекомендаций")
+    @Operation(summary = "Получить список рекомендаций", security = @SecurityRequirement(name = "jwt"))
     @JsonView(View.Friends.class)
     @GetMapping("/friends/recommendations")
     @PreAuthorize("hasAuthority('user:write')")

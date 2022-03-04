@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/tags")
 public class TagController {
-
     private final TagService tagService;
 
     @GetMapping("")
@@ -39,7 +38,7 @@ public class TagController {
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
     ResponseEntity<DataResponse<TagData>> addTag(
-            @RequestBody String tag ){
+            @RequestBody String tag) {
         return new ResponseEntity<>(tagService.addTag(tag), HttpStatus.OK);
     }
 

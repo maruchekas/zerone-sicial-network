@@ -7,18 +7,13 @@ import com.skillbox.javapro21.api.response.DataResponse;
 import com.skillbox.javapro21.api.response.ListDataResponse;
 import com.skillbox.javapro21.api.response.MessageOkContent;
 import com.skillbox.javapro21.api.response.dialogs.*;
-import com.skillbox.javapro21.domain.Dialog;
-import com.skillbox.javapro21.domain.Message;
-import com.skillbox.javapro21.domain.Person;
-import com.skillbox.javapro21.domain.PersonToDialog;
+import com.skillbox.javapro21.domain.*;
+import com.skillbox.javapro21.domain.enumeration.NotificationType;
 import com.skillbox.javapro21.domain.enumeration.ReadStatus;
 import com.skillbox.javapro21.exception.MessageNotFoundException;
 import com.skillbox.javapro21.exception.PersonNotFoundException;
 import com.skillbox.javapro21.exception.UserExistOnDialogException;
-import com.skillbox.javapro21.repository.DialogRepository;
-import com.skillbox.javapro21.repository.MessageRepository;
-import com.skillbox.javapro21.repository.PersonRepository;
-import com.skillbox.javapro21.repository.PersonToDialogRepository;
+import com.skillbox.javapro21.repository.*;
 import com.skillbox.javapro21.service.DialogsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -43,6 +38,7 @@ public class DialogsServiceImpl implements DialogsService {
     private final DialogRepository dialogRepository;
     private final UtilsService utilsService;
     private final MessageRepository messageRepository;
+    private final NotificationRepository notificationRepository;
 
     @Override
     public ListDataResponse<DialogContent> getDialogs(String query, int offset, int itemPerPage, Principal principal) {
@@ -90,7 +86,6 @@ public class DialogsServiceImpl implements DialogsService {
             }
         } else {
             setNewChat(person, personList);
-
         }
         return null;
     }
@@ -171,14 +166,14 @@ public class DialogsServiceImpl implements DialogsService {
             dialog
                     .setCode("")
                     .setPersons(personSet);
-            Dialog sDialog = dialogRepository.save(dialog);
+            dialogRepository.save(dialog);
             List<Long> list = new ArrayList<>();
             for (Person p : personSet) {
                 list.add(p.getId());
             }
             return getDataResponseWithListPersonsId(list);
         } else {
-            throw new UserExistOnDialogException("Пользователь уже в есть в диалоге");
+            throw new UserExistOnDialogException("Пользователь уже есть в диалоге");
         }
     }
 
@@ -231,10 +226,24 @@ public class DialogsServiceImpl implements DialogsService {
             for (Person p : personList) {
                 message.setRecipient(p);
                 save = messageRepository.save(message);
+
+                notificationRepository.save(new Notification()
+                                                .setSentTime(utilsService.getLocalDateTimeZoneOffsetUtc())
+                                                .setNotificationType(NotificationType.MESSAGE)
+                                                .setPerson(p)
+                                                .setEntityId(message.getId())
+                                                .setContact("Contact"));
             }
         } else {
             message.setRecipient(personList.stream().findFirst().orElseThrow());
             save = messageRepository.save(message);
+
+            notificationRepository.save(new Notification()
+                    .setSentTime(utilsService.getLocalDateTimeZoneOffsetUtc())
+                    .setNotificationType(NotificationType.MESSAGE)
+                    .setPerson(personList.stream().findFirst().orElseThrow())
+                    .setEntityId(message.getId())
+                    .setContact("Contact"));
         }
         PersonToDialog p2DByDialogAndMessage = personToDialogRepository.findP2DByDialogAndMessage(id, person.getId());
         return getDataResponseWithMessageData(save, p2DByDialogAndMessage);

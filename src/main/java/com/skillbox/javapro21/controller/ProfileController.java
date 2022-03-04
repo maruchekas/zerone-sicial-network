@@ -78,11 +78,12 @@ public class ProfileController {
     public ResponseEntity<ListDataResponse<PostData>> getPersonWallById(@PathVariable Long id,
                                                                         @RequestParam(name = "offset", defaultValue = "0") int offset,
                                                                         @RequestParam(name = "item_per_page", defaultValue = "20") int itemPerPage,
-                                                                        Principal principal) throws InterlockedFriendshipStatusException, PersonNotFoundException {
+                                                                        Principal principal)
+            throws InterlockedFriendshipStatusException, PersonNotFoundException {
         return new ResponseEntity<>(profileService.getPersonWallById(id, offset, itemPerPage, principal), HttpStatus.OK);
     }
 
-    @Operation(summary = "Сделать убликацию пользователем на стене", security = @SecurityRequirement(name = "jwt"))
+    @Operation(summary = "Сделать публикацию на стене", security = @SecurityRequirement(name = "jwt"))
     @JsonView(View.Posts.class)
     @PostMapping("/{id}/wall")
     @PreAuthorize("hasAuthority('user:write')")
@@ -98,7 +99,7 @@ public class ProfileController {
     @PutMapping("block/{id}")
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
-    public ResponseEntity<DataResponse<MessageOkContent>> blockPersonById(@PathVariable Long id,Principal principal) throws InterlockedFriendshipStatusException, BlockPersonHimselfException, PersonNotFoundException, FriendshipNotFoundException {
+    public ResponseEntity<DataResponse<MessageOkContent>> blockPersonById(@PathVariable Long id, Principal principal) throws InterlockedFriendshipStatusException, BlockPersonHimselfException, PersonNotFoundException, FriendshipNotFoundException {
         return new ResponseEntity<>(profileService.blockPersonById(id, principal), HttpStatus.OK);
     }
 
@@ -106,7 +107,7 @@ public class ProfileController {
     @DeleteMapping("block/{id}")
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
-    public ResponseEntity<DataResponse<MessageOkContent>> unblockPersonById(@PathVariable Long id,Principal principal) throws InterlockedFriendshipStatusException, BlockPersonHimselfException, PersonNotFoundException, NonBlockedFriendshipException, FriendshipNotFoundException {
+    public ResponseEntity<DataResponse<MessageOkContent>> unblockPersonById(@PathVariable Long id, Principal principal) throws InterlockedFriendshipStatusException, BlockPersonHimselfException, PersonNotFoundException, NonBlockedFriendshipException, FriendshipNotFoundException {
         return new ResponseEntity<>(profileService.unblockPersonById(id, principal), HttpStatus.OK);
     }
 
@@ -125,5 +126,12 @@ public class ProfileController {
                                                                     @RequestParam(name = "limit", defaultValue = "20") Integer limit,
                                                                     Principal principal) {
         return new ResponseEntity<>(profileService.searchByPerson(firstName, lastName, ageFrom, ageTo, country, city, offset, limit, principal), HttpStatus.OK);
+    }
+
+    @Operation(summary = "Получить email пользователя", security = @SecurityRequirement(name = "jwt"))
+    @GetMapping("/email")
+    @PreAuthorize("hasAuthority('user:write')")
+    public ResponseEntity<String> getEmail(Principal principal) {
+        return new ResponseEntity<>(principal.getName(), HttpStatus.OK);
     }
 }

@@ -18,21 +18,23 @@ import com.skillbox.javapro21.service.PostService;
 import com.skillbox.javapro21.service.TagService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.security.Principal;
-import java.sql.ResultSet;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+
+import static com.skillbox.javapro21.domain.enumeration.NotificationType.COMMENT_COMMENT;
+import static com.skillbox.javapro21.domain.enumeration.NotificationType.POST_COMMENT;
 
 @Slf4j
 @Component
@@ -44,12 +46,11 @@ public class PostServiceImpl implements PostService {
     private final UtilsService utilsService;
     private final TagService tagService;
     private final PostRepository postRepository;
-    private final TagRepository tagRepository;
     private final PostLikeRepository postLikeRepository;
     private final PostCommentRepository postCommentRepository;
     private final CommentLikeRepository commentLikeRepository;
     private final MailjetSender mailjetSender;
-    private final JdbcTemplate jdbcTemplate;
+    private final NotificationRepository notificationRepository;
 
     @Override
     public ListDataResponse<PostData> getPosts(String text, long dateFrom, long dateTo, int offset, int itemPerPage,
@@ -59,25 +60,28 @@ public class PostServiceImpl implements PostService {
         LocalDateTime datetimeTo = (dateTo != -1) ? utilsService.getLocalDateTime(dateTo) : LocalDateTime.now();
         Pageable pageable = PageRequest.of(offset / itemPerPage, itemPerPage);
         Page<Post> pageablePostList;
-        if ((text.matches("\\s*") || text.equals("")) && tags.length == 0 && author.equals("")) {
+        if ((StringUtils.isBlank(text)) && tags.length == 0 && author.equals("")) {
             pageablePostList = postRepository.findAllPosts(datetimeFrom, datetimeTo, pageable);
-        } else if (!text.isEmpty() && !text.matches("\\s*") && tags.length == 0 && author.equals("")) {
+        } else if (!StringUtils.isBlank(text) && tags.length == 0 && author.equals("")) {
             pageablePostList = postRepository.findAllPostsByText(text.toLowerCase(Locale.ROOT), datetimeFrom, datetimeTo, pageable);
-            if (pageablePostList.getTotalElements() == 0){
+            if (pageablePostList.getTotalElements() == 0) {
                 text = utilsService.convertKbLayer(text);
                 pageablePostList = postRepository.findAllPostsByText(text.toLowerCase(Locale.ROOT), datetimeFrom, datetimeTo, pageable);
             }
         } else if (!text.trim().isEmpty() && tags.length == 0 && !author.isEmpty()) {
             pageablePostList = postRepository.findPostsByTextByAuthorWithoutTagsContainingByDateExcludingBlockers(text.toLowerCase(Locale.ROOT), datetimeFrom, datetimeTo, author.toLowerCase(Locale.ROOT), pageable);
-            if (pageablePostList.getTotalElements() == 0){
+            if (pageablePostList.getTotalElements() == 0) {
                 text = utilsService.convertKbLayer(text);
                 pageablePostList = postRepository.findPostsByTextByAuthorWithoutTagsContainingByDateExcludingBlockers(text.toLowerCase(Locale.ROOT), datetimeFrom, datetimeTo, author.toLowerCase(Locale.ROOT), pageable);
             }
-        } else if ((text.matches("\\s*") || text.equals("")) && tags.length == 0 && !author.isEmpty()) {
+        } else if (StringUtils.isBlank(text) && tags.length == 0 && !author.isEmpty()) {
             pageablePostList = postRepository.findAllPostsByAuthor(author.toLowerCase(Locale.ROOT), datetimeFrom, datetimeTo, pageable);
         } else {
-            List<Long> tagsId = getTags(tags);
-            pageablePostList = postRepository.findPostsByTextByAuthorByTagsContainingByDateExcludingBlockers(text.toLowerCase(Locale.ROOT), datetimeFrom, datetimeTo, author.toLowerCase(Locale.ROOT), tags, pageable);
+            List<Post> foundPosts
+                    = postRepository.findPostsByTextByAuthorByTagsContainingByDateExcludingBlockers(
+                            text.toLowerCase(Locale.ROOT), datetimeFrom, datetimeTo, author.toLowerCase(Locale.ROOT), tags, pageable).getContent();
+            List<Long> tagsIds = filterPostsByTagList(tags, foundPosts);
+            pageablePostList = postRepository.findAllByIdIn(tagsIds, pageable);
         }
         return getPostsResponse(offset, itemPerPage, pageablePostList, currentPerson);
     }
@@ -142,6 +146,7 @@ public class PostServiceImpl implements PostService {
         return getListDataResponseWithComments(pageable, post, person);
     }
 
+    @Transactional
     @Override
     public DataResponse<CommentsData> postComments(Long id, CommentRequest commentRequest, Principal principal) throws PostNotFoundException, CommentNotFoundException {
         Person person = utilsService.findPersonByEmail(principal.getName());
@@ -159,6 +164,14 @@ public class PostServiceImpl implements PostService {
                 .setPost(post)
                 .setTime(LocalDateTime.now(ZoneOffset.UTC));
         postCommentRepository.save(postComment);
+
+        notificationRepository.save(new Notification()
+                .setSentTime(utilsService.getLocalDateTimeZoneOffsetUtc())
+                .setNotificationType(postComment.getParent() == null ? POST_COMMENT : COMMENT_COMMENT)
+                .setPerson(post.getAuthor())
+                .setEntityId(postComment.getParent() == null ? post.getId() : postComment.getParent().getId())
+                .setContact("contact"));
+
         return getCommentResponse(postComment, person);
     }
 
@@ -232,59 +245,15 @@ public class PostServiceImpl implements PostService {
         Person currentPerson = utilsService.findPersonByEmail(principal.getName());
         Pageable pageable = PageRequest.of(offset, itemPerPage);
 
-        String query =
-                "(" +
-                        "SELECT p.id FROM posts p " +
-                        "JOIN persons ps ON ps.id = p.author_id " +
-                        "WHERE ps.id IN (" +
-                        "SELECT p.id FROM persons p " +
-                        "JOIN friendship f on f.dst_person_id = p.id " +
-                        "JOIN friendship_statuses fst on fst.id = f.status_id " +
-                        "WHERE f.src_person_id = (?) " +
-                        "AND (fst.name = 'FRIEND' OR fst.name = 'SUBSCRIBED')" +
-                        ") " +
-                        "AND p.is_Blocked = 0 " +
-                        "AND ps.is_Blocked = 0 " +
-                        "AND (p.title ILIKE CONCAT('%', (?), '%') OR p.post_text ILIKE CONCAT('%', (?),'%')) " +
-                        "ORDER BY p.time DESC" +
-                        ") " +
-                        "UNION ALL " +
-                        "(" +
-                        "SELECT p.id FROM posts p " +
-                        "JOIN persons ps ON ps.id = p.author_id " +
-                        "LEFT JOIN post_likes pl ON pl.post_id = p.id " +
-                        "WHERE p.author_id NOT IN (" +
-                        "(" +
-                        "SELECT p.id FROM persons p " +
-                        "JOIN friendship f ON f.dst_person_id = p.id " +
-                        "JOIN friendship_statuses fst ON fst.id = f.status_id " +
-                        "WHERE f.src_person_id = (?) " +
-                        "AND (fst.name = 'FRIEND' OR fst.name = 'SUBSCRIBED')" +
-                        ") " +
-                        "UNION ALL " +
-                        "(" +
-                        "SELECT p.id FROM persons p " +
-                        "JOIN friendship f ON f.dst_person_id = p.id " +
-                        "JOIN friendship_statuses fs ON fs.id = f.status_id " +
-                        "WHERE f.src_person_id = (?) " +
-                        "AND (fs.name = 'BLOCKED' OR fs.name = 'INTERLOCKED') " +
-                        "OR (p.is_blocked != 0) " +
-                        "GROUP BY p.id" +
-                        ") " +
-                        ") " +
-                        "AND p.id != (?) " +
-                        "AND p.is_Blocked = 0 " +
-                        "AND ps.is_Blocked = 0 " +
-                        "AND (p.title ILIKE CONCAT('%', (?),'%') OR p.post_text ILIKE CONCAT('%', (?),'%')) " +
-                        "GROUP BY p.id " +
-                        "ORDER BY count(pl) DESC, p.time DESC" +
-                        ")";
-        List<Long> ids = jdbcTemplate.query(
-                query,
-                (ResultSet rs, int rowNum) -> rs.getLong("id"),
-                currentPerson.getId(), text, text,
-                currentPerson.getId(), currentPerson.getId(), currentPerson.getId(), text, text);
-        Page<Post> result = postRepository.findAllByIdIn(ids, pageable);
+        List<Post> postsToFeeds =
+                postRepository.findPostsByFriendsAndSubscribersSortedByLikes(currentPerson.getId());
+        postsToFeeds.addAll(postRepository.findBestPosts(currentPerson.getId()));
+
+        int start = offset * itemPerPage;
+        int limit = Math.min(start + pageable.getPageSize(), postsToFeeds.size());
+
+        Page<Post> result = new PageImpl<>(postsToFeeds.subList(start, limit), pageable, postsToFeeds.size());
+
         return getPostsResponse(offset, itemPerPage, result, currentPerson);
     }
 
@@ -309,7 +278,7 @@ public class PostServiceImpl implements PostService {
                 .setTimestamp(utilsService.getTimestamp())
                 .setOffset((int) pageable.getOffset())
                 .setTotal(pageablePostComments.getTotalPages())
-                .setData(getCommentDataForResponse(pageablePostComments.toList(), currentPerson));
+                .setData(getCommentDataForResponse(pageablePostComments.stream().filter(pc -> pc.getParent() == null).toList(), currentPerson));
         return commentsDataListDataResponse;
     }
 
@@ -336,7 +305,9 @@ public class PostServiceImpl implements PostService {
                 .setMyLike(likes.stream().map(CommentLike::getPerson).toList().contains(currentPerson))
                 .setLikes(likes.size())
                 .setSubComments(getSubCommentsData(postCommentsByParentId, currentPerson));
-        if (postComment.getParent() != null) commentsData.setParentId(postComment.getParent().getId());
+        if (postComment.getParent() != null) {
+            commentsData.setParentId(postComment.getParent().getId());
+        }
         return commentsData;
     }
 
@@ -424,12 +395,15 @@ public class PostServiceImpl implements PostService {
         return commentsDataArrayList;
     }
 
-    private List<Long> getTags(String[] tags) {
+    private List<Long> filterPostsByTagList(String[] tags, List<Post> foundPosts) {
+        List<Long> tagsIds = new ArrayList<>();
 
-        return Arrays.stream(tags)
-                .map(t -> tagRepository.findByTag(t).orElse(null))
-                .filter(Objects::nonNull)
-                .map(Tag::getId)
-                .collect(Collectors.toList());
+        foundPosts.forEach((post) -> {
+                    List<String> tagNames = post.getTags().stream().map(Tag::getTag).toList();
+                    if (tagNames.containsAll(Arrays.asList(tags)))
+                        tagsIds.add(post.getId());
+                }
+        );
+        return tagsIds;
     }
 }

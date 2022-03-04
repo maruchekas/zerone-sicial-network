@@ -35,11 +35,10 @@ public class ResourceServiceImpl implements ResourceService {
     private final PersonRepository personRepository;
     private final Cloudinary cloudinary;
 
-
     public String setDefaultAvatarToUser(String userEmail) throws IOException {
         String format = "png";
         int setNum = new Random().nextInt(4) + 1;
-        String urlCreatedAvatar =  Constants.BASE_ROBOTIC_AVA_URL
+        String urlCreatedAvatar = Constants.BASE_ROBOTIC_AVA_URL
                 + userEmail + Constants.AVATAR_CONFIG + setNum;
 
         Map params = getUploadParamsMap(userEmail, 360);
@@ -53,18 +52,15 @@ public class ResourceServiceImpl implements ResourceService {
         return uploadResult.get("url").toString();
     }
 
-
     @Override
     public DataResponse<Content> saveFileInStorage(String type, MultipartFile image, Principal principal) throws IOException {
-        Person person = ((Person)(((UsernamePasswordAuthenticationToken) principal).getPrincipal()));
+        Person person = ((Person) (((UsernamePasswordAuthenticationToken) principal).getPrincipal()));
         DataResponse<Content> response = new DataResponse<>()
-                                            .setTimestamp(utilsService.getTimestamp());
-
+                .setTimestamp(utilsService.getTimestamp());
         if (image == null) {
             log.info("Не принимаем никакой файл в хранилище");
             return response.setData(new MessageOkContent().setMessage("Ничего не сохраняем"));
         }
-
         if ("IMAGE".equals(type)) {
             AvatarUploadData data = saveCustomUserAvatar(image, person);
             response.setData(data);

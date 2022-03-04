@@ -19,5 +19,6 @@ public interface CaptchaRepository extends JpaRepository<CaptchaCode, Integer> {
     void deleteOldCaptcha(Timestamp timeThreshold);
 
     @Query("SELECT c FROM CaptchaCode c WHERE c.secretCode = :secret")
-    CaptchaCode findBySecretCode(String secret);;
+    CaptchaCode findBySecretCode(String secret);
+
 }

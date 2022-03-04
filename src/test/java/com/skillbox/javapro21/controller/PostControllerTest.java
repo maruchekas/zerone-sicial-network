@@ -150,8 +150,7 @@ public class PostControllerTest extends AbstractTest {
                         .param("date_from", yearAgo)
                         .param("date_to", now))
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.total").value(2));
+                .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
     @Test
@@ -176,12 +175,34 @@ public class PostControllerTest extends AbstractTest {
                         .get("/api/v1/post")
                         .principal(() -> "test@test.ru")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("tag", "моржиНавсегда,морскиеКотикиИзже")
+                        .param("tag", "морскиеКотикиИзже")
                         .param("date_from", yearAgo)
                         .param("date_to", now))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.total").value(2));
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/api/v1/post")
+                        .principal(() -> "test@test.ru")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("tag", "моржиНавсегда,морскиеКотикиИзже")
+                        .param("date_from", yearAgo)
+                        .param("date_to", now))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.total").value(1));
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/api/v1/post")
+                        .principal(() -> "test@test.ru")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("tag", "моржиНавсегда,морскиеКотикиИзже, тюлениТут")
+                        .param("date_from", yearAgo)
+                        .param("date_to", now))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.total").value(0));
     }
 
     @Test

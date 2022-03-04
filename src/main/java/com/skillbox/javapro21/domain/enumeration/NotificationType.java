@@ -10,7 +10,7 @@ import lombok.ToString;
 @Getter
 @ToString
 @AllArgsConstructor
-public enum NotificationTypeStatus {
+public enum NotificationType {
     POST("Новый пост"),
     POST_COMMENT("Комментарий к посту"),
     COMMENT_COMMENT("Ответ на комментарий"),
