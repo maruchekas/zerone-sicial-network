@@ -184,7 +184,7 @@ public class DialogsController {
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
     public ResponseEntity<DataResponse<LastActivityContent>> activityPersonInDialog(@PathVariable int id,
-                                                                                    @PathVariable(name = "user_id") Long userId,
+                                                                                    @PathVariable(name = "user_id") long userId,
                                                                                     Principal principal) {
         return new ResponseEntity<>(dialogsService.activityPersonInDialog(id, userId, principal), HttpStatus.OK);
     }
