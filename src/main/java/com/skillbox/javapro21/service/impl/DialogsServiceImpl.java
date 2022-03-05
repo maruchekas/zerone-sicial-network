@@ -6,6 +6,7 @@ import com.skillbox.javapro21.api.request.dialogs.MessageTextRequest;
 import com.skillbox.javapro21.api.response.DataResponse;
 import com.skillbox.javapro21.api.response.ListDataResponse;
 import com.skillbox.javapro21.api.response.MessageOkContent;
+import com.skillbox.javapro21.api.response.WSNotificationResponse;
 import com.skillbox.javapro21.api.response.dialogs.*;
 import com.skillbox.javapro21.domain.*;
 import com.skillbox.javapro21.domain.enumeration.NotificationType;
@@ -40,7 +41,7 @@ public class DialogsServiceImpl implements DialogsService {
     private final UtilsService utilsService;
     private final MessageRepository messageRepository;
     private final NotificationRepository notificationRepository;
-    private final SimpMessagingTemplate messagingTemplate;
+    private final SimpMessagingTemplate simpMessagingTemplate;
 
     @Override
     public ListDataResponse<DialogContent> getDialogs(String query, int offset, int itemPerPage, Principal principal) {
@@ -199,10 +200,6 @@ public class DialogsServiceImpl implements DialogsService {
             return null;
         }
         Person person = utilsService.findPersonByEmail(principal.getName());
-
-        Person dstPerson = personRepository.findPersonById((long) id).get();
-        messagingTemplate.convertAndSendToUser(dstPerson.getEmail(), "/topic/messages", messageText);
-
         PersonToDialog p2d = personToDialogRepository.findDialogByPersonIdAndDialogId(person.getId(), id);
         p2d.setLastCheck(LocalDateTime.now(ZoneOffset.UTC));
         personToDialogRepository.save(p2d);
@@ -222,27 +219,46 @@ public class DialogsServiceImpl implements DialogsService {
                 message.setRecipient(p);
                 save = messageRepository.save(message);
 
+                simpMessagingTemplate.convertAndSendToUser(p.getEmail(), "/topic/messages", messageText);
+
+                WSNotificationResponse response = new WSNotificationResponse();
+                response.setNotificationType(NotificationType.MESSAGE);
+                response.setInitiatorName(person.getEmail());
+                simpMessagingTemplate.convertAndSendToUser(p.getEmail(), "/topic/notifications", response);
+
+                int countMessages = getCountMessages(p.getEmail());
+                simpMessagingTemplate.convertAndSendToUser(p.getEmail(),
+                        "/topic/unreaded", new CountContent().setCount(countMessages));
+
                 notificationRepository.save(new Notification()
-                                                .setSentTime(utilsService.getLocalDateTimeZoneOffsetUtc())
-                                                .setNotificationType(NotificationType.MESSAGE)
-                                                .setPerson(p)
-                                                .setEntityId(message.getId())
-                                                .setContact("Contact"));
+                        .setSentTime(utilsService.getLocalDateTimeZoneOffsetUtc())
+                        .setNotificationType(NotificationType.MESSAGE)
+                        .setPerson(p)
+                        .setEntityId(message.getId())
+                        .setContact("Contact"));
             }
         } else {
-            message.setRecipient(personList.stream().findFirst().orElseThrow());
+            Person recipient = personList.stream().findFirst().orElseThrow();
+            message.setRecipient(recipient);
             save = messageRepository.save(message);
+            simpMessagingTemplate.convertAndSendToUser(recipient.getEmail(), "/topic/messages", messageText);
+
+            WSNotificationResponse response = new WSNotificationResponse();
+            response.setNotificationType(NotificationType.MESSAGE);
+            response.setInitiatorName(person.getEmail());
+            simpMessagingTemplate.convertAndSendToUser(recipient.getEmail(), "/topic/notifications", response);
+
+            int countMessages = getCountMessages(recipient.getEmail());
+            simpMessagingTemplate.convertAndSendToUser(recipient.getEmail(),
+                    "/topic/unreaded", new CountContent().setCount(countMessages));
 
             notificationRepository.save(new Notification()
                     .setSentTime(utilsService.getLocalDateTimeZoneOffsetUtc())
                     .setNotificationType(NotificationType.MESSAGE)
-                    .setPerson(personList.stream().findFirst().orElseThrow())
+                    .setPerson(recipient)
                     .setEntityId(message.getId())
                     .setContact("Contact"));
         }
-        int countMessages = getCountMessages(dstPerson.getEmail());
-        messagingTemplate.convertAndSendToUser(dstPerson.getEmail(),
-                "/topic/unreaded", new CountContent().setCount(countMessages));
 
         PersonToDialog p2DByDialogAndMessage = personToDialogRepository.findP2DByDialogAndMessage(id, person.getId());
         return getDataResponseWithMessageData(save, p2DByDialogAndMessage);

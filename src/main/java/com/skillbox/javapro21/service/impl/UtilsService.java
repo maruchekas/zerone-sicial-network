@@ -16,6 +16,7 @@ import com.skillbox.javapro21.service.kbLayearConverter.KbLayerConverter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,6 +44,7 @@ public class UtilsService {
     private final FriendshipStatusRepository friendshipStatusRepository;
     private final NotificationRepository notificationRepository;
     private NotificationService notificationService;
+    private final SimpMessagingTemplate simpMessagingTemplate;
 
     /**
      * поиск пользователя по почте, если не найден выбрасывает ошибку
@@ -245,6 +247,11 @@ public class UtilsService {
                     .setPerson(dst)
                     .setEntityId(friendshipSrc.getId())
                     .setContact("Contact"));
+
+            WSNotificationResponse response = new WSNotificationResponse();
+            response.setNotificationType(FRIEND_REQUEST);
+            response.setInitiatorName(dst.getEmail());
+            simpMessagingTemplate.convertAndSendToUser(src.getEmail(), "/topic/notifications", response);
         }
     }
 
