@@ -34,6 +34,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
+import static com.skillbox.javapro21.config.Constants.USER_INTERLOCKED_ERR;
 import static com.skillbox.javapro21.config.Constants.USER_WASBLOCKED_ERR;
 import static com.skillbox.javapro21.domain.enumeration.FriendshipStatusType.*;
 
@@ -356,7 +357,7 @@ public class ProfileControllerTest extends AbstractTest {
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.error").value("user"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.error_description").value(USER_WASBLOCKED_ERR));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.error_description").value(USER_INTERLOCKED_ERR));
     }
 
 
@@ -435,6 +436,8 @@ public class ProfileControllerTest extends AbstractTest {
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.data.message").value("ok"));
+
+        Assertions.assertNull(utilsService.getFriendshipStatus(verifyPersonWithPost.getId(), verifyPerson.getId()));
     }
 
     @Test
