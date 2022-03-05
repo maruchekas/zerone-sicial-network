@@ -24,18 +24,6 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler
-    ResponseEntity<BadDataResponse> handleUserNotAuthorisedException(UnauthorizedUserException exception) {
-        BadDataResponse badDataResponse = new BadDataResponse().setError("user").setDescription(exception.getMessage());
-        return new ResponseEntity<>(badDataResponse, HttpStatus.UNAUTHORIZED);
-    }
-
-    @ExceptionHandler
-    ResponseEntity<BadDataResponse> handleUserNotAuthorisedException(InterlockedFriendshipStatusException exception) {
-        BadDataResponse badDataResponse = new BadDataResponse().setError("user").setDescription(exception.getMessage());
-        return new ResponseEntity<>(badDataResponse, HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler
     ResponseEntity<BadDataResponse> handleParseWeatherException(ParseException exception) {
         BadDataResponse badDataResponse =
                 new BadDataResponse().setError("weather_parse").setDescription("Не удалось получить данные о погоде");
