@@ -6,6 +6,7 @@ import com.skillbox.javapro21.api.request.post.PostRequest;
 import com.skillbox.javapro21.api.response.DataResponse;
 import com.skillbox.javapro21.api.response.ListDataResponse;
 import com.skillbox.javapro21.api.response.MessageOkContent;
+import com.skillbox.javapro21.api.response.WSNotificationResponse;
 import com.skillbox.javapro21.api.response.post.CommentDelete;
 import com.skillbox.javapro21.api.response.post.CommentsData;
 import com.skillbox.javapro21.api.response.post.PostData;
@@ -24,6 +25,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -51,6 +53,7 @@ public class PostServiceImpl implements PostService {
     private final CommentLikeRepository commentLikeRepository;
     private final MailjetSender mailjetSender;
     private final NotificationRepository notificationRepository;
+    private final SimpMessagingTemplate simpMessagingTemplate;
 
     @Override
     public ListDataResponse<PostData> getPosts(String text, long dateFrom, long dateTo, int offset, int itemPerPage,
@@ -165,12 +168,18 @@ public class PostServiceImpl implements PostService {
                 .setTime(LocalDateTime.now(ZoneOffset.UTC));
         postCommentRepository.save(postComment);
 
-        notificationRepository.save(new Notification()
+        Notification notification = new Notification()
                 .setSentTime(utilsService.getLocalDateTimeZoneOffsetUtc())
                 .setNotificationType(postComment.getParent() == null ? POST_COMMENT : COMMENT_COMMENT)
                 .setPerson(post.getAuthor())
                 .setEntityId(postComment.getParent() == null ? post.getId() : postComment.getParent().getId())
-                .setContact("contact"));
+                .setContact("contact");
+        notificationRepository.save(notification);
+
+        WSNotificationResponse response = new WSNotificationResponse();
+        response.setNotificationType(postComment.getParent() == null ? POST_COMMENT : COMMENT_COMMENT);
+        response.setInitiatorName(person.getEmail());
+        simpMessagingTemplate.convertAndSendToUser(post.getAuthor().getEmail(), "topic/notifications", response);
 
         return getCommentResponse(postComment, person);
     }
