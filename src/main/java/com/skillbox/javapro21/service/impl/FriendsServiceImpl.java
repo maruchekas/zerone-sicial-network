@@ -214,7 +214,7 @@ public class FriendsServiceImpl implements FriendsService {
                 .setPerPage(pageable.getPageSize())
                 .setTimestamp(utilsService.getTimestamp())
                 .setOffset((int) pageable.getOffset())
-                .setTotal(personsPage.getTotalPages())
+                .setTotal((int) personsPage.getTotalElements())
                 .setData(getAuthData(personsPage.toList()));
         return commentsDataListDataResponse;
     }
