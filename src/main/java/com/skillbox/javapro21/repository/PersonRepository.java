@@ -158,7 +158,7 @@ public interface PersonRepository extends JpaRepository<Person, Long> {
             "and p.isBlocked = 0 ")
     Page<Person> findAllSubscriptions(Long id, Pageable pageable);
 
-    @Query("select p from Person p " +
+    @Query("select distinct p from Person p " +
             "join Friendship f on f.dstPerson.id = p.id " +
             "join FriendshipStatus fs on fs.id = f.friendshipStatus.id " +
             "where f.srcPerson.id = :id " +
@@ -168,7 +168,7 @@ public interface PersonRepository extends JpaRepository<Person, Long> {
             "order by p.firstName asc")
     Page<Person> findAllSubscriptionsByName(Long id, String name, Pageable pageable);
 
-    @Query("select p from Person p " +
+    @Query("select distinct p from Person p " +
             "join Friendship f on f.dstPerson.id = p.id " +
             "join FriendshipStatus fs on fs.id = f.friendshipStatus.id " +
             "where f.srcPerson.id in (:idsFriends) " +
@@ -178,7 +178,7 @@ public interface PersonRepository extends JpaRepository<Person, Long> {
             "order by p.firstName asc")
     Page<Person> findRecommendedFriendsByPerson(List<Long> exceptPersons, List<Long> idsFriends, Pageable pageable);
 
-    @Query("select p.id from Person p " +
+    @Query("select distinct p.id from Person p " +
             "join Friendship f on f.dstPerson.id = p.id " +
             "where f.srcPerson.id = :id")
     List<Long> findAllConnections(Long id);
