@@ -66,8 +66,9 @@ public class ProfileController {
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
-    public ResponseEntity<DataResponse<AuthData>> getPersonById(@PathVariable Long id) throws PersonNotFoundException {
-        return new ResponseEntity<>(profileService.getPersonById(id), HttpStatus.OK);
+    public ResponseEntity<DataResponse<AuthData>> getPersonById(@PathVariable Long id, Principal principal)
+            throws PersonNotFoundException, InterlockedFriendshipStatusException {
+        return new ResponseEntity<>(profileService.getPersonById(id, principal), HttpStatus.OK);
     }
 
     @Operation(summary = "Получить публикации пользователя на стене", security = @SecurityRequirement(name = "jwt"))
@@ -99,7 +100,8 @@ public class ProfileController {
     @PutMapping("block/{id}")
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
-    public ResponseEntity<DataResponse<MessageOkContent>> blockPersonById(@PathVariable Long id, Principal principal) throws InterlockedFriendshipStatusException, BlockPersonHimselfException, PersonNotFoundException, FriendshipNotFoundException {
+    public ResponseEntity<DataResponse<MessageOkContent>> blockPersonById(@PathVariable Long id, Principal principal)
+            throws InterlockedFriendshipStatusException, PersonNotFoundException, FriendshipNotFoundException {
         return new ResponseEntity<>(profileService.blockPersonById(id, principal), HttpStatus.OK);
     }
 
@@ -107,7 +109,8 @@ public class ProfileController {
     @DeleteMapping("block/{id}")
     @PreAuthorize("hasAuthority('user:write')")
     @LastActivity
-    public ResponseEntity<DataResponse<MessageOkContent>> unblockPersonById(@PathVariable Long id, Principal principal) throws InterlockedFriendshipStatusException, BlockPersonHimselfException, PersonNotFoundException, NonBlockedFriendshipException, FriendshipNotFoundException {
+    public ResponseEntity<DataResponse<MessageOkContent>> unblockPersonById(@PathVariable Long id, Principal principal)
+            throws InterlockedFriendshipStatusException, BlockPersonHimselfException, PersonNotFoundException, NonBlockedFriendshipException, FriendshipNotFoundException {
         return new ResponseEntity<>(profileService.unblockPersonById(id, principal), HttpStatus.OK);
     }
 

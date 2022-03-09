@@ -13,7 +13,7 @@ public class MainController {
     }
 
     @RequestMapping(method = {RequestMethod.OPTIONS, RequestMethod.GET},
-            value = "/**/{path:[^\\.]*}")
+            value = "/**/{path:[^\\.]*socket}")
     public String redirectToForward() {
         return "forward:/";
     }

@@ -95,6 +95,8 @@ public class FriendsServiceImpl implements FriendsService {
                 .stream().map(Person::getId).toList();
 
         List<Long> exceptIds = personRepository.findAllConnections(person.getId());
+        exceptIds.addAll(personRepository.findAllOutgoingRequests(person.getId(), pageable)
+                .stream().map(Person::getId).toList());
         exceptIds.add(person.getId());
 
         Page<Person> personPage = personRepository.findRecommendedFriendsByPerson(exceptIds, idsFriends, pageable);

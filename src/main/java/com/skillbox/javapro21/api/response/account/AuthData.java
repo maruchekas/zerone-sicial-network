@@ -1,5 +1,6 @@
 package com.skillbox.javapro21.api.response.account;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.skillbox.javapro21.api.response.Content;

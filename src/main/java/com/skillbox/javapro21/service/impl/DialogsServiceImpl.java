@@ -6,6 +6,7 @@ import com.skillbox.javapro21.api.request.dialogs.MessageTextRequest;
 import com.skillbox.javapro21.api.response.DataResponse;
 import com.skillbox.javapro21.api.response.ListDataResponse;
 import com.skillbox.javapro21.api.response.MessageOkContent;
+import com.skillbox.javapro21.api.response.WSNotificationResponse;
 import com.skillbox.javapro21.api.response.dialogs.*;
 import com.skillbox.javapro21.domain.*;
 import com.skillbox.javapro21.domain.enumeration.NotificationType;
@@ -19,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
@@ -39,6 +41,7 @@ public class DialogsServiceImpl implements DialogsService {
     private final UtilsService utilsService;
     private final MessageRepository messageRepository;
     private final NotificationRepository notificationRepository;
+    private final SimpMessagingTemplate simpMessagingTemplate;
 
     @Override
     public ListDataResponse<DialogContent> getDialogs(String query, int offset, int itemPerPage, Principal principal) {
@@ -92,18 +95,7 @@ public class DialogsServiceImpl implements DialogsService {
 
     @Override
     public DataResponse<CountContent> getUnreadedDialogs(Principal principal) {
-        Person person = utilsService.findPersonByEmail(principal.getName());
-        List<PersonToDialog> dialogs = personToDialogRepository.findDialogsByPersonId(person.getId());
-        int count = 0;
-        for (PersonToDialog p2d : dialogs) {
-            count += dialogRepository.findDialogById(p2d.getDialogId()).orElseThrow().getMessages().stream()
-                    .filter(message -> {
-                        if (!message.getAuthor().getId().equals(person.getId())) {
-                            return message.getReadStatus().equals(SENT);
-                        }
-                        return false;
-                    }).count();
-        }
+        int count = getCountMessages(principal.getName());
         return new DataResponse<CountContent>()
                 .setError("")
                 .setTimestamp(utilsService.getTimestamp())
@@ -227,24 +219,47 @@ public class DialogsServiceImpl implements DialogsService {
                 message.setRecipient(p);
                 save = messageRepository.save(message);
 
+                simpMessagingTemplate.convertAndSendToUser(p.getEmail(), "/topic/messages", messageText);
+
+                WSNotificationResponse response = new WSNotificationResponse();
+                response.setNotificationType(NotificationType.MESSAGE);
+                response.setInitiatorName(person.getEmail());
+                simpMessagingTemplate.convertAndSendToUser(p.getEmail(), "/topic/notifications", response);
+
+                int countMessages = getCountMessages(p.getEmail());
+                simpMessagingTemplate.convertAndSendToUser(p.getEmail(),
+                        "/topic/unreaded", new CountContent().setCount(countMessages));
+
                 notificationRepository.save(new Notification()
-                                                .setSentTime(utilsService.getLocalDateTimeZoneOffsetUtc())
-                                                .setNotificationType(NotificationType.MESSAGE)
-                                                .setPerson(p)
-                                                .setEntityId(message.getId())
-                                                .setContact("Contact"));
+                        .setSentTime(utilsService.getLocalDateTimeZoneOffsetUtc())
+                        .setNotificationType(NotificationType.MESSAGE)
+                        .setPerson(p)
+                        .setEntityId(message.getId())
+                        .setContact("Contact"));
             }
         } else {
-            message.setRecipient(personList.stream().findFirst().orElseThrow());
+            Person recipient = personList.stream().findFirst().orElseThrow();
+            message.setRecipient(recipient);
             save = messageRepository.save(message);
+            simpMessagingTemplate.convertAndSendToUser(recipient.getEmail(), "/topic/messages", messageText);
+
+            WSNotificationResponse response = new WSNotificationResponse();
+            response.setNotificationType(NotificationType.MESSAGE);
+            response.setInitiatorName(person.getEmail());
+            simpMessagingTemplate.convertAndSendToUser(recipient.getEmail(), "/topic/notifications", response);
+
+            int countMessages = getCountMessages(recipient.getEmail());
+            simpMessagingTemplate.convertAndSendToUser(recipient.getEmail(),
+                    "/topic/unreaded", new CountContent().setCount(countMessages));
 
             notificationRepository.save(new Notification()
                     .setSentTime(utilsService.getLocalDateTimeZoneOffsetUtc())
                     .setNotificationType(NotificationType.MESSAGE)
-                    .setPerson(personList.stream().findFirst().orElseThrow())
+                    .setPerson(recipient)
                     .setEntityId(message.getId())
                     .setContact("Contact"));
         }
+
         PersonToDialog p2DByDialogAndMessage = personToDialogRepository.findP2DByDialogAndMessage(id, person.getId());
         return getDataResponseWithMessageData(save, p2DByDialogAndMessage);
     }
@@ -476,5 +491,21 @@ public class DialogsServiceImpl implements DialogsService {
                 .setError("")
                 .setTimestamp(utilsService.getTimestamp())
                 .setData(new DialogContent().setId(savedDialog.getId()));
+    }
+
+    private int getCountMessages(String name) {
+        Person person = utilsService.findPersonByEmail(name);
+        List<PersonToDialog> dialogs = personToDialogRepository.findDialogsByPersonId(person.getId());
+        int count = 0;
+        for (PersonToDialog p2d : dialogs) {
+            count += dialogRepository.findDialogById(p2d.getDialogId()).orElseThrow().getMessages().stream()
+                    .filter(message -> {
+                        if (!message.getAuthor().getId().equals(person.getId())) {
+                            return message.getReadStatus().equals(SENT);
+                        }
+                        return false;
+                    }).count();
+        }
+        return count;
     }
 }

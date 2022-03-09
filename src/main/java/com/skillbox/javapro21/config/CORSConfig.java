@@ -15,6 +15,7 @@ public class CORSConfig implements WebMvcConfigurer {
                 .allowedOrigins("https://zerone-2022-develop.herokuapp.com/")
                 .allowedOrigins("https://zerone-2022.herokuapp.com/")
                 .allowedOrigins("http://localhost:8080")
+                .allowedOrigins("http://localhost:8081")
                 .allowedMethods("HEAD", "GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowCredentials(true)
                 .allowedHeaders("Authorization", "Cache-Control", "Content-Type", "Access-Control-Allow-Origin");

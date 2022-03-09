@@ -92,9 +92,20 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     @Override
-    public DataResponse<AuthData> getPersonById(Long id) throws PersonNotFoundException {
+    public DataResponse<AuthData> getPersonById(Long id, Principal principal)
+            throws PersonNotFoundException, InterlockedFriendshipStatusException {
+        Person src = utilsService.findPersonByEmail(principal.getName());
+        Person dst = personRepository.findPersonById(id)
+                .orElseThrow(() -> new PersonNotFoundException(USER_NOT_FOUND_ERR));
+        Optional<Friendship> directRelation = friendshipRepository.findFriendshipBySrcPersonAndDstPerson(src.getId(), id);
+
+        if (isBlockedFor(dst.getId(), src.getId(), directRelation)) {
+            throw new InterlockedFriendshipStatusException();
+        }
+
         Person person = personRepository.findPersonById(id)
                 .orElseThrow(() -> new PersonNotFoundException(USER_NOT_FOUND_ERR));
+
         return getPersonDataResponse(person);
     }
 
@@ -167,22 +178,18 @@ public class ProfileServiceImpl implements ProfileService {
             @CacheEvict(value = "persons", allEntries = true)
     })
     public DataResponse<MessageOkContent> blockPersonById(Long id, Principal principal)
-            throws BlockPersonHimselfException, InterlockedFriendshipStatusException, PersonNotFoundException, FriendshipNotFoundException {
+            throws InterlockedFriendshipStatusException, PersonNotFoundException, FriendshipNotFoundException {
         Person src = utilsService.findPersonByEmail(principal.getName());
         Person dst = personRepository.findPersonById(id)
                 .orElseThrow(() -> new PersonNotFoundException(USER_NOT_FOUND_ERR));
-        if (src.getId().equals(dst.getId()))
-            throw new BlockPersonHimselfException("Пользователь пытается заблокировать сам себя");
-        Optional<Friendship> optionalFriendship = friendshipRepository.findFriendshipBySrcPersonAndDstPerson(src.getId(), id);
-        if (optionalFriendship.isEmpty()) {
-            utilsService.createFriendship(src, dst, BLOCKED);
-        } else {
-            Friendship friendship = optionalFriendship.get();
-            if (utilsService.isBlockedBy(src.getId(), dst.getId(), optionalFriendship)) {
-                if (!friendship.getFriendshipStatus().getFriendshipStatusType().equals(BLOCKED)) {
-                    utilsService.createFriendship(src, dst, BLOCKED);
-                } else if (friendship.getFriendshipStatus().getFriendshipStatusType().equals(WASBLOCKED)) {
-                    utilsService.createFriendship(src, dst, FriendshipStatusType.WASBLOCKED);
+        if (!src.getId().equals(dst.getId())) {
+            Optional<Friendship> optionalFriendship = friendshipRepository.findFriendshipBySrcPersonAndDstPerson(src.getId(), id);
+            if (optionalFriendship.isEmpty() || !optionalFriendship.get().getFriendshipStatus().getFriendshipStatusType().equals(BLOCKED)) {
+                utilsService.createFriendship(src, dst, BLOCKED);
+            } else {
+                if (optionalFriendship.get().getFriendshipStatus().getFriendshipStatusType().equals(BLOCKED)) {
+                    friendshipStatusRepository.delete(utilsService.getFriendshipStatus(src.getId(), dst.getId()));
+                    friendshipStatusRepository.delete(utilsService.getFriendshipStatus(dst.getId(), src.getId()));
                 } else throw new InterlockedFriendshipStatusException();
             }
         }
