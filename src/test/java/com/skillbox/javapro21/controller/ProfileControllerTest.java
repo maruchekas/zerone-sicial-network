@@ -356,8 +356,8 @@ public class ProfileControllerTest extends AbstractTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.error").value("user"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.error_description").value(USER_INTERLOCKED_ERR));
+//                .andExpect(MockMvcResultMatchers.jsonPath("$.error").value("user"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.error_description").value(USER_WASBLOCKED_ERR));
     }
 
 
