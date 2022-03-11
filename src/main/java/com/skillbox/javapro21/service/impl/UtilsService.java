@@ -2,15 +2,9 @@ package com.skillbox.javapro21.service.impl;
 
 import com.skillbox.javapro21.api.response.*;
 import com.skillbox.javapro21.api.response.account.AuthData;
-import com.skillbox.javapro21.domain.Friendship;
-import com.skillbox.javapro21.domain.FriendshipStatus;
-import com.skillbox.javapro21.domain.Notification;
-import com.skillbox.javapro21.domain.Person;
+import com.skillbox.javapro21.domain.*;
 import com.skillbox.javapro21.domain.enumeration.FriendshipStatusType;
-import com.skillbox.javapro21.repository.FriendshipRepository;
-import com.skillbox.javapro21.repository.FriendshipStatusRepository;
-import com.skillbox.javapro21.repository.NotificationRepository;
-import com.skillbox.javapro21.repository.PersonRepository;
+import com.skillbox.javapro21.repository.*;
 import com.skillbox.javapro21.service.NotificationService;
 import com.skillbox.javapro21.service.kbLayearConverter.KbLayerConverter;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +34,8 @@ import static com.skillbox.javapro21.domain.enumeration.NotificationType.FRIEND_
 @Component
 public class UtilsService {
     private final PersonRepository personRepository;
+    private final CityRepository cityRepository;
+    private final CountryRepository countryRepository;
     private final FriendshipRepository friendshipRepository;
     private final FriendshipStatusRepository friendshipStatusRepository;
     private final NotificationRepository notificationRepository;
@@ -116,6 +112,7 @@ public class UtilsService {
      * заполнение данных о пользователе
      */
     public AuthData getAuthData(Person person, String token) {
+
         AuthData authData = new AuthData()
                 .setId(person.getId())
                 .setFirstName(person.getFirstName())
@@ -129,10 +126,8 @@ public class UtilsService {
         if (person.getPhone() != null) authData.setPhone(person.getPhone());
         if (person.getPhoto() != null) authData.setPhoto(person.getPhoto());
         if (person.getAbout() != null) authData.setAbout(person.getAbout());
-        if (person.getCountry() != null) {
-            authData.setCity(Map.of("id", person.getId().toString(), "City", person.getTown()));
-            authData.setCountry(Map.of("id", person.getId().toString(), "Country", person.getCountry()));
-        }
+        if (person.getCountry() != null) authData.setCountry(setCountryData(person));
+        if (person.getTown() != null) authData.setCity(setCityData(person));
         if (person.getBirthDate() != null)
             authData.setBirthDate(person.getBirthDate().toInstant(ZoneOffset.UTC).toEpochMilli());
         return authData;
@@ -210,6 +205,25 @@ public class UtilsService {
         }
         saveNewFriendshipForSrcAndDst(src, dst, fst);
         saveNewFriendshipForSrcAndDst(dst, src, fst);
+    }
+
+    /**
+     * установка данных о стране и городе пользователя
+     */
+    private Map<String, String> setCountryData(Person person) {
+        Country country = countryRepository.findCountryByName(person.getCountry()).orElse(null);
+
+        long countryId = country == null ? person.getId() : country.getId();
+        String countryName = country == null ? person.getCountry() : country.getName();
+        return Map.of("id", String.valueOf(countryId), "Country", countryName);
+    }
+
+    private Map<String, String> setCityData(Person person) {
+        City city = cityRepository.findCityByName(person.getTown()).orElse(null);
+
+        long cityId = city == null ? person.getId() : city.getId();
+        String cityName = city == null ? person.getTown() : city.getName();
+        return Map.of("id", String.valueOf(cityId), "City", cityName);
     }
 
     private void saveNewFriendshipForSrcAndDst(Person src, Person dst, FriendshipStatusType fst) {
