@@ -2,11 +2,9 @@ package com.skillbox.javapro21.controller;
 
 import com.skillbox.javapro21.AbstractTest;
 import com.skillbox.javapro21.api.request.account.*;
-import com.skillbox.javapro21.config.security.JwtGenerator;
 import com.skillbox.javapro21.domain.CaptchaCode;
 import com.skillbox.javapro21.domain.Person;
 import com.skillbox.javapro21.domain.enumeration.MessagesPermission;
-import com.skillbox.javapro21.domain.enumeration.NotificationType;
 import com.skillbox.javapro21.repository.CaptchaRepository;
 import com.skillbox.javapro21.repository.PersonRepository;
 import org.junit.jupiter.api.AfterEach;
@@ -28,7 +26,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
-import static com.skillbox.javapro21.domain.enumeration.NotificationType.*;
+import static com.skillbox.javapro21.domain.enumeration.NotificationType.MESSAGE;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -145,14 +143,14 @@ public class AccountControllerTest extends AbstractTest {
     @Test
     void recoveryPasswordMessage() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders
-                        .get("/api/v1/account/password/send_recovery_massage")
+                        .get("/api/v1/account/send_recovery_massage")
                         .contentType(MediaType.APPLICATION_JSON)
 //                        .content(mapper.writeValueAsString(recoveryRequest))
                         .param("email", "test1@test.ru")
                         .param("code", "4321")
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.status().isOk());
+                .andExpect(MockMvcResultMatchers.status().is3xxRedirection());
     }
 
     @Test
