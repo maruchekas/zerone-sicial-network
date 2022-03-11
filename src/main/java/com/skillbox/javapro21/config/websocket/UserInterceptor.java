@@ -3,8 +3,6 @@ package com.skillbox.javapro21.config.websocket;
 import com.skillbox.javapro21.config.security.JwtGenerator;
 import com.sun.security.auth.UserPrincipal;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -20,7 +18,6 @@ import java.util.Map;
 @Configuration
 @RequiredArgsConstructor
 public class UserInterceptor implements ChannelInterceptor {
-    private final Logger logger = LoggerFactory.getLogger(UserInterceptor.class);
     private final JwtGenerator jwtGenerator;
 
     @Override
@@ -36,7 +33,6 @@ public class UserInterceptor implements ChannelInterceptor {
                     String token = ((ArrayList<String>) array).get(0);
                     String username = jwtGenerator.getLoginFromToken(token);
                     accessor.setUser(new UserPrincipal(username));
-                    logger.info(username + " connected");
                 }
             }
         }

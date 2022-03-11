@@ -27,8 +27,8 @@ public class WebSocketBrokerConfig implements WebSocketMessageBrokerConfigurer {
         registry.addEndpoint("/api/v1/socket")
                 .setAllowedOrigins("http://localhost:8081",
                                     "http://localhost:8080",
-                        "https://zerone-2022-develop.herokuapp.com/",
-                        "https://zerone-2022.herokuapp.com/")
+                        "https://zerone-2022-develop.herokuapp.com",
+                        "https://zerone-2022.herokuapp.com")
                 .withSockJS();
     }
 
