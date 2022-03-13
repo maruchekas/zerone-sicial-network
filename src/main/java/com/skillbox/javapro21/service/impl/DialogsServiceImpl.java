@@ -233,7 +233,7 @@ public class DialogsServiceImpl implements DialogsService {
                 notificationRepository.save(new Notification()
                         .setSentTime(utilsService.getLocalDateTimeZoneOffsetUtc())
                         .setNotificationType(NotificationType.MESSAGE)
-                        .setPerson(p)
+                        .setPerson(person)
                         .setEntityId(message.getId())
                         .setContact("Contact"));
             }
@@ -255,7 +255,7 @@ public class DialogsServiceImpl implements DialogsService {
             notificationRepository.save(new Notification()
                     .setSentTime(utilsService.getLocalDateTimeZoneOffsetUtc())
                     .setNotificationType(NotificationType.MESSAGE)
-                    .setPerson(recipient)
+                    .setPerson(person)
                     .setEntityId(message.getId())
                     .setContact("Contact"));
         }

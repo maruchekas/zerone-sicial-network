@@ -145,14 +145,14 @@ public class AccountControllerTest extends AbstractTest {
     @Test
     void recoveryPasswordMessage() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders
-                        .get("/api/v1/account/password/send_recovery_massage")
+                        .get("/api/v1/account/send_recovery_massage")
                         .contentType(MediaType.APPLICATION_JSON)
-//                        .content(mapper.writeValueAsString(recoveryRequest))
+           //             .content(mapper.writeValueAsString(recoveryRequest))
                         .param("email", "test1@test.ru")
                         .param("code", "4321")
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.status().isOk());
+                .andExpect(MockMvcResultMatchers.status().is(302));
     }
 
     @Test
