@@ -56,9 +56,9 @@ public class AccountController {
 
     @Operation(summary = "Разрешение на восстановление пароля/email/аккаунта")
     @GetMapping("/send_recovery_massage")
-    public ModelAndView verifyRecovery(@RequestParam String email,
+    public ResponseEntity<MessageOkContent> verifyRecovery(@RequestParam String email,
                                        @RequestParam String code) throws TokenConfirmationException {
-        return accountService.verifyRecovery(email, code);
+        return new ResponseEntity<>(accountService.verifyRecovery(email, code), HttpStatus.OK);
     }
 
     @Operation(summary = "Восстановление пароля")
