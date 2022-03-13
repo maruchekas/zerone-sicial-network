@@ -10,6 +10,7 @@ import com.skillbox.javapro21.exception.CaptchaCodeException;
 import com.skillbox.javapro21.exception.NotFoundException;
 import com.skillbox.javapro21.exception.TokenConfirmationException;
 import com.skillbox.javapro21.exception.UserExistException;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -24,7 +25,7 @@ public interface AccountService {
 
     String recoveryPasswordMessage(RecoveryRequest recoveryRequest) throws MailjetException, IOException;
 
-    ModelAndView verifyRecovery(String email, String code) throws TokenConfirmationException;
+    MessageOkContent verifyRecovery(String email, String code) throws TokenConfirmationException;
 
     String recoveryPassword(String email, String password);
 
