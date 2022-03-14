@@ -150,7 +150,7 @@ public class AccountControllerTest extends AbstractTest {
                         .param("code", "4321")
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.status().is(200));
+                .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
     @Test
