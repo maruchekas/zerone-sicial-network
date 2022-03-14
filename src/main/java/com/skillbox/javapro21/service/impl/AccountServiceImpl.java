@@ -117,13 +117,13 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public ModelAndView verifyRecovery(String email, String code) throws TokenConfirmationException {
+    public MessageOkContent verifyRecovery(String email, String code) throws TokenConfirmationException {
         Person person = utilsService.findPersonByEmail(email);
         if (person.getConfirmationCode().equals(code)) {
             if (person.getIsBlocked() == 2) {
                 person.setIsBlocked(0);
                 personRepository.save(person);
-                return new ModelAndView("redirect:" + baseUrl);
+                return new MessageOkContent();
             }
             person
                     .setIsApproved(1)
@@ -131,7 +131,7 @@ public class AccountServiceImpl implements AccountService {
                     .setMessagesPermission(MessagesPermission.ALL)
                     .setConfirmationCode("");
             personRepository.save(person);
-            return new ModelAndView("redirect:" + baseUrl);
+            return new MessageOkContent();
         } else throw new TokenConfirmationException(CONFIRMATION_CODE_ERR);
     }
 

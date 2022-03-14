@@ -35,7 +35,6 @@ import java.util.Optional;
 import java.util.Set;
 
 import static com.skillbox.javapro21.config.Constants.USER_INTERLOCKED_ERR;
-import static com.skillbox.javapro21.config.Constants.USER_WASBLOCKED_ERR;
 import static com.skillbox.javapro21.domain.enumeration.FriendshipStatusType.*;
 
 @SpringBootTest
