@@ -1,0 +1,2 @@
+webpackJsonp([15],{"8q/Q":function(e,s){},xQWX:function(e,s,t){"use strict";Object.defineProperty(s,"__esModule",{value:!0});var i={render:function(){var e=this.$createElement,s=this._self._c||e;return s("div",{staticClass:"success-shift-email"},[s("simple-svg",{attrs:{filepath:"/static/img/success-forgot.svg"}})],1)},staticRenderFns:[]};var c=t("VU/8")({name:"ShiftEmailSuccess"},i,!1,function(e){t("8q/Q")},null,null);s.default=c.exports}});
+//# sourceMappingURL=15.2f83515dd2dc166401ef.js.map

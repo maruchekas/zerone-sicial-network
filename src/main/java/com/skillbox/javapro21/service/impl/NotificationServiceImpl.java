@@ -113,7 +113,7 @@ public class NotificationServiceImpl implements NotificationService {
     private List<Content> convertNotificationsToNotificationData(List<Notification> notifications) {
         return notifications.stream()
                 .map(n -> new NotificationData()
-                        .setId(n.getId())
+                        .setId(n.getPerson().getId())
                         .setSentTime(utilsService.getTimestampFromLocalDateTime(n.getSentTime()))
                         .setType(n.getNotificationType()))
                 .collect(Collectors.toList());

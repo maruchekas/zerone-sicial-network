@@ -97,7 +97,8 @@ public class ProfileServiceImpl implements ProfileService {
         Person src = utilsService.findPersonByEmail(principal.getName());
         Person dst = personRepository.findPersonById(id)
                 .orElseThrow(() -> new PersonNotFoundException(USER_NOT_FOUND_ERR));
-        Optional<Friendship> directRelation = friendshipRepository.findFriendshipBySrcPersonAndDstPerson(src.getId(), id);
+        Optional<Friendship> directRelation = friendshipRepository.findFriendshipBySrcPersonAndDstPerson(src.getId()
+                , id);
 
         if (isBlockedFor(dst.getId(), src.getId(), directRelation)) {
             throw new InterlockedFriendshipStatusException();

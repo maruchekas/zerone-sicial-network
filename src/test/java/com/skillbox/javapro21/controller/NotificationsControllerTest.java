@@ -2,12 +2,10 @@ package com.skillbox.javapro21.controller;
 
 import com.skillbox.javapro21.AbstractTest;
 import com.skillbox.javapro21.api.request.notification.ReadNotificationRequest;
-import com.skillbox.javapro21.api.response.notification.NotificationData;
 import com.skillbox.javapro21.domain.*;
 import com.skillbox.javapro21.domain.enumeration.MessagesPermission;
 import com.skillbox.javapro21.repository.*;
 import com.skillbox.javapro21.service.NotificationService;
-import org.assertj.core.util.Arrays;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,17 +16,14 @@ import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.web.servlet.ResultMatcher;
-import org.springframework.test.web.servlet.result.JsonPathResultMatchers;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.List;
 
 import static com.skillbox.javapro21.domain.enumeration.FriendshipStatusType.FRIEND;
 import static com.skillbox.javapro21.domain.enumeration.NotificationType.*;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -108,31 +103,31 @@ class NotificationsControllerTest extends AbstractTest {
                 .setNotificationType(POST_COMMENT)
                 .setSentTime(LocalDateTime.now())
                 .setPerson(person)
-                .setEntityId(1L)
+                .setEntityId(person.getId())
                 .setContact("Contact");
         notification2 = new Notification()
                 .setNotificationType(COMMENT_COMMENT)
                 .setSentTime(LocalDateTime.now())
                 .setPerson(person)
-                .setEntityId(2L)
+                .setEntityId(person.getId())
                 .setContact("Contact");
         notification3 = new Notification()
                 .setNotificationType(FRIEND_REQUEST)
                 .setSentTime(LocalDateTime.now())
                 .setPerson(person)
-                .setEntityId(3L)
+                .setEntityId(person.getId())
                 .setContact("Contact");
         notification4 = new Notification()
                 .setNotificationType(MESSAGE)
                 .setSentTime(LocalDateTime.now())
                 .setPerson(person)
-                .setEntityId(4L)
+                .setEntityId(person.getId())
                 .setContact("Contact");
         notification5 = new Notification()
                 .setNotificationType(FRIEND_BIRTHDAY)
                 .setSentTime(LocalDateTime.now())
                 .setPerson(person)
-                .setEntityId(5L)
+                .setEntityId(person.getId())
                 .setContact("Contact");
 
         notificationRepository.saveAll(List.of(notification1, notification2, notification3, notification4, notification5));
@@ -153,10 +148,12 @@ class NotificationsControllerTest extends AbstractTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data").isArray())
                 .andExpect(jsonPath("$.data", hasSize(5)))
-                .andExpect(jsonPath("$.data[*].id", containsInAnyOrder(
-                                notification1.getId().intValue(), notification2.getId().intValue(),
-                                notification3.getId().intValue(), notification4.getId().intValue(),
-                                notification5.getId().intValue())));
+                .andExpect(jsonPath("$.data[*].type", containsInAnyOrder(
+                        notification1.getNotificationType().name(),
+                        notification2.getNotificationType().name(),
+                        notification3.getNotificationType().name(),
+                        notification4.getNotificationType().name(),
+                        notification5.getNotificationType().name())));
 
     }
 
@@ -175,10 +172,11 @@ class NotificationsControllerTest extends AbstractTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data").isArray())
                 .andExpect(jsonPath("$.data", hasSize(4)))
-                .andExpect(jsonPath("$.data[*].id", containsInAnyOrder(
-                        notification1.getId().intValue(),
-                        notification3.getId().intValue(), notification4.getId().intValue(),
-                        notification5.getId().intValue())));
+                .andExpect(jsonPath("$.data[*].type", containsInAnyOrder(
+                        notification1.getNotificationType().name(),
+                        notification3.getNotificationType().name(),
+                        notification4.getNotificationType().name(),
+                        notification5.getNotificationType().name())));
 
         request.setAll(true);
 
