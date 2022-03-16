@@ -8,6 +8,8 @@
 настройкой личного профиля, публикацией и комментированием новостей, добавлением в друзья других пользователей, 
 перепиской.
 
+Используемые технологии: Spring (IoC, Web, Data, Security), PostgreSQL, FlyWay, WebSockets, MailJet, Swagger, библиотеки Slf4j, Lombok, Google guava, Jericho, Apache commons, GCage.
+
 Выполненные задачи:
 
 ✅ Создание каркаса БД, настройка версионирования.
